@@ -1,8 +1,8 @@
-require 'nexus_cli/version'
+require "nexus_cli/remote"
+require "nexus_cli/cli"
+require "nexus_cli/errors"
 
 module NexusCli
-  autoload :Cli, 'nexus_cli/cli'
-  autoload :Remote, 'nexus_cli/remote'
   class << self
     def root
       @root ||= Pathname.new(File.expand_path('../', File.dirname(__FILE__)))
