@@ -8,7 +8,11 @@ module NexusCli
 
       def configuration
         return @configuration if @configuration
-        config = YAML::load_file(File.expand_path("~/.nexus_cli"))
+        begin
+          config = YAML::load_file(File.expand_path("~/.nexus_cli"))
+        rescue Errno::ENOENT
+          raise MissingSettingsFile
+        end
         validate_config(config)
         @configuration = config
       end

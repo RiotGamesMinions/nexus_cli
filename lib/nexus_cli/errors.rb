@@ -31,4 +31,11 @@ module NexusCli
     end
     status_code(102)
   end
+
+  class MissingSettingsFile < NexusCliError
+    def message
+      "The .nexus_cli file is missing or corrupt."
+    end
+    status_code(103)
+  end
 end
