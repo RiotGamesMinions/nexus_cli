@@ -7,7 +7,10 @@ module NexusCli
     class << self
 
       def configuration
-        @configuration ||= YAML::load_file(File.expand_path("~/.nexus_cli"))
+        return @configuration if @configuration
+        config = YAML::load_file(File.expand_path("~/.nexus_cli"))
+        validate_config(config)
+        @configuration = config
       end
 
       def nexus
@@ -19,7 +22,11 @@ module NexusCli
         if(split_artifact.size < 4)
           raise ArtifactMalformedException
         end
-        fileData = nexus['service/local/artifact/maven/redirect'].get ({params: {r: 'riot', g: split_artifact[0], a: split_artifact[1], v: split_artifact[2], e: split_artifact[3]}})
+        begin
+          fileData = nexus['service/local/artifact/maven/redirect'].get ({params: {r: 'riot', g: split_artifact[0], a: split_artifact[1], v: split_artifact[2], e: split_artifact[3]}})
+        rescue RestClient::ResourceNotFound
+          raise ArtifactNotFoundException
+        end
         artifact = nil
         destination = File.join(File.expand_path(destination || "."), "#{split_artifact[1]}-#{split_artifact[2]}.#{split_artifact[3]}")
         artifact = File.open(destination, 'w')
@@ -77,6 +84,16 @@ module NexusCli
           raise ArtifactNotFoundException
         end
       end
+
+      private
+
+        def validate_config(configuration)
+          ["url","username","password"].each do |key|
+            unless configuration.has_key?(key)
+              raise InvalidSettingsException.new(key)
+            end
+          end
+        end
     end
   end
 end

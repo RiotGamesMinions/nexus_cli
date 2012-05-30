@@ -7,7 +7,6 @@ Requirements
 ============
 
 * Ruby
-* RubyGems
 
 Installation
 ============
