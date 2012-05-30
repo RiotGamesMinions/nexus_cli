@@ -6,6 +6,11 @@ module NexusCli
   class Remote
     class << self
 
+      def configuration=(config = {})
+        validate_config(config)
+        @configuration = config
+      end
+
       def configuration
         return @configuration if @configuration
         begin
