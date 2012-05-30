@@ -93,9 +93,7 @@ module NexusCli
 
         def validate_config(configuration)
           ["url","username","password"].each do |key|
-            unless configuration.has_key?(key)
-              raise InvalidSettingsException.new(key)
-            end
+            raise InvalidSettingsException.new(key) unless configuration.has_key?(key)
           end
         end
     end
