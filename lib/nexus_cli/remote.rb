@@ -1,5 +1,4 @@
 require 'restclient'
-require 'curb'
 require 'yaml'
 
 module NexusCli
@@ -32,7 +31,7 @@ module NexusCli
           raise ArtifactMalformedException
         end
         begin
-          fileData = nexus['service/local/artifact/maven/redirect'].get ({params: {r: 'riot', g: split_artifact[0], a: split_artifact[1], v: split_artifact[2], e: split_artifact[3]}})
+          fileData = nexus['service/local/artifact/maven/redirect'].get ({params: {r: configuration['repository'], g: split_artifact[0], a: split_artifact[1], v: split_artifact[2], e: split_artifact[3]}})
         rescue RestClient::ResourceNotFound
           raise ArtifactNotFoundException
         end
@@ -57,12 +56,7 @@ module NexusCli
 
         put_string = "content/repositories/releases/#{artifact_id}/#{group_id}/#{version}/#{file_name}"
         #nexus[put_string].put File.read(file), :accept => "*/*"
-
-        curl_client = Curl::Easy.new("#{configuration["url"]}#{put_string}")
-        curl_client.http_auth_types = :basic
-        curl_client.username = configuration["username"]
-        curl_client.password = configuration["password"]
-        curl_client.http_put(File.read(file))
+        Kernel.quietly {`curl -T #{file} #{configuration['url']}#{put_string} -u #{configuration['username']}:#{configuration['password']}`}
       end
 
       def delete_artifact(artifact)
@@ -75,11 +69,7 @@ module NexusCli
         version = split_artifact[2]
 
         delete_string = "content/repositories/releases/#{artifact_id}/#{group_id}/#{version}"
-        curl_client = Curl::Easy.new("#{configuration["url"]}#{delete_string}")
-        curl_client.http_auth_types = :basic
-        curl_client.username = configuration["username"]
-        curl_client.password = configuration["password"]
-        curl_client.http_delete()
+        Kernel.quietly {`curl --request DELETE #{configuration['url']}#{delete_string} -u #{configuration['username']}:#{configuration['password']}`}
       end
 
       def get_artifact_info(artifact)
@@ -88,7 +78,7 @@ module NexusCli
           raise ArtifactMalformedException
         end
         begin
-          nexus['service/local/artifact/maven/resolve'].get ({params: {r: 'riot', g: split_artifact[0], a: split_artifact[1], v: split_artifact[2], e: split_artifact[3]}})
+          nexus['service/local/artifact/maven/resolve'].get ({params: {r: configuration['repository'], g: split_artifact[0], a: split_artifact[1], v: split_artifact[2], e: split_artifact[3]}})
         rescue RestClient::ResourceNotFound => e
           raise ArtifactNotFoundException
         end
@@ -97,7 +87,7 @@ module NexusCli
       private
 
         def validate_config(configuration)
-          ["url","username","password"].each do |key|
+          ["url", "repository", "username","password"].each do |key|
             raise InvalidSettingsException.new(key) unless configuration.has_key?(key)
           end
         end
