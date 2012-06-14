@@ -7,13 +7,13 @@ Gem::Specification.new do |s|
   s.version     = NexusCli.version
   s.authors     = ["Kyle Allan"]
   s.email       = ["kallan@riotgames.com"]
-  s.homepage    = ""
+  s.homepage    = "https://github.com/RiotGames/nexus_cli"
   s.summary     = %q{A command-line wrapper for making REST calls to Sonatype Nexus.}
   s.description = s.summary
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
-  #s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
+  s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
   s.add_dependency 'thor'
