@@ -1,4 +1,5 @@
 .DS_Store
 .rake_tasks~
+Gemfile.lock
 tmp/
 pkg/
