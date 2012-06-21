@@ -19,9 +19,15 @@ module NexusCli
         end
 
         desc "push_artifact artifact file", "Pushes an artifact from your machine onto the Nexus."
+        method_options :insecure => false
         def push_artifact(artifact, file)
-          Remote.push_artifact(artifact, file)
-          puts "Artifact #{artifact} has been successfully pushed to Nexus."
+          begin
+            Remote.push_artifact(artifact, file, options[:insecure])
+            puts "Artifact #{artifact} has been successfully pushed to Nexus."
+          rescue NexusCliError => e
+            puts e.message
+            exit e.status_code
+          end
         end
 
         desc "get_artifact_info artifact", "Gets and returns the XML information about a particular artifact."
