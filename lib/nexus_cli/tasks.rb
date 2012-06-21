@@ -11,9 +11,9 @@ module NexusCli
         def pull_artifact(artifact)
           begin
             path_to_artifact = Remote.pull_artifact(artifact, options[:destination])
-            puts "Artifact has been retrived and can be found at path: #{path_to_artifact}"
+            say "Artifact has been retrived and can be found at path: #{path_to_artifact}", :green
           rescue NexusCliError => e
-            puts e.message
+            say e.message, :red
             exit e.status_code
           end
         end
@@ -23,9 +23,9 @@ module NexusCli
         def push_artifact(artifact, file)
           begin
             Remote.push_artifact(artifact, file, options[:insecure])
-            puts "Artifact #{artifact} has been successfully pushed to Nexus."
+            say "Artifact #{artifact} has been successfully pushed to Nexus.", :green
           rescue NexusCliError => e
-            puts e.message
+            say e.message, :red
             exit e.status_code
           end
         end
@@ -33,9 +33,9 @@ module NexusCli
         desc "get_artifact_info artifact", "Gets and returns the XML information about a particular artifact."
         def get_artifact_info(artifact)
           begin
-            puts Remote.get_artifact_info(artifact)
+            say Remote.get_artifact_info(artifact), :green
           rescue NexusCliError => e
-            puts e.message
+            say e.message, :red
             exit e.status_code
           end
         end
