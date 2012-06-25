@@ -35,6 +35,8 @@ module NexusCli
           fileData = nexus['service/local/artifact/maven/redirect'].get ({params: {r: configuration['repository'], g: split_artifact[0], a: split_artifact[1], v: split_artifact[2], e: split_artifact[3]}})
         rescue RestClient::ResourceNotFound
           raise ArtifactNotFoundException
+        rescue Errno::ECONNREFUSED
+          raise CouldNotConnectToNexusException
         end
         artifact = nil
         destination = File.join(File.expand_path(destination || "."), "#{split_artifact[1]}-#{split_artifact[2]}.#{split_artifact[3]}")
@@ -61,6 +63,8 @@ module NexusCli
           case exit_code
           when 60
             raise NonSecureConnectionException
+          when 7
+            raise CouldNotConnectToNexusException
           end
         end
       end
@@ -85,8 +89,10 @@ module NexusCli
         end
         begin
           nexus['service/local/artifact/maven/resolve'].get ({params: {r: configuration['repository'], g: split_artifact[0], a: split_artifact[1], v: split_artifact[2], e: split_artifact[3]}})
-        rescue RestClient::ResourceNotFound => e
+        rescue RestClient::ResourceNotFound
           raise ArtifactNotFoundException
+        rescue Errno::ECONNREFUSED
+          raise CouldNotConnectToNexusException
         end
       end
 
