@@ -56,10 +56,9 @@ module NexusCli
         file_name = "#{split_artifact[1]}-#{version}.#{split_artifact[3]}"      
         repository = override_repository.nil? ? configuration['repository'] : override_repository
         put_string = "content/repositories/#{repository}/#{artifact_id}/#{group_id}/#{version}/#{file_name}"
-        Open3.popen3("curl -I #{insecure ? "-k" : ""} -T #{file} #{configuration['url']}#{put_string} -u #{configuration['username']}:#{configuration['password']}") do |stdin, stdout, stderr, wait_thr|  
+        Open3.popen3("curl -I #{insecure ? "-k" : ""} -T #{file} #{File.join(configuration['url'], put_string)} -u #{configuration['username']}:#{configuration['password']}") do |stdin, stdout, stderr, wait_thr|  
           exit_code = wait_thr.value.exitstatus
           standard_out = stdout.read
-          puts standard_out
           if (standard_out.match('403 Forbidden') || standard_out.match('401 Unauthorized'))
             raise PermissionsException
           elsif standard_out.match('400 Bad Request')
@@ -84,7 +83,7 @@ module NexusCli
         version = split_artifact[2]
 
         delete_string = "content/repositories/releases/#{artifact_id}/#{group_id}/#{version}"
-        Kernel.quietly {`curl --request DELETE #{configuration['url']}#{delete_string} -u #{configuration['username']}:#{configuration['password']}`}
+        Kernel.quietly {`curl --request DELETE #{File.join(configuration['url'], delete_string)} -u #{configuration['username']}:#{configuration['password']}`}
       end
 
       def get_artifact_info(artifact)
