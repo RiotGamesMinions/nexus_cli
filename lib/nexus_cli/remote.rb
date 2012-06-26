@@ -46,7 +46,7 @@ module NexusCli
         File.expand_path(artifact.path)
       end
 
-      def push_artifact(artifact, file, insecure)
+      def push_artifact(artifact, file, insecure, staging)
         #Build up the pieces that will make up the PUT request
         split_artifact = artifact.split(":")
         if(split_artifact.size < 4)
@@ -55,11 +55,14 @@ module NexusCli
         artifact_id = split_artifact[0].gsub(".", "/")
         group_id = split_artifact[1].gsub(".", "/")
         version = split_artifact[2]
-        file_name = "#{split_artifact[1]}-#{version}.#{split_artifact[3]}"      
-
-        put_string = "content/repositories/releases/#{artifact_id}/#{group_id}/#{version}/#{file_name}"
-        Open3.popen3("curl #{insecure ? "-k" : ""} -T #{file} #{configuration['url']}#{put_string} -u #{configuration['username']}:#{configuration['password']}") do |stdin, stdout, stderr, wait_thr|  
+        file_name = "#{split_artifact[1]}-#{version}.#{split_artifact[3]}"
+        put_string = staging ? "service/local/staging/deploy/maven2/#{artifact_id}/#{group_id}/#{version}/#{file_name}" : "content/repositories/releases/#{artifact_id}/#{group_id}/#{version}/#{file_name}"
+        Open3.popen3("curl -I #{insecure ? "-k" : ""} -T #{file} #{configuration['url']}#{put_string} -u #{configuration['username']}:#{configuration['password']}") do |stdin, stdout, stderr, wait_thr|  
           exit_code = wait_thr.value.exitstatus
+          standard_out = stdout.read
+          if (standard_out.match('400 Bad Request') && standard_out.match('Cannot find a matching staging profile'))
+            raise NoMatchingStagingProfile
+          end
           case exit_code
           when 60
             raise NonSecureConnectionException

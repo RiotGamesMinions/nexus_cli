@@ -52,4 +52,11 @@ module NexusCli
     end
     status_code(105)
   end
+
+  class NoMatchingStagingProfile < NexusCliError
+    def message
+      "No Staging Profile was found that matched your groupdId:artifactId path. You will need to check your syntax or administrate the Nexus."
+    end
+    status_code(106)
+  end
 end
