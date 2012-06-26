@@ -16,7 +16,7 @@ module NexusCli
         begin
           config = YAML::load_file(File.expand_path("~/.nexus_cli"))
         rescue Errno::ENOENT
-          raise MissingSettingsFile
+          raise MissingSettingsFileException
         end
         validate_config(config)
         @configuration = config
@@ -60,8 +60,12 @@ module NexusCli
         Open3.popen3("curl -I #{insecure ? "-k" : ""} -T #{file} #{configuration['url']}#{put_string} -u #{configuration['username']}:#{configuration['password']}") do |stdin, stdout, stderr, wait_thr|  
           exit_code = wait_thr.value.exitstatus
           standard_out = stdout.read
+          puts standard_out
           if (standard_out.match('400 Bad Request') && standard_out.match('Cannot find a matching staging profile'))
-            raise NoMatchingStagingProfile
+            raise NoMatchingStagingProfileException
+          end
+          if (standard_out.match('403 Forbidden'))
+            raise PermissionsException
           end
           case exit_code
           when 60

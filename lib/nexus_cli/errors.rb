@@ -32,7 +32,7 @@ module NexusCli
     status_code(102)
   end
 
-  class MissingSettingsFile < NexusCliError
+  class MissingSettingsFileException < NexusCliError
     def message
       "The .nexus_cli file is missing or corrupt."
     end
@@ -53,10 +53,17 @@ module NexusCli
     status_code(105)
   end
 
-  class NoMatchingStagingProfile < NexusCliError
+  class NoMatchingStagingProfileException < NexusCliError
     def message
       "No Staging Profile was found that matched your groupdId:artifactId path. You will need to check your syntax or administrate the Nexus."
     end
     status_code(106)
+  end
+
+  class PermissionsException < NexusCliError
+    def message
+      "Your request was denied by the Nexus server due to a permissions error. You will need to administer the Nexus or use a different user/password in .nexus_cli."
+    end
+    status_code(107)
   end
 end
