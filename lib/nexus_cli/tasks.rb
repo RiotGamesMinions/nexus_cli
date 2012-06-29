@@ -49,6 +49,14 @@ module NexusCli
             exit e.status_code
           end
         end
+
+        desc "get_nexus_configuration", "Prints out configuration from the .nexus_cli file that helps inform where artifacts will be uploaded."
+        def get_nexus_configuration
+          config = Remote.configuration
+          puts "*********Reading Configuration from #{File.expand_path('~/.nexus_cli')}*********"
+          puts "Nexus URL: #{config['url']}"
+          puts "Nexus Repository: #{config['repository']}"
+        end
       end
     end
   end
