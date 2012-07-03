@@ -56,8 +56,7 @@ module NexusCli
         group_id = split_artifact[1].gsub(".", "/")
         version = split_artifact[2]
         file_name = "#{split_artifact[1]}-#{version}.#{split_artifact[3]}"      
-        repository = override_repository.nil? ? configuration['repository'] : override_repository
-        put_string = "content/repositories/#{repository}/#{artifact_id}/#{group_id}/#{version}/#{file_name}"
+        put_string = "content/repositories/#{configuration['repository']}/#{artifact_id}/#{group_id}/#{version}/#{file_name}"
         Open3.popen3("curl -I #{insecure ? "-k" : ""} -T #{file} #{File.join(configuration['url'], put_string)} -u #{configuration['username']}:#{configuration['password']}") do |stdin, stdout, stderr, wait_thr|  
           exit_code = wait_thr.value.exitstatus
           standard_out = stdout.read
