@@ -99,6 +99,19 @@ module NexusCli
           raise ArtifactNotFoundException
         end
       end
+      
+      def get_artifact_custom_info(artifact, overrides)
+        parse_overrides(overrides)
+        split_artifact = artifact.split(":")
+        if(split_artifact.size < 4)
+          raise ArtifactMalformedException
+        end
+        begin
+          nexus['service/local/artifact/maven/resolve'].get ({params: {r: configuration['repository'], g: split_artifact[0], a: split_artifact[1], v: split_artifact[2], e: split_artifact[3]}})
+        rescue RestClient::ResourceNotFound => e
+          raise ArtifactNotFoundException
+        end
+      end
 
       private
 
