@@ -119,13 +119,21 @@ module NexusCli
       end
       
       def get_artifact_custom_info(artifact, overrides)
+        check_nexus_pro
         parse_overrides(overrides)
         split_artifact = artifact.split(":")
         if(split_artifact.size < 4)
           raise ArtifactMalformedException
         end
+        group_id = split_artifact[0]
+        artifact_id = split_artifact[1]
+        version = split_artifact[2]
+        extension = split_artifact[3]
+        file_name = "#{artifact_id}-#{version}.#{extension}"      
+        get_string = "content/repositories/#{configuration['repository']}/.meta/#{group_id.gsub(".", "/")}/#{artifact_id.gsub(".", "/")}/#{version}/#{file_name}.n3"
         begin
-          nexus['service/local/index/custom_metadata'].get ({params: {r: configuration['repository'], g: split_artifact[0], a: split_artifact[1], v: split_artifact[2], e: split_artifact[3]}})
+          n3_data = nexus[get_string].get
+          parse_n3(n3_data)
         rescue RestClient::ResourceNotFound => e
           raise ArtifactNotFoundException
         end
@@ -143,6 +151,32 @@ module NexusCli
           overrides.each do |key, value|
             configuration[key] = value unless configuration[key].nil?
           end
+        end
+
+        def running_nexus_pro?
+          return REXML::Document.new(nexus['service/local/status'].get).elements['status/data/editionLong'].text == "Professional" ? true : false
+        end
+
+        def check_nexus_pro
+          raise NotNexusProException unless running_nexus_pro?
+        end
+
+        def parse_n3(data)
+          result = ""
+          data = data.strip
+          data.gsub!(/urn:maven#/, "")
+          data.gsub!(/urn:nexus\/user#/, "")
+          items = data.split(";")
+          # Skip first item as it just the gets the 4-piece input again.
+          items.delete_at(0)
+          items.each { |item|
+            item.strip!
+            subitem = item.split(" ")
+            tag = subitem[0].strip
+            value = subitem[1].strip.gsub(/"/, "")
+            result += "    #{tag}#{value}#{tag.sub(/</,"<\\")}\n"
+          }
+          return "<artifact-resolution>\n  <data>\n" + result + "  </data>\n</artifact-resolution>"
         end
     end
   end

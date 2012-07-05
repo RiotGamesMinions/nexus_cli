@@ -69,4 +69,11 @@ This could mean several things:
     end
     status_code(107)
   end
+
+  class NotNexusProException < NexusCliError
+    def message
+      "You cannot use this feature unless you are using Nexus Professional."
+    end
+    status_code(108)
+  end
 end
