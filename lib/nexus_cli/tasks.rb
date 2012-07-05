@@ -48,10 +48,24 @@ module NexusCli
           :type => :hash,
           :default => {},
           :desc => "A hashed list of overrides. Available options are 'url', 'repository', 'username', and 'password'."
-        desc "get_artifact_info artifact", "Gets and returns the XML information about a particular artifact."
+        desc "get_artifact_info artifact", "Gets and returns the metadata in XML format about a particular artifact."
         def get_artifact_info(artifact)
           begin
             say Remote.get_artifact_info(artifact, options[:overrides]), :green
+          rescue NexusCliError => e
+            say e.message, :red
+            exit e.status_code
+          end
+        end
+
+        method_option :overrides,
+          :type => :hash,
+          :default => {},
+          :desc => "A hashed list of overrides. Available options are 'url', 'repository', 'username', and 'password'."
+        desc "get_artifact_custom_info artifact", "Gets and returns the custom metadata in XML format about a particular artifact."
+        def get_artifact_custom_info(artifact)
+          begin
+            say Remote.get_artifact_custom_info(artifact, options[:overrides]), :green
           rescue NexusCliError => e
             say e.message, :red
             exit e.status_code
@@ -65,6 +79,22 @@ module NexusCli
             say "*********Reading Configuration from #{File.expand_path('~/.nexus_cli')}*********", :blue
             say "Nexus URL: #{config['url']}", :blue
             say "Nexus Repository: #{config['repository']}", :blue
+          rescue NexusCliError => e
+            say e.message, :red
+            exit e.status_code
+          end
+        end
+
+        desc "get_nexus_status", "Prints out information about the Nexus instance."
+        def get_nexus_status
+          begin
+            data = Remote.status
+            say "Application Name: #{data['app_name']}"
+            say "Version: #{data['version']}"
+            say "Edition: #{data['edition_long']}"
+            say "State: #{data['state']}"
+            say "Started At: #{data['started_at']}"
+            say "Base URL: #{data['base_url']}"
           rescue NexusCliError => e
             say e.message, :red
             exit e.status_code
