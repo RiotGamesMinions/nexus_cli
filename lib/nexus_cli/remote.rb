@@ -163,18 +163,11 @@ module NexusCli
 
         def parse_n3(data)
           result = ""
-          data = data.strip
-          data.gsub!(/urn:maven#/, "")
-          data.gsub!(/urn:nexus\/user#/, "")
-          items = data.split(";")
           # Skip first item as it just the gets the 4-piece input again.
-          items.delete_at(0)
-          items.each { |item|
-            item.strip!
-            subitem = item.split(" ")
-            tag = subitem[0].strip
-            value = subitem[1].strip.gsub(/"/, "")
-            result += "    #{tag}#{value}#{tag.sub(/</,"<\\")}\n"
+          data.split(";").drop(1).each { |item|
+            tag = item.scan(/#\w*>/).first[1..-2]
+            value = item.scan(/"[^"]*"/).first[1..-2]
+            result += "    <#{tag}>#{value}</#{tag}>\n"
           }
           return "<artifact-resolution>\n  <data>\n" + result + "  </data>\n</artifact-resolution>"
         end
