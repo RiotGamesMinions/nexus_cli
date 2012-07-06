@@ -45,10 +45,7 @@ module NexusCli
         if(split_artifact.size < 4)
           raise ArtifactMalformedException
         end
-        group_id = split_artifact[0]
-        artifact_id = split_artifact[1]
-        version = split_artifact[2]
-        extension = split_artifact[3]
+        group_id, artifact_id, version, extension = split_artifact
         begin
           fileData = nexus['service/local/artifact/maven/redirect'].get ({params: {r: configuration['repository'], g: group_id, a: artifact_id, v: version, e: extension}})
         rescue RestClient::ResourceNotFound
@@ -69,10 +66,7 @@ module NexusCli
         if(split_artifact.size < 4)
           raise ArtifactMalformedException
         end
-        group_id = split_artifact[0]
-        artifact_id = split_artifact[1]
-        version = split_artifact[2]
-        extension = split_artifact[3]
+        group_id, artifact_id, version, extension = split_artifact
         file_name = "#{artifact_id}-#{version}.#{extension}"      
         put_string = "content/repositories/#{configuration['repository']}/#{group_id.gsub(".", "/")}/#{artifact_id.gsub(".", "/")}/#{version}/#{file_name}"
         Open3.popen3("curl -I #{insecure ? "-k" : ""} -T #{file} #{File.join(configuration['url'], put_string)} -u #{configuration['username']}:#{configuration['password']}") do |stdin, stdout, stderr, wait_thr|  
@@ -119,16 +113,13 @@ module NexusCli
       end
       
       def get_artifact_custom_info(artifact, overrides)
-        check_nexus_pro
+        raise NotNexusProException unless running_nexus_pro?
         parse_overrides(overrides)
         split_artifact = artifact.split(":")
         if(split_artifact.size < 4)
           raise ArtifactMalformedException
         end
-        group_id = split_artifact[0]
-        artifact_id = split_artifact[1]
-        version = split_artifact[2]
-        extension = split_artifact[3]
+        group_id, artifact_id, version, extension = split_artifact
         file_name = "#{artifact_id}-#{version}.#{extension}"      
         get_string = "content/repositories/#{configuration['repository']}/.meta/#{group_id.gsub(".", "/")}/#{artifact_id.gsub(".", "/")}/#{version}/#{file_name}.n3"
         begin
@@ -157,17 +148,12 @@ module NexusCli
           return REXML::Document.new(nexus['service/local/status'].get).elements['status/data/editionLong'].text == "Professional" ? true : false
         end
 
-        def check_nexus_pro
-          raise NotNexusProException unless running_nexus_pro?
-        end
-
         def parse_n3(data)
           result = ""
-          # Skip first item as it just the gets the 4-piece input again.
-          data.split(";").drop(1).each { |item|
-            tag = item.scan(/#\w*>/).first[1..-2]
-            value = item.scan(/"[^"]*"/).first[1..-2]
-            result += "    <#{tag}>#{value}</#{tag}>\n"
+          data.each_line { |item|
+            tag = item.match(/#(\w*)>/) ? "#{$1}" : ""
+            value = item.match(/"([^"]*)"/)  ? "#{$1}" : ""
+            result += "    <#{tag}>#{value}</#{tag}>\n" unless tag.empty? && value.empty?
           }
           return "<artifact-resolution>\n  <data>\n" + result + "  </data>\n</artifact-resolution>"
         end
