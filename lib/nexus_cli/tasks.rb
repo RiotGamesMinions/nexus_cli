@@ -6,14 +6,15 @@ module NexusCli
       base.send :include, ::Thor::Actions
       base.class_eval do
 
+        class_option :overrides,
+          :type => :hash,
+          :default => {},
+          :desc => "A hashed list of overrides. Available options are 'url', 'repository', 'username', and 'password'."
+
         method_option :destination, 
           :type => :string,
           :default => nil,
           :desc => "A different folder other than the current working directory."
-        method_option :overrides,
-          :type => :hash,
-          :default => {},
-          :desc => "A hashed list of overrides. Available options are 'url', 'repository', 'username', and 'password'."
         desc "pull_artifact artifact", "Pulls an artifact from Nexus and places it on your machine."
         def pull_artifact(artifact)
           begin
@@ -30,10 +31,6 @@ module NexusCli
           :type => :boolean,
           :default => false,
           :desc => "Overrides any failures because of an 'insecure' SSL conncetion."
-        method_option :overrides,
-          :type => :hash,
-          :default => {},
-          :desc => "A hashed list of overrides. Available options are 'url', 'repository', 'username', and 'password'."
         desc "push_artifact artifact file", "Pushes an artifact from your machine onto the Nexus."
         def push_artifact(artifact, file)
           begin
@@ -46,10 +43,6 @@ module NexusCli
           end
         end
 
-        method_option :overrides,
-          :type => :hash,
-          :default => {},
-          :desc => "A hashed list of overrides. Available options are 'url', 'repository', 'username', and 'password'."
         desc "get_artifact_info artifact", "Gets and returns the metadata in XML format about a particular artifact."
         def get_artifact_info(artifact)
           begin
@@ -61,10 +54,6 @@ module NexusCli
           end
         end
 
-        method_option :overrides,
-          :type => :hash,
-          :default => {},
-          :desc => "A hashed list of overrides. Available options are 'url', 'repository', 'username', and 'password'."
         desc "get_artifact_custom_info artifact", "Gets and returns the custom metadata in XML format about a particular artifact."
         def get_artifact_custom_info(artifact)
           begin
@@ -76,10 +65,6 @@ module NexusCli
           end
         end
 
-        method_option :overrides,
-          :type => :hash,
-          :default => {},
-          :desc => "A hashed list of overrides. Available options are 'url', 'repository', 'username', and 'password'."
         desc "get_nexus_configuration", "Prints out configuration from the .nexus_cli file that helps inform where artifacts will be uploaded."
         def get_nexus_configuration
           begin
@@ -94,10 +79,6 @@ module NexusCli
           end
         end
 
-        method_option :overrides,
-          :type => :hash,
-          :default => {},
-          :desc => "A hashed list of overrides. Available options are 'url', 'repository', 'username', and 'password'."
         desc "get_nexus_status", "Prints out information about the Nexus instance."
         def get_nexus_status
           begin
