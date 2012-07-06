@@ -76,7 +76,7 @@ module NexusCli
         def get_nexus_configuration
           begin
             config = Remote.configuration
-            say "*********Reading Configuration from #{File.expand_path('~/.nexus_cli')}*********", :blue
+            say "********* Reading CLI configuration from #{File.expand_path('~/.nexus_cli')} *********", :blue
             say "Nexus URL: #{config['url']}", :blue
             say "Nexus Repository: #{config['repository']}", :blue
           rescue NexusCliError => e
@@ -89,6 +89,7 @@ module NexusCli
         def get_nexus_status
           begin
             data = Remote.status
+            say "********* Getting Nexus status from #{data['base_url']} *********", :blue
             say "Application Name: #{data['app_name']}"
             say "Version: #{data['version']}"
             say "Edition: #{data['edition_long']}"

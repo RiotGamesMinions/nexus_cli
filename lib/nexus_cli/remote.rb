@@ -145,7 +145,7 @@ module NexusCli
         end
 
         def running_nexus_pro?
-          return REXML::Document.new(nexus['service/local/status'].get).elements['status/data/editionLong'].text == "Professional" ? true : false
+          return status['edition_long'] == "Professional" ? true : false
         end
 
         def parse_n3(data)
