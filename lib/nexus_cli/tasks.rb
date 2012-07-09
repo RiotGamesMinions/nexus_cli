@@ -20,7 +20,12 @@ module NexusCli
 
         def initialize(*args)
           super
-          set_remote_configuration(options[:overrides])
+          begin
+            set_remote_configuration(options[:overrides])
+          rescue NexusCliError => e
+            say e.message, :red
+            exit e.status_code
+          end
         end
 
         method_option :destination, 
@@ -105,18 +110,16 @@ module NexusCli
 
         private
           def set_remote_configuration(overrides)
-            if overrides.nil? || overrides.empty?
-              begin
-                config = YAML::load_file(File.expand_path("~/.nexus_cli"))
-              rescue Errno::ENOENT
-                raise MissingSettingsFileException
-              end
-              validate_config(config)
-              Remote.configuration = config
-            else
-              validate_config(overrides)
-              Remote.configuration = overrides
+            begin
+              config = YAML::load_file(File.expand_path("~/.nexus_cli"))
+            rescue
             end
+            if config.nil? && (overrides.nil? || overrides.empty?)
+              raise MissingSettingsFileException
+            end
+            overrides.each{|key, value| config[key] = value} unless overrides.nil? || overrides.empty?
+            validate_config(config)
+            Remote.configuration = config
           end
           
           def validate_config(configuration)
