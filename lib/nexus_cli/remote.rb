@@ -136,13 +136,13 @@ module NexusCli
         # Read in local n3 file.
         local_n3 = File.open(file).read
 
-        n3_user_urns = Hash.new
+        n3_user_urns = { "head" => "<urn:maven/artifact##{group_id}:#{artifact_id}:#{version}::#{extension}> a <urn:maven#artifact>" }
         # Get all the urn:nexus/user# keys and consolidate.
         # First, get the nexus keys.
         nexus_n3.each_line { |line|
           if line.match(/urn:nexus\/user#/)
             tag, value = parse_n3_line(line)
-            n3_user_urns[tag] = value unless tag.empty? || value.empty?
+            n3_user_urns[tag] = "\t<urn:nexus/user##{tag}> \"#{value}\"" unless tag.empty? || value.empty?
           end
         }
         # Next, get the local keys and update the nexus keys.
@@ -153,18 +153,12 @@ module NexusCli
             if n3_user_urns.has_key?(tag) && value.empty?
               n3_user_urns.delete(tag)
             else
-              n3_user_urns[tag] = value unless tag.empty? || value.empty?
+              n3_user_urns[tag] = "\t<urn:nexus/user##{tag}> \"#{value}\"" unless tag.empty? || value.empty?
             end
           end
         }
 
-        # Construct the header.
-        n3_data = "<urn:maven/artifact##{group_id}:#{artifact_id}:#{version}::#{extension}> a <urn:maven#artifact> ;\n"
-        # Construct the urns.
-        n3_user_urns.each { |tag, value|
-          n3_data += "\t<urn:nexus/user##{tag}> \"#{value}\" ;\n"
-        }
-        n3_data.reverse!.sub!(/;/, ".").reverse!
+        n3_data = n3_user_urns.values.join(" ;\n") + " ."
         n3_temp = Tempfile.new("nexus_n3")
         begin
           n3_temp.write(n3_data)
