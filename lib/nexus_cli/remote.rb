@@ -163,7 +163,7 @@ module NexusCli
         begin
           n3_temp.write(n3_data)
           n3_temp.rewind
-          Kernel.quietly {`curl -T #{n3_temp.path} #{File.join(configuration['url'], post_string)} -u #{configuration['username']}:#{configuration['password']}"`}
+          Kernel.quietly {`curl -T #{n3_temp.path} #{File.join(configuration['url'], post_string)} -u #{configuration['username']}:#{configuration['password']}`}
         ensure
           n3_temp.close
           n3_temp.unlink
