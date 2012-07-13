@@ -149,11 +149,10 @@ module NexusCli
             raise SearchParameterMalformedException
         end
         begin
-          doc = Nokogiri::XML(nexus['service/local/search/m2/freeform'].get ({params: {p: key, t: type, v: value}})).xpath("/search-results")
-          if doc.xpath("count")[0].text.to_i > 0
-            return doc.to_s
-          else
-            return "No search results."
+          nexus['service/local/search/m2/freeform'].get ({params: {p: key, t: type, v: value}}) do |response, request, result, &block|
+            raise BadSearchRequestException if response.code == 400
+            doc = Nokogiri::XML(response.body).xpath("/search-results")
+            return doc.xpath("count")[0].text.to_i > 0 ? doc.to_s : "No search results."
           end
         rescue RestClient::ResourceNotFound => e
           raise ArtifactNotFoundException
