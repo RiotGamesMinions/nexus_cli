@@ -91,7 +91,7 @@ module NexusCli
         method_option :insecure,
           :type => :boolean,
           :default => false,
-          :desc => "Overrides any failures because of an 'insecure' SSL conncetion."
+          :desc => "Overrides any failures because of an 'insecure' SSL connection."
         desc "update_artifact_custom_info artifact file", "Updates the artifact custom metadata by pushing the Nexus custom artifact file (n3) from your machine onto the Nexus."
         def update_artifact_custom_info(artifact, file)
           begin
