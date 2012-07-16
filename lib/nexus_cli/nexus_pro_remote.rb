@@ -5,10 +5,9 @@ require 'yaml'
 require 'open3'
 
 module NexusCli
-  module ProRemote
+  class ProRemote < OSSRemote
       
     def get_artifact_custom_info(artifact, overrides)
-      raise NotNexusProException unless running_nexus_pro?
       parse_n3(get_artifact_custom_info_n3(artifact, overrides))
     end
 
@@ -24,7 +23,6 @@ module NexusCli
     end
 
     def update_artifact_custom_info(artifact, file, insecure, overrides)
-      raise NotNexusProException unless running_nexus_pro?
       # Check if artifact exists before posting custom metadata.
       get_artifact_info(artifact, overrides)
       # Update the custom metadata using the n3 file.
@@ -72,7 +70,6 @@ module NexusCli
     end
 
     def search_artifacts(key, type, value, overrides)
-      raise NotNexusProException unless running_nexus_pro?
       if key.empty? || type.empty? || value.empty?
           raise SearchParameterMalformedException
       end
@@ -88,10 +85,6 @@ module NexusCli
     end
 
     private
-      def running_nexus_pro?
-        return status['edition_long'] == "Professional" ? true : false
-      end
-
       def parse_n3(data)
         builder = Nokogiri::XML::Builder.new do |xml|
           xml.send("artifact-resolution") {
