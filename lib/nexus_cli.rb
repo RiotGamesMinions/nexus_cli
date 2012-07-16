@@ -2,7 +2,8 @@ require 'nexus_cli/tasks'
 require 'nexus_cli/cli'
 require 'nexus_cli/errors'
 require 'nexus_cli/kernel'
-require 'nexus_cli/remote'
+require 'nexus_cli/nexus_pro_remote'
+require 'nexus_cli/nexus_remote'
 
 module NexusCli
   class << self
