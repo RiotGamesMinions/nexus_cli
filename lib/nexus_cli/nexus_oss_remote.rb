@@ -55,14 +55,5 @@ module NexusCli
           raise ArtifactNotFoundException
         end
       end
-
-      private
-        def parse_artifact_string(artifact)
-          split_artifact = artifact.split(":")
-          if(split_artifact.size < 4)
-            raise ArtifactMalformedException
-          end
-          return split_artifact
-        end
   end
 end
