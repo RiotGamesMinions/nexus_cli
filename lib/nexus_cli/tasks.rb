@@ -21,8 +21,7 @@ module NexusCli
         def initialize(*args)
           super
           begin
-            remote = Remote.new(options[:overrides])
-            @nexus_remote = (remote.running_nexus_pro? && ProRemote.new(options[:overrides])) || OSSRemote.new(options[:overrides])
+            @nexus_remote = Factory.create(options[:overrides])
           rescue NexusCliError => e
             say e.message, :red
             exit e.status_code
@@ -82,7 +81,7 @@ module NexusCli
         desc "get_artifact_custom_info_n3 artifact", "Gets and returns the custom metadata in Nexus n3 format about a particular artifact."
         def get_artifact_custom_info_n3(artifact)
           begin
-            raise NotNexusProException unless @nexus_remote.class == ProRemote.class
+            raise NotNexusProException unless @nexus_remote.kind_of? ProRemote
             say @nexus_remote.get_artifact_custom_info_n3(artifact, options[:overrides]), :green
           rescue NexusCliError => e
             say e.message, :red
@@ -97,7 +96,7 @@ module NexusCli
         desc "update_artifact_custom_info artifact file", "Updates the artifact custom metadata by pushing the Nexus custom artifact file (n3) from your machine onto the Nexus."
         def update_artifact_custom_info(artifact, file)
           begin
-            raise NotNexusProException unless @nexus_remote.class == ProRemote.class
+            raise NotNexusProException unless @nexus_remote.kind_of? ProRemote
             @nexus_remote.update_artifact_custom_info(artifact, file, options[:insecure], options[:overrides])
             say "Custom metadata for artifact #{artifact} has been successfully pushed to Nexus.", :green
           rescue NexusCliError => e
@@ -109,7 +108,7 @@ module NexusCli
         desc "search_artifacts key type value", "Searches for artifacts using artifact metadata and returns the result as a list with items in XML format."
         def search_artifacts(key, type, value)
           begin
-            raise NotNexusProException unless @nexus_remote.class == ProRemote.class
+            raise NotNexusProException unless @nexus_remote.kind_of? ProRemote
             say @nexus_remote.search_artifacts(key, type, value, options[:overrides]), :green
           rescue NexusCliError => e
             say e.message, :red
@@ -120,7 +119,7 @@ module NexusCli
         desc "get_nexus_configuration", "Prints out configuration from the .nexus_cli file that helps inform where artifacts will be uploaded."
         def get_nexus_configuration
           begin
-            config = Remote.configuration
+            config = @nexus_remote.configuration
             say "********* Reading CLI configuration from #{File.expand_path('~/.nexus_cli')} *********", :blue
             say "Nexus URL: #{config['url']}", :blue
             say "Nexus Repository: #{config['repository']}", :blue

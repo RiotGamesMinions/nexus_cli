@@ -2,7 +2,6 @@ require 'restclient'
 require 'nokogiri'
 require 'tempfile'
 require 'yaml'
-require 'open3'
 
 module NexusCli
   class ProRemote < OSSRemote
