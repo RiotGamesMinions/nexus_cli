@@ -44,7 +44,7 @@ module NexusCli
       File.expand_path(artifact.path)
     end
 
-    def push_artifact(artifact, file, insecure, overrides)
+    def push_artifact(artifact, file, overrides)
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
       nexus['service/local/artifact/maven/content'].post({:hasPom => false, :g => group_id, :a => artifact_id, :v => version, :e => extension, :p => extension, :r => configuration['repository'],
         :file => File.new(file)}) do |response, request, result, &block|

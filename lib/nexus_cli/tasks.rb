@@ -43,14 +43,10 @@ module NexusCli
           end
         end
 
-        method_option :insecure,
-          :type => :boolean,
-          :default => false,
-          :desc => "Overrides any failures because of an 'insecure' SSL connection."
         desc "push_artifact artifact file", "Pushes an artifact from your machine onto the Nexus."
         def push_artifact(artifact, file)
           begin
-            @nexus_remote.push_artifact(artifact, file, options[:insecure], options[:overrides])
+            @nexus_remote.push_artifact(artifact, file, options[:overrides])
             say "Artifact #{artifact} has been successfully pushed to Nexus.", :green
           rescue NexusCliError => e
             say e.message, :red
