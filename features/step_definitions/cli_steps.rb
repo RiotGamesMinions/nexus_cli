@@ -12,3 +12,7 @@ When /^I push an artifact with the GAV of "(.*)"$/ do |gav|
   file.close
   step "I run `nexus-cli push #{gav} #{file.path}`"
 end
+
+When /^I delete an artifact with the GAV of "(.*)"$/ do |gav|
+  nexus_remote.delete_artifact(gav)
+end

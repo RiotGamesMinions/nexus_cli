@@ -11,13 +11,13 @@ Feature: Use the Nexus CLI
       """
     And the exit status should be 0
 
-  @working
   Scenario: Push an Artifact
     When I push an artifact with the GAV of "com.test:mytest:1.0.0:tgz"
     Then the output should contain:
       """
       Artifact com.test:mytest:1.0.0:tgz has been successfully pushed to Nexus.
       """
+    And the exit status should be 0
   
   @wip
   Scenario: Pull an artifact
@@ -33,3 +33,13 @@ Feature: Use the Nexus CLI
   Scenario: Attempt to pull an artifact with the wrong parameters
     When I run `nexus-cli pull_artifact com.riotgames.whatever:something`
     Then I should expect an error because I need more colon separated values
+
+  @working
+  Scenario: Attempt to delete an artifact
+    When I delete an artifact with the GAV of "com.test:mytest:1.0.0:tgz"
+    And I call the nexus "info com.test:mytest:1.0.0:tgz" command
+    Then the output should contain:
+    """
+    The artifact you requested information for could not be found. Please ensure it exists inside the Nexus.
+    """
+    And the exit status should be 101

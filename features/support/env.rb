@@ -11,6 +11,10 @@ def temp_dir
   @tmpdir ||= Dir.mktmpdir
 end
 
+def nexus_remote
+  @nexus_remote ||= NexusCli::Factory.create(get_overrides)
+end
+
 at_exit do
   #tear down here
 end
