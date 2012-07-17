@@ -19,7 +19,6 @@ Feature: Use the Nexus CLI
       """
     And the exit status should be 0
   
-  @working
   Scenario: Pull an artifact
     When I call the nexus "pull com.test:mytest:1.0.0:tgz" command
     Then the output should contain:
@@ -27,16 +26,10 @@ Feature: Use the Nexus CLI
     Artifact has been retrived and can be found at path:
     """
     And the exit status should be 0
-
-  @wip
+  
   Scenario: Pull an artifact to a specific place
-    When I want the artifact "com.riotgames.tar:mytar:1.0.3:tgz" in a temp directory
-    Then I should have a copy of the "mytar-1.0.3.tgz" artifact in a temp directory
-
-  @wip
-  Scenario: Attempt to pull an artifact with the wrong parameters
-    When I run `nexus-cli pull_artifact com.riotgames.whatever:something`
-    Then I should expect an error because I need more colon separated values
+    When I pull an artifact with the GAV of "com.test:mytest:1.0.0:tgz" to a temp directory
+    Then I should have a copy of the "mytest-1.0.0.tgz" artifact in a temp directory
 
   Scenario: Attempt to delete an artifact
     When I delete an artifact with the GAV of "com.test:mytest:1.0.0:tgz"

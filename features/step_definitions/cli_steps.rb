@@ -13,6 +13,14 @@ When /^I push an artifact with the GAV of "(.*)"$/ do |gav|
   step "I run `nexus-cli push #{gav} #{file.path}`"
 end
 
+When /^I pull an artifact with the GAV of "(.*?)" to a temp directory$/ do |gav|
+  step "I run `nexus-cli pull #{gav} --destination #{temp_dir}`"
+end
+
+Then /^I should have a copy of the "(.*?)" artifact in a temp directory$/ do |fileName|
+  File.exists?(File.join(temp_dir, fileName)).should == true
+end
+
 When /^I delete an artifact with the GAV of "(.*)"$/ do |gav|
   nexus_remote.delete_artifact(gav)
 end
