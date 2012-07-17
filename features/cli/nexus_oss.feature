@@ -19,10 +19,14 @@ Feature: Use the Nexus CLI
       """
     And the exit status should be 0
   
-  @wip
+  @working
   Scenario: Pull an artifact
-    When I get the artifact "com.riotgames.tar:mytar:1.0.3:tgz"
-    Then I should have a copy of the "mytar-1.0.3.tgz" artifact on my computer
+    When I call the nexus "pull com.test:mytest:1.0.0:tgz" command
+    Then the output should contain:
+    """
+    Artifact has been retrived and can be found at path:
+    """
+    And the exit status should be 0
 
   @wip
   Scenario: Pull an artifact to a specific place
@@ -34,7 +38,6 @@ Feature: Use the Nexus CLI
     When I run `nexus-cli pull_artifact com.riotgames.whatever:something`
     Then I should expect an error because I need more colon separated values
 
-  @working
   Scenario: Attempt to delete an artifact
     When I delete an artifact with the GAV of "com.test:mytest:1.0.0:tgz"
     And I call the nexus "info com.test:mytest:1.0.0:tgz" command
