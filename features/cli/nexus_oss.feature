@@ -1,17 +1,35 @@
-@cli
-Feature: Pull Artifact
+Feature: Use the Nexus CLI
   As a CLI user
-  I need a command to pull artifacts from the Nexus repository
-  So I have a way to get artifacts from a remote system to my local machine
+  I need commands to get Nexus status, push, pull
+  
+  Scenario: Get Nexus Status
+    When I call the nexus "status" command
+    Then the output should contain:
+      """
+      Application Name: Sonatype Nexus
+      Version: 2.0.5
+      """
+    And the exit status should be 0
 
+  @working
+  Scenario: Push an Artifact
+    When I push an artifact with the GAV of "com.test:mytest:1.0.0:tgz"
+    Then the output should contain:
+      """
+      Artifact com.test:mytest:1.0.0:tgz has been successfully pushed to Nexus.
+      """
+  
+  @wip
   Scenario: Pull an artifact
     When I get the artifact "com.riotgames.tar:mytar:1.0.3:tgz"
     Then I should have a copy of the "mytar-1.0.3.tgz" artifact on my computer
 
+  @wip
   Scenario: Pull an artifact to a specific place
     When I want the artifact "com.riotgames.tar:mytar:1.0.3:tgz" in a temp directory
     Then I should have a copy of the "mytar-1.0.3.tgz" artifact in a temp directory
 
+  @wip
   Scenario: Attempt to pull an artifact with the wrong parameters
     When I run `nexus-cli pull_artifact com.riotgames.whatever:something`
     Then I should expect an error because I need more colon separated values
