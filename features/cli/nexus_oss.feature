@@ -31,6 +31,15 @@ Feature: Use the Nexus CLI
     When I pull an artifact with the GAV of "com.test:mytest:1.0.0:tgz" to a temp directory
     Then I should have a copy of the "mytest-1.0.0.tgz" artifact in a temp directory
 
+  Scenario: Get an artifact's info
+    When I call the nexus "info com.test:mytest:1.0.0:tgz" command
+    Then the output should contain:
+    """
+    <groupId>com.test</groupId>
+    """
+    And the exit status should be 0
+
+
   Scenario: Attempt to delete an artifact
     When I delete an artifact with the GAV of "com.test:mytest:1.0.0:tgz"
     And I call the nexus "info com.test:mytest:1.0.0:tgz" command

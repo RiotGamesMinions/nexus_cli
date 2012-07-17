@@ -16,5 +16,5 @@ def nexus_remote
 end
 
 at_exit do
-  #tear down here
+  FileUtils.rm_rf(temp_dir)
 end
