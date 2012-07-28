@@ -5,14 +5,14 @@ require 'yaml'
 
 module NexusCli
   class ProRemote < OSSRemote
-      
+
     def get_artifact_custom_info(artifact)
       parse_n3(get_artifact_custom_info_n3(artifact))
     end
 
     def get_artifact_custom_info_n3(artifact)
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
-      file_name = "#{artifact_id}-#{version}.#{extension}.n3"      
+      file_name = "#{artifact_id}-#{version}.#{extension}.n3"
       get_string = "content/repositories/#{configuration['repository']}/.meta/#{group_id.gsub(".", "/")}/#{artifact_id.gsub(".", "/")}/#{version}/#{file_name}"
       begin
         nexus[get_string].get
@@ -28,7 +28,7 @@ module NexusCli
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
       file_name = "#{artifact_id}-#{version}.#{extension}.n3"
       post_string = "content/repositories/#{configuration['repository']}/.meta/#{group_id.gsub(".", "/")}/#{artifact_id.gsub(".", "/")}/#{version}/#{file_name}"
-      
+
       # Read in nexus n3 file. If this is a newly-added artifact, there will be no n3 file so escape the exception.
       begin
         nexus_n3 = get_artifact_custom_info_n3(artifact, overrides)
@@ -75,7 +75,7 @@ module NexusCli
 
     def search_artifacts(key, type, value)
       if key.empty? || type.empty? || value.empty?
-          raise SearchParameterMalformedException
+        raise SearchParameterMalformedException
       end
       begin
         nexus['service/local/search/m2/freeform'].get ({params: {p: key, t: type, v: value}}) do |response, request, result, &block|
@@ -89,24 +89,24 @@ module NexusCli
     end
 
     private
-      def parse_n3(data)
-        builder = Nokogiri::XML::Builder.new do |xml|
-          xml.send("artifact-resolution") {
-            xml.data {
-              data.each_line { |line|
-                tag, value = parse_n3_line(line)
-                xml.send(tag, value) unless tag.empty? || value.empty?
-              }
+    def parse_n3(data)
+      builder = Nokogiri::XML::Builder.new do |xml|
+        xml.send("artifact-resolution") {
+          xml.data {
+            data.each_line { |line|
+              tag, value = parse_n3_line(line)
+              xml.send(tag, value) unless tag.empty? || value.empty?
             }
           }
-        end
-        return builder.doc.root.to_s
+        }
       end
+      return builder.doc.root.to_s
+    end
 
-      def parse_n3_line(line)
-          tag = line.match(/#(\w*)>/) ? "#{$1}" : ""
-          value = line.match(/"([^"]*)"/)  ? "#{$1}" : ""
-          return tag, value
-      end
+    def parse_n3_line(line)
+      tag = line.match(/#(\w*)>/) ? "#{$1}" : ""
+      value = line.match(/"([^"]*)"/)  ? "#{$1}" : ""
+      return tag, value
+    end
   end
 end
