@@ -85,15 +85,11 @@ module NexusCli
           end
         end
 
-        method_option :insecure,
-          :type => :boolean,
-          :default => false,
-          :desc => "Overrides any failures because of an 'insecure' SSL connection."
         desc "update_artifact_custom_info artifact file", "Updates the artifact custom metadata by pushing the Nexus custom artifact file (n3) from your machine onto the Nexus."
         def update_artifact_custom_info(artifact, file)
           begin
             raise NotNexusProException unless @nexus_remote.kind_of? ProRemote
-            @nexus_remote.update_artifact_custom_info(artifact, file, options[:insecure])
+            @nexus_remote.update_artifact_custom_info(artifact, file)
             say "Custom metadata for artifact #{artifact} has been successfully pushed to Nexus.", :green
           rescue NexusCliError => e
             say e.message, :red
