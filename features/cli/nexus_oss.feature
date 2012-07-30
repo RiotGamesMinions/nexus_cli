@@ -39,6 +39,13 @@ Feature: Use the Nexus CLI
     """
     And the exit status should be 0
 
+  Scenario: Search for artifacts
+    When I I call the nexus "search_for_artifacts com.test:mytest" command
+    Then the output should contain:
+    """
+    Some sort of shit
+    """
+
   Scenario: Attempt to delete an artifact
     When I delete an artifact with the GAV of "com.test:mytest:1.0.0:tgz"
     And I call the nexus "info com.test:mytest:1.0.0:tgz" command
