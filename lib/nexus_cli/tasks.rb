@@ -67,7 +67,7 @@ module NexusCli
         desc "search_for_artifacts", "Prints out some information about some junk."
         def search_for_artifacts(artifact)
           begin
-            puts @nexus_remote.search_for_artifacts(artifact)
+            @nexus_remote.search_for_artifacts(artifact).each{|output| say output, :green}
           rescue
           end
         end
