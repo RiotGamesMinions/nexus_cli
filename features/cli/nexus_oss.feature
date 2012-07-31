@@ -44,8 +44,10 @@ Feature: Use the Nexus CLI
     When I call the nexus "search_for_artifacts com.test:mytest" command
     Then the output should contain:
     """
-    Some sort of shit
+    Found Versions:
+    1.0.0: `nexus-cli pull com.test:mytest:1.0.0:tgz`
     """
+    And the exit status should be 0
 
   Scenario: Attempt to delete an artifact
     When I delete an artifact with the GAV of "com.test:mytest:1.0.0:tgz"

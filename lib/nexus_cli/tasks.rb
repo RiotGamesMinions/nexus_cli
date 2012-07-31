@@ -66,6 +66,10 @@ module NexusCli
 
         desc "search_for_artifacts", "Prints out some information about some junk."
         def search_for_artifacts(artifact)
+          begin
+            puts @nexus_remote.search_for_artifacts(artifact)
+          rescue
+          end
         end
 
         desc "get_artifact_custom_info artifact", "Gets and returns the custom metadata in XML format about a particular artifact."
