@@ -48,7 +48,6 @@ Feature: Use the Nexus CLI
     """
     And the exit status should be 0
 
-  @broke
   Scenario: Attempt to delete an artifact
     When I delete an artifact with the GAV of "com.test:mytest:1.0.0:tgz"
     And I call the nexus "info com.test:mytest:1.0.0:tgz" command
