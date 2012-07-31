@@ -83,9 +83,7 @@ module NexusCli
       nexus['service/local/data_index'].get ({params: {g: group_id, a: artifact_id}}) do |response, request, result, &block|
         doc = Nokogiri::XML(response.body)
         puts "Found Versions:"
-        foo = []
-        doc.xpath("//version").each {|version| foo << "#{version.content()}: `nexus-cli pull #{group_id}:#{artifact_id}:#{version.content()}:tgz`"}
-        return foo
+        return doc.xpath("//version").inject([]) {|string,version| string << "#{version.content()}: `nexus-cli pull #{group_id}:#{artifact_id}:#{version.content()}:tgz`"; string}
       end
     end
 
