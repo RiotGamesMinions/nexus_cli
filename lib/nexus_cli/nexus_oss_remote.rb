@@ -6,7 +6,7 @@ module NexusCli
   class OSSRemote
 
     def initialize(overrides)
-      @configuration = ConfigurationParser::parse_configuration(overrides)
+      @configuration = Configuration::parse(overrides)
     end
 
     def configuration

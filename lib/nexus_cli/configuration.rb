@@ -1,7 +1,7 @@
 module NexusCli
-  module ConfigurationParser
+  module Configuration
     class << self
-      def parse_configuration(overrides)
+      def parse(overrides)
         config_path = File.expand_path("~/.nexus_cli")
         config = File.exists?(config_path) ? YAML::load_file(config_path) : Hash.new
         if config.nil? && (overrides.nil? || overrides.empty?)

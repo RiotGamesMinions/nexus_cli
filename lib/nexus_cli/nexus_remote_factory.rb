@@ -7,7 +7,7 @@ module NexusCli
     class << self
 
       def create(overrides)
-        @configuration = ConfigurationParser::parse_configuration(overrides)
+        @configuration = Configuration::parse(overrides)
         running_nexus_pro? ? ProRemote.new(overrides) : OSSRemote.new(overrides)
       end
 
