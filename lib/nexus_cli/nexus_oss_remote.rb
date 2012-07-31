@@ -88,7 +88,7 @@ module NexusCli
 
     private
     def format_search_results(doc, group_id, artifact_id)
-      versions = doc.xpath("//version").inject([]) {|array,node| array << "#{node.content()}"; array}
+      versions = doc.xpath("//version").inject([]) {|array,node| array << "#{node.content()}"}
       indent_size = versions.max{|a,b| a.length <=> b.length}.size+4
       formated_results = ['Found Versions:']
       versions.inject(formated_results) do |array,version| 
@@ -96,7 +96,7 @@ module NexusCli
         array << "#{temp_version.ljust(indent_size)} `nexus-cli pull #{group_id}:#{artifact_id}:#{version}:tgz`"
       end
     end
-      
+
     def parse_artifact_string(artifact)
       split_artifact = artifact.split(":")
       if(split_artifact.size < 4)
