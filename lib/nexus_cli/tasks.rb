@@ -12,6 +12,7 @@ module NexusCli
         map 'custom' => :get_artifact_custom_info
         map 'config' => :get_nexus_configuration
         map 'status' => :get_nexus_status
+        map 'search' => :search_for_artifacts
 
         class_option :overrides,
           :type => :hash,
@@ -68,7 +69,9 @@ module NexusCli
         def search_for_artifacts(artifact)
           begin
             @nexus_remote.search_for_artifacts(artifact).each{|output| say output, :green}
-          rescue
+          rescue NexusCliError => e
+            say e.message, :red
+            exit e.status_code
           end
         end
 

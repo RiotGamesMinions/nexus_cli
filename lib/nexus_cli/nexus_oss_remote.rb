@@ -88,7 +88,7 @@ module NexusCli
 
     private
       def format_search_results(doc, group_id, artifact_id)
-        versions = doc.xpath("//version").inject([]) {|array,node| array << "#{node.content()}"; array}
+        versions = doc.xpath("//version").inject([]) {|array,node| array << "#{node.content()}"}
         indent_size = versions.max{|a,b| a.length <=> b.length}.size+4
         formated_results = ['Found Versions:']
         versions.inject(formated_results) do |array,version| 
