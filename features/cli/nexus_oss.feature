@@ -44,7 +44,7 @@ Feature: Use the Nexus CLI
     Then the output should contain:
     """
     Found Versions:
-    1.0.0: `nexus-cli pull com.test:mytest:1.0.0:tgz`
+    1.0.0:    `nexus-cli pull com.test:mytest:1.0.0:tgz`
     """
     And the exit status should be 0
 
