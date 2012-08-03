@@ -73,15 +73,33 @@ module NexusCli
       end
     end
 
+    def clear_artifact_custom_info(artifact)
+      # Check if artifact exists before posting custom metadata.
+      get_artifact_info(artifact)
+      group_id, artifact_id, version, extension = parse_artifact_string(artifact)
+      file_name = "#{artifact_id}-#{version}.#{extension}.n3"
+      post_string = "content/repositories/#{configuration['repository']}/.meta/#{group_id.gsub(".", "/")}/#{artifact_id.gsub(".", "/")}/#{version}/#{file_name}"
+      n3_temp = Tempfile.new("nexus_n3")
+      begin
+        n3_temp.write("<urn:maven/artifact##{group_id}:#{artifact_id}:#{version}::#{extension}> a <urn:maven#artifact> .")
+        n3_temp.rewind
+        Kernel.quietly {`curl -T #{n3_temp.path} #{File.join(configuration['url'], post_string)} -u #{configuration['username']}:#{configuration['password']}`}
+      ensure
+        n3_temp.close
+        n3_temp.unlink
+      end
+    end
+
     def search_artifacts(key, type, value)
       if key.empty? || type.empty? || value.empty?
         raise SearchParameterMalformedException
       end
       begin
-        nexus['service/local/search/m2/freeform'].get ({params: {p: key, t: type, v: value}}) do |response, request, result, &block|
+        nexus['service/local/search/m2/freeform'].get ({params: {p: key, t: type, v: value}}) do |response|
           raise BadSearchRequestException if response.code == 400
           doc = Nokogiri::XML(response.body).xpath("/search-results")
-          return doc.xpath("count")[0].text.to_i > 0 ? doc.to_s : "No search results."
+          # Only letters and numbers are allowed in key names.
+          return !doc.xpath("count")[0].blank? && doc.xpath("count")[0].text.to_i > 0 ? doc.to_s : "No search results."
         end
       rescue RestClient::ResourceNotFound => e
         raise ArtifactNotFoundException

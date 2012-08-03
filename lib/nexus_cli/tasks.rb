@@ -108,6 +108,18 @@ module NexusCli
           end
         end
 
+        desc "clear_artifact_custom_info artifact", "Clears the artifact custom metadata."
+        def clear_artifact_custom_info(artifact)
+          begin
+            raise NotNexusProException unless @nexus_remote.kind_of? ProRemote
+            @nexus_remote.clear_artifact_custom_info(artifact)
+            say "Custom metadata for artifact #{artifact} has been successfully cleared.", :green
+          rescue NexusCliError => e
+            say e.message, :red
+            exit e.status_code
+          end
+        end
+
         desc "search_artifacts key type value", "Searches for artifacts using artifact metadata and returns the result as a list with items in XML format."
         def search_artifacts(key, type, value)
           begin
