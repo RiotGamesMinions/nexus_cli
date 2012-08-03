@@ -30,27 +30,34 @@ module NexusCli
     end
 
     def pull_artifact(artifact, destination)
+      # Using net/http because restclient dies on large files.
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
-      begin
-        fileData = nexus['service/local/artifact/maven/redirect'].get({:params => {:r => configuration['repository'], :g => group_id, :a => artifact_id, :v => version, :e => extension}})
-      rescue RestClient::ResourceNotFound
-        raise ArtifactNotFoundException
-      end
-      if version.casecmp("latest")
-        doc = Nokogiri::XML(get_artifact_info(artifact))
-        version = doc.xpath("//version").first.content()
-      end
+      version = Nokogiri::XML(get_artifact_info(artifact)).xpath("//version").first.content() if version.casecmp("latest")
+      uri = URI(File.join(configuration["url"], "service/local/repositories/#{configuration['repository']}/content/#{group_id.gsub(".", "/")}/#{artifact_id.gsub(".", "/")}/#{version}/#{artifact_id}-#{version}.#{extension}"))
       destination = File.join(File.expand_path(destination || "."), "#{artifact_id}-#{version}.#{extension}")
-      artifact_file = File.open(destination, 'w')
-      artifact_file.write(fileData)
-      artifact_file.close()
-      File.expand_path(artifact_file.path)
+      Net::HTTP.start(uri.host, uri.port) do |http|
+        request = Net::HTTP::Get.new(uri.request_uri)
+        request.basic_auth(configuration["username"], configuration["password"])
+        http.request(request) do |response|
+          case response.code.to_i
+          when 404
+            raise ArtifactNotFoundException
+          end
+          artifact_file = File.open(destination, "wb") do |io|
+            response.read_body do |chunk|
+              io.write(chunk)
+              sleep(0.005) # http://stackoverflow.com/a/6964173
+            end
+          end
+        end
+      end
+      File.expand_path(destination)
     end
 
     def push_artifact(artifact, file)
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
       nexus['service/local/artifact/maven/content'].post({:hasPom => false, :g => group_id, :a => artifact_id, :v => version, :e => extension, :p => extension, :r => configuration['repository'],
-        :file => File.new(file)}) do |response, request, result, &block|
+      :file => File.new(file)}) do |response, request, result, &block|
         case response.code
         when 400
           raise BadUploadRequestException
@@ -94,7 +101,7 @@ module NexusCli
       versions = doc.xpath("//version").inject([]) {|array,node| array << "#{node.content()}"}
       indent_size = versions.max{|a,b| a.length <=> b.length}.size+4
       formated_results = ['Found Versions:']
-      versions.inject(formated_results) do |array,version| 
+      versions.inject(formated_results) do |array,version|
         temp_version = version + ":"
         array << "#{temp_version.ljust(indent_size)} `nexus-cli pull #{group_id}:#{artifact_id}:#{version}:tgz`"
       end
@@ -109,5 +116,5 @@ module NexusCli
       version.upcase! if version.casecmp("latest")
       return group_id, artifact_id, version, extension
     end
-  end 
+  end
 end
