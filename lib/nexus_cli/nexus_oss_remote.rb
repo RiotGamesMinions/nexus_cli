@@ -41,7 +41,7 @@ module NexusCli
         version = doc.xpath("//version").first.content()
       end
       destination = File.join(File.expand_path(destination || "."), "#{artifact_id}-#{version}.#{extension}")
-      artifact_file = File.open(destination, 'w')
+      artifact_file = File.open(destination, 'wb')
       artifact_file.write(fileData)
       artifact_file.close()
       File.expand_path(artifact_file.path)
@@ -50,7 +50,7 @@ module NexusCli
     def push_artifact(artifact, file)
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
       nexus['service/local/artifact/maven/content'].post({:hasPom => false, :g => group_id, :a => artifact_id, :v => version, :e => extension, :p => extension, :r => configuration['repository'],
-        :file => File.new(file)}) do |response, request, result, &block|
+      :file => File.new(file)}) do |response, request, result, &block|
         case response.code
         when 400
           raise BadUploadRequestException
@@ -94,7 +94,7 @@ module NexusCli
       versions = doc.xpath("//version").inject([]) {|array,node| array << "#{node.content()}"}
       indent_size = versions.max{|a,b| a.length <=> b.length}.size+4
       formated_results = ['Found Versions:']
-      versions.inject(formated_results) do |array,version| 
+      versions.inject(formated_results) do |array,version|
         temp_version = version + ":"
         array << "#{temp_version.ljust(indent_size)} `nexus-cli pull #{group_id}:#{artifact_id}:#{version}:tgz`"
       end
@@ -109,5 +109,5 @@ module NexusCli
       version.upcase! if version.casecmp("latest")
       return group_id, artifact_id, version, extension
     end
-  end 
+  end
 end
