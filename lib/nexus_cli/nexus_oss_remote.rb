@@ -32,11 +32,12 @@ module NexusCli
     def pull_artifact(artifact, destination)
       # Using net/http because restclient dies on large files.
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
+      uri = URI(File.join(configuration["url"], "service/local/artifact/maven/redirect"))
+      params = {:g => group_id, :a => artifact_id, :v => version, :e => extension, :r => configuration["repository"]}.collect {|k,v| "#{k}=#{URI::escape(v.to_s)}"}.join("&")
       version = Nokogiri::XML(get_artifact_info(artifact)).xpath("//version").first.content() if version.casecmp("latest")
-      uri = URI(File.join(configuration["url"], "service/local/repositories/#{configuration['repository']}/content/#{group_id.gsub(".", "/")}/#{artifact_id.gsub(".", "/")}/#{version}/#{artifact_id}-#{version}.#{extension}"))
       destination = File.join(File.expand_path(destination || "."), "#{artifact_id}-#{version}.#{extension}")
       Net::HTTP.start(uri.host, uri.port) do |http|
-        request = Net::HTTP::Get.new(uri.request_uri)
+        request = Net::HTTP::Get.new(URI(http.request_get(uri.request_uri + "?" + params)["location"]).request_uri)
         request.basic_auth(configuration["username"], configuration["password"])
         http.request(request) do |response|
           case response.code.to_i
