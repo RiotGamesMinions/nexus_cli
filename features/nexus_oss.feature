@@ -65,8 +65,7 @@ Feature: Use the Nexus CLI
     """
     And the exit status should be 101
 
-  @wip
-  Scenario: Update the current global settings of Nexus
+  Scenario: Get the current global settings of Nexus
     When I call the nexus "global_settings" command
     Then the output should contain:
     """
