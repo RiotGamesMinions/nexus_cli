@@ -92,7 +92,13 @@ module NexusCli
 
     def global_settings(upload)
       if upload
-        puts "hey"
+        global_settings_file = File.join(File.expand_path("."), "global_settings.json")
+        nexus['service/local/global_settings/current'].put(File.read(global_settings_file), {:content_type => "application/json"}) do |response, request, result, &block|
+          case response.code
+          when 400
+            raise BadSettingsException
+          end
+        end
       else
         nexus['service/local/global_settings/current'].get({:accept => "application/json"}) do |response, request, result, &block|
           pretty_json = JSON.pretty_generate(JSON.parse(response.body))

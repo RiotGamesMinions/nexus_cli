@@ -90,4 +90,11 @@ This could mean several things:
     end
     status_code(110)
   end
+
+  class BadSettingsException < NexusCliError
+    def message
+      "Your global_settings.json file is malformed and could not be uploaded to Nexus."
+    end
+    status_code(111)
+  end
 end

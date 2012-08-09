@@ -155,7 +155,12 @@ module NexusCli
           :desc => "When true, the global_settings.json file will be PUT on Nexus, allowing you to edit the config"
         desc "global_settings", "Prints out your Nexus' current setttings and saves them to a file."
         def global_settings
-          @nexus_remote.global_settings(options[:upload])
+          begin
+            @nexus_remote.global_settings(options[:upload])
+          rescue NexusCliError => e
+            say e.message, :red
+            exit e.status_code
+          end
           if options[:upload]
             say "something else"
           else
