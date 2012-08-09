@@ -71,5 +71,15 @@ Feature: Use the Nexus CLI
     """
     Your current Nexus global settings have been written to the file: global_settings.json
     """
-    And the exit status should be 0
     And a file named "global_settings.json" should exist
+    And the exit status should be 0
+
+  Scenario: Update the global settings of Nexus
+    When I call the nexus "global_settings" command
+    And I edit the "global_settings.json" file
+    And I call the nexus "global_settings --upload" command
+    Then the output should contain:
+    """
+    Something
+    """
+    And the exit status should be 0
