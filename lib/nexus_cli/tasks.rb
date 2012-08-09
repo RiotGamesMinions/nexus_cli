@@ -151,7 +151,8 @@ module NexusCli
 
         desc "global_settings", "Prints out your Nexus' current setttings and saves them to a file."
         def global_settings
-          say @nexus_remote.global_settings
+          @nexus_remote.global_settings
+          say "Your current Nexus global settings have been written to the file: global_settings.json", :blue
         end
       end
     end

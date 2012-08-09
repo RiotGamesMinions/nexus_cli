@@ -97,7 +97,6 @@ module NexusCli
         artifact_file = File.open(destination, 'wb') do |file|
           file.write(pretty_json)
         end
-        return pretty_json
       end
     end
 
