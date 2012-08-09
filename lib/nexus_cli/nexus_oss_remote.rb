@@ -92,7 +92,12 @@ module NexusCli
 
     def global_settings
       nexus['service/local/global_settings/current'].get({:accept => "application/json"}) do |response, request, result, &block|
-        return JSON.pretty_generate(JSON.parse(response.body))
+        pretty_json = JSON.pretty_generate(JSON.parse(response.body))
+        destination = File.join(File.expand_path("."), "global_settings.json")
+        artifact_file = File.open(destination, 'wb') do |file|
+          file.write(pretty_json)
+        end
+        return pretty_json
       end
     end
 
