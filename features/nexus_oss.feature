@@ -64,3 +64,16 @@ Feature: Use the Nexus CLI
     The artifact you requested information for could not be found. Please ensure it exists inside the Nexus.
     """
     And the exit status should be 101
+
+  Scenario: Update the current global settings of Nexus
+    When I call the nexus "global_settings" command
+    Then the output should contain:
+    """
+    Something
+    """
+    And the exit status should be 0
+    And I should have a nice Json file
+
+
+
+

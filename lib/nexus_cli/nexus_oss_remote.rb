@@ -89,6 +89,10 @@ module NexusCli
       end
     end
 
+    def update_global_config(payload)
+      nexus['service/local/global_settings/current'].put File.read(payload), 
+    end
+
     private
     def format_search_results(doc, group_id, artifact_id)
       versions = doc.xpath("//version").inject([]) {|array,node| array << "#{node.content()}"}
