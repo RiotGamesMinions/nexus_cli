@@ -148,6 +148,11 @@ module NexusCli
             exit e.status_code
           end
         end
+
+        desc "global_settings", "Prints out your Nexus' current setttings and saves them to a file."
+        def global_settings
+          say @nexus_remote.global_settings
+        end
       end
     end
   end

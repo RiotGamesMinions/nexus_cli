@@ -1,6 +1,7 @@
 require 'restclient'
 require 'nokogiri'
 require 'yaml'
+require 'json'
 
 module NexusCli
   class OSSRemote
@@ -83,14 +84,16 @@ module NexusCli
 
     def search_for_artifacts(artifact)
       group_id, artifact_id = artifact.split(":")
-      nexus['service/local/data_index'].get ({params: {g: group_id, a: artifact_id}}) do |response, request, result, &block|
+      nexus['service/local/data_index'].get({params: {g: group_id, a: artifact_id}}) do |response, request, result, &block|
         doc = Nokogiri::XML(response.body)
         return format_search_results(doc, group_id, artifact_id)
       end
     end
 
-    def update_global_config(payload)
-      nexus['service/local/global_settings/current'].put File.read(payload), 
+    def global_settings
+      nexus['service/local/global_settings/current'].get({:accept => "application/json"}) do |response, request, result, &block|
+        return JSON.pretty_generate(JSON.parse(response.body))
+      end
     end
 
     private
