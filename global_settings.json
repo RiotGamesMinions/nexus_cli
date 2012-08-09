@@ -1,0 +1,43 @@
+{
+  "data": {
+    "securityEnabled": true,
+    "securityAnonymousAccessEnabled": true,
+    "securityAnonymousUsername": "anonymous",
+    "securityAnonymousPassword": "|$|N|E|X|U|S|$|",
+    "securityRealms": [
+      "XmlAuthenticatingRealm",
+      "XmlAuthorizingRealm",
+      "NexusLdapAuthenticationRealm"
+    ],
+    "globalConnectionSettings": {
+      "connectionTimeout": 20,
+      "retrievalRetryCount": 3,
+      "queryString": ""
+    },
+    "systemNotificationSettings": {
+      "enabled": false,
+      "emailAddresses": "",
+      "roles": [
+
+      ]
+    },
+    "smtpSettings": {
+      "host": "smtp-host",
+      "port": 25,
+      "username": "smtp-username",
+      "password": "|$|N|E|X|U|S|$|",
+      "systemEmailAddress": "system@nexus.org",
+      "sslEnabled": false,
+      "tlsEnabled": false
+    },
+    "globalRestApiSettings": {
+      "forceBaseUrl": false,
+      "baseUrl": "http://guiness.riotgames.com:8081/nexus",
+      "uiTimeout": 60
+    },
+    "errorReportingSettings": {
+      "useGlobalProxy": true,
+      "reportErrorsAutomatically": false
+    }
+  }
+}

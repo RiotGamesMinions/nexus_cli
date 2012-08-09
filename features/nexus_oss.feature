@@ -74,6 +74,7 @@ Feature: Use the Nexus CLI
     And a file named "global_settings.json" should exist
     And the exit status should be 0
 
+  @wip
   Scenario: Update the global settings of Nexus
     When I call the nexus "global_settings" command
     And I edit the "global_settings.json" file
