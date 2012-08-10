@@ -7,7 +7,6 @@ Feature: Use the Nexus CLI
     Then the output should contain:
       """
       Application Name: Sonatype Nexus
-      Version: 2.0.5
       """
     And the exit status should be 0
 
