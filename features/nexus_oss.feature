@@ -83,9 +83,9 @@ Feature: Use the Nexus CLI
     """
     Your global_settings.json file has been uploaded to Nexus
     """
-    #When I call the nexus "global_settings" command
-    #Then the file "global_settings.json" should contain:
-    #"""
-    #"forceBaseUrl": true
-    #"""
+    When I call the nexus "global_settings" command
+    Then the file "global_settings.json" should contain:
+    """
+    "forceBaseUrl": true
+    """
     And the exit status should be 0
