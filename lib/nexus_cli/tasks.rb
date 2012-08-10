@@ -162,7 +162,7 @@ module NexusCli
             exit e.status_code
           end
           if options[:upload]
-            say "something else"
+            say "Your global_settings.json file has been uploaded to Nexus", :blue
           else
             say "Your current Nexus global settings have been written to the file: global_settings.json", :blue
           end

@@ -92,8 +92,14 @@ This could mean several things:
   end
 
   class BadSettingsException < NexusCliError
+    def initialize(body)
+      @server_response = JSON.pretty_generate(JSON.parse(body))
+    end
+
     def message
-      "Your global_settings.json file is malformed and could not be uploaded to Nexus."
+      %{Your global_settings.json file is malformed and could not be uploaded to Nexus.
+The output from the server was:
+  #{@server_response}}
     end
     status_code(111)
   end

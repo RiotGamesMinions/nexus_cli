@@ -77,10 +77,15 @@ Feature: Use the Nexus CLI
   @wip
   Scenario: Update the global settings of Nexus
     When I call the nexus "global_settings" command
-    And I edit the "global_settings.json" file
+    And I edit the "global_settings.json" files "forceBaseUrl" field to true
     And I call the nexus "global_settings --upload" command
     Then the output should contain:
     """
-    Something
+    Your global_settings.json file has been uploaded to Nexus
     """
+    #When I call the nexus "global_settings" command
+    #Then the file "global_settings.json" should contain:
+    #"""
+    #"forceBaseUrl": true
+    #"""
     And the exit status should be 0

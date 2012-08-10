@@ -96,7 +96,7 @@ module NexusCli
         nexus['service/local/global_settings/current'].put(File.read(global_settings_file), {:content_type => "application/json"}) do |response, request, result, &block|
           case response.code
           when 400
-            raise BadSettingsException
+            raise BadSettingsException.new(response.body)
           end
         end
       else
