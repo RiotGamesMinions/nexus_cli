@@ -89,16 +89,15 @@ Feature: Use the Nexus CLI
     """
     And the exit status should be 0
 
-  @wip
   Scenario: Reset the global settings of Nexus
     When I call the nexus "global_settings --reset" command
     Then the output should contain:
     """
-    Something
+    Your Nexus global settings have been reset to their default values
     """
     When I call the nexus "global_settings" command
     Then the file "global_settings.json" should contain:
     """
-    Output
+    "forceBaseUrl": false
     """
     And the exit status should be 0
