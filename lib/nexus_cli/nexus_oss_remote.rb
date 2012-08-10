@@ -90,27 +90,29 @@ module NexusCli
       end
     end
 
-    def global_settings(upload, reset)
-      if upload
-        global_settings_file = File.join(File.expand_path("."), "global_settings.json")
-        nexus['service/local/global_settings/current'].put(File.read(global_settings_file), {:content_type => "application/json"}) do |response|
-          case response.code
-          when 400
-            raise BadSettingsException.new(response.body)
-          end
-        end
-      elsif reset
-        default_json = nexus['service/local/global_settings/default'].get({:accept => "application/json"})
-        nexus['service/local/global_settings/current'].put(default_json, {:content_type => "application/json"})
-      else
-        nexus['service/local/global_settings/current'].get({:accept => "application/json"}) do |response|
-          pretty_json = JSON.pretty_generate(JSON.parse(response.body))
-          destination = File.join(File.expand_path("."), "global_settings.json")
-          artifact_file = File.open(destination, 'wb') do |file|
-            file.write(pretty_json)
-          end
+    def get_global_settings
+      nexus['service/local/global_settings/current'].get({:accept => "application/json"}) do |response|
+        pretty_json = JSON.pretty_generate(JSON.parse(response.body))
+        destination = File.join(File.expand_path("."), "global_settings.json")
+        artifact_file = File.open(destination, 'wb') do |file|
+          file.write(pretty_json)
         end
       end
+    end
+
+    def upload_global_settings
+      global_settings_file = File.join(File.expand_path("."), "global_settings.json")
+      nexus['service/local/global_settings/current'].put(File.read(global_settings_file), {:content_type => "application/json"}) do |response|
+        case response.code
+        when 400
+          raise BadSettingsException.new(response.body)
+        end
+      end
+    end
+
+    def reset_global_settings
+      default_json = nexus['service/local/global_settings/default'].get({:accept => "application/json"})
+      nexus['service/local/global_settings/current'].put(default_json, {:content_type => "application/json"})
     end
 
     private
