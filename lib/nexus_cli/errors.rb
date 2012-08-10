@@ -1,3 +1,5 @@
+require 'json'
+
 module NexusCli
   class NexusCliError < StandardError
     class << self
