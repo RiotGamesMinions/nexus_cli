@@ -152,17 +152,23 @@ module NexusCli
         method_option :upload, 
           :type => :boolean,
           :default => false,
-          :desc => "When true, the global_settings.json file will be PUT on Nexus, allowing you to edit the config"
+          :desc => "When true, the global_settings.json file will be PUT on Nexus, allowing you to edit the config."
+        method_option :reset,
+          :type => :boolean,
+          :default => false,
+          :desc => "When true, the global_settings of Nexus will be reset to their default values."
         desc "global_settings", "Prints out your Nexus' current setttings and saves them to a file."
         def global_settings
           begin
-            @nexus_remote.global_settings(options[:upload])
+            @nexus_remote.global_settings(options[:upload], options[:reset])
           rescue NexusCliError => e
             say e.message, :red
             exit e.status_code
           end
           if options[:upload]
             say "Your global_settings.json file has been uploaded to Nexus", :blue
+          elsif options[:reset]
+            say "Your Nexus global settings have been reset to their default values", :blue
           else
             say "Your current Nexus global settings have been written to the file: global_settings.json", :blue
           end

@@ -27,10 +27,12 @@ When /^I delete an artifact with the GAV of "(.*)"$/ do |gav|
 end
 
 When /^I edit the "(.*?)" files "(.*?)" field to true$/ do |file, field|
-  json = JSON.parse(File.read(File.join(File.expand_path("."), file)))
-  File.open(File.join(File.expand_path("."), file), "w+") do |opened|
-    json["data"]["globalRestApiSettings"][field] = true
-    opened.write(JSON.pretty_generate(json))
+  Dir.chdir('tmp/aruba') do
+    json = JSON.parse(File.read(File.join(File.expand_path("."), file)))
+    File.open(File.join(File.expand_path("."), file), "w+") do |opened|
+      json["data"]["globalRestApiSettings"][field] = true
+      opened.write(JSON.pretty_generate(json))
+    end
   end
 end
 

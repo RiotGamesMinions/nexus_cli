@@ -3,9 +3,9 @@ $:.push "#{File.dirname(__FILE__)}/../../lib/"
 require 'nexus_cli'
 require 'rspec'
 
-Before do
-  @dirs = ["."]
-end
+#Before do
+#  @dirs = ["."]
+#end
 
 def get_overrides_string
   @overrides_string ||= "url:http://localhost:8081/nexus repository:releases username:admin password:admin123"

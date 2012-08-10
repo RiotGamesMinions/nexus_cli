@@ -90,7 +90,7 @@ module NexusCli
       end
     end
 
-    def global_settings(upload)
+    def global_settings(upload, reset)
       if upload
         global_settings_file = File.join(File.expand_path("."), "global_settings.json")
         nexus['service/local/global_settings/current'].put(File.read(global_settings_file), {:content_type => "application/json"}) do |response, request, result, &block|
@@ -99,6 +99,9 @@ module NexusCli
             raise BadSettingsException.new(response.body)
           end
         end
+      elsif reset
+        default_json = nexus['service/local/global_settings/default'].get({:accept => "application/json"})
+        nexus['service/local/global_settings/current'].put(default_json, {:content_type => "application/json"})
       else
         nexus['service/local/global_settings/current'].get({:accept => "application/json"}) do |response, request, result, &block|
           pretty_json = JSON.pretty_generate(JSON.parse(response.body))
