@@ -1,3 +1,5 @@
+require 'json'
+
 module NexusCli
   class NexusCliError < StandardError
     class << self
@@ -91,10 +93,23 @@ This could mean several things:
     status_code(110)
   end
 
+  class BadSettingsException < NexusCliError
+    def initialize(body)
+      @server_response = JSON.pretty_generate(JSON.parse(body))
+    end
+
+    def message
+      %{Your global_settings.json file is malformed and could not be uploaded to Nexus.
+The output from the server was:
+  #{@server_response}}
+    end
+    status_code(111)
+  end
+
   class N3ParameterMalformedException < NexusCliError
     def message
       "Submit your tag request specifying one or more 2 colon-separated values: `key:value`. The key can only consist of alphanumeric characters."
     end
-    status_code(111)
+    status_code(112)
   end
 end

@@ -25,7 +25,7 @@ Feature: Use the Nexus Pro CLI
 			"""
 			Submit your tag request specifying one or more 2 colon-separated values: `key:value`. The key can only consist of alphanumeric characters.
 			"""
-		And the exit status should be 111
+		And the exit status should be 112
 
 	Scenario: Update an artifact's custom metadata
 		When I call the nexus "update_artifact_custom_info com.test:myprotest:1.0.0:tgz teemoHat:equipped" command

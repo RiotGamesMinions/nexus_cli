@@ -6,7 +6,6 @@ require 'rspec'
 module ArubaOverrides
   def detect_ruby(cmd)
     processor, platform, *rest = RUBY_PLATFORM.split("-")
-    #puts platform
     if platform =~ /w32$/ && cmd =~ /^nexus-cli /
       "ruby -I../../lib -S ../../bin/#{cmd}"
     else
