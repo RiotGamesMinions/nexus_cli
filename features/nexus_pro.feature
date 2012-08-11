@@ -19,6 +19,14 @@ Feature: Use the Nexus Pro CLI
 	    """
     And the exit status should be 0
 
+	Scenario: Get an artifact's custom metadata when it does not exist
+		When I call the nexus "custom com.test:myprotest:1.0.0:tgz" command
+		Then the output should contain:
+			"""
+			The artifact you requested information for could not be found. Please ensure it exists inside the Nexus.
+			"""
+		And the exit status should be 101
+
 	Scenario: Update an artifact's custom metadata with invalid parameters
 		When I call the nexus "update_artifact_custom_info com.test:myprotest:1.0.0:tgz teemoHat_:equipped_" command
 		Then the output should contain:
@@ -27,6 +35,7 @@ Feature: Use the Nexus Pro CLI
 			"""
 		And the exit status should be 112
 
+	@test
 	Scenario: Update an artifact's custom metadata
 		When I call the nexus "update_artifact_custom_info com.test:myprotest:1.0.0:tgz teemoHat:equipped" command
 		Then the output should contain:
@@ -36,26 +45,25 @@ Feature: Use the Nexus Pro CLI
 		And the exit status should be 0
 
 	Scenario: Update an artifact's custom metadata with multiple parameters
-		When I call the nexus "update_artifact_custom_info com.test:myprotest:1.0.0:tgz teemoHat:equipped,viktorStrong:false" command
+		When I call the nexus "update_artifact_custom_info com.test:myprotest:1.0.0:tgz teemoHat:equipped_,viktorStrong:false" command
 		Then the output should contain:
 			"""
 			Custom metadata for artifact com.test:myprotest:1.0.0:tgz has been successfully pushed to Nexus.
 			"""
 		And the exit status should be 0
 
+	@test
 	Scenario: Get an artifact's custom metadata
 		When I call the nexus "custom com.test:myprotest:1.0.0:tgz" command
-		Then the output should contain:
-			"""
-			<teemoHat>equipped_</teemoHat>
-			"""
+		Then the output should contain "<teemoHat>equipped_</teemoHat>"
 		And the exit status should be 0
 
+	@test
 	Scenario: Get an artifact's raw custom metadata
 		When I call the nexus "custom_raw com.test:myprotest:1.0.0:tgz" command
 		Then the output should contain:
 			"""
-
+			<urn:nexus/user#teemoHat> "equipped_"
 			"""
 		And the exit status should be 0
 

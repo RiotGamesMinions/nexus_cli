@@ -15,9 +15,15 @@ module NexusCli
       file_name = "#{artifact_id}-#{version}.#{extension}.n3"
       get_string = "content/repositories/#{configuration['repository']}/.meta/#{group_id.gsub(".", "/")}/#{artifact_id.gsub(".", "/")}/#{version}/#{file_name}"
       begin
-        nexus[get_string].get
+        n3 = nexus[get_string].get
+        # If only the header and deleted tag exist, this artifact is deleted.
+        if n3.split("\n") == 2 && /<urn:maven#deleted>/.match(n3).nil? == false
+          raise ArtifactNotFoundException
+        else
+          return n3
+        end
       rescue RestClient::ResourceNotFound => e
-        raise ArtifactNotFoundException
+        raise  ArtifactNotFoundException
       end
     end
 
