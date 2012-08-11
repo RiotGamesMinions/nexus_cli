@@ -90,4 +90,11 @@ This could mean several things:
     end
     status_code(110)
   end
+
+  class N3ParameterMalformedException < NexusCliError
+    def message
+      "Submit your tag request specifying one or more 2 colon-separated values: `key:value`. The key can only consist of alphanumeric characters."
+    end
+    status_code(111)
+  end
 end

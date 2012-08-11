@@ -6,13 +6,15 @@ module NexusCli
       base.send :include, ::Thor::Actions
       base.class_eval do
 
-        map 'pull'   => :pull_artifact
-        map 'push'   => :push_artifact
-        map 'info'   => :get_artifact_info
-        map 'custom' => :get_artifact_custom_info
-        map 'config' => :get_nexus_configuration
-        map 'status' => :get_nexus_status
-        map 'search' => :search_for_artifacts
+        map 'pull'          => :pull_artifact
+        map 'push'          => :push_artifact
+        map 'info'          => :get_artifact_info
+        map 'custom'        => :get_artifact_custom_info
+        map 'custom_raw'    => :get_artifact_custom_info_n3
+        map 'config'        => :get_nexus_configuration
+        map 'status'        => :get_nexus_status
+        map 'search'        => :search_for_artifacts
+        map 'search_custom' => :search_artifacts
 
         class_option :overrides,
           :type => :hash,
@@ -96,11 +98,23 @@ module NexusCli
           end
         end
 
-        desc "update_artifact_custom_info artifact file", "Updates the artifact custom metadata by pushing the Nexus custom artifact file (n3) from your machine onto the Nexus."
-        def update_artifact_custom_info(artifact, file)
+        desc "update_artifact_custom_info artifact param1,param2,...", "Updates the artifact custom metadata with the given key-value pairs."
+        def update_artifact_custom_info(artifact, params)
           begin
             raise NotNexusProException unless @nexus_remote.kind_of? ProRemote
-            @nexus_remote.update_artifact_custom_info(artifact, file)
+            @nexus_remote.update_artifact_custom_info(artifact, params)
+            say "Custom metadata for artifact #{artifact} has been successfully pushed to Nexus.", :green
+          rescue NexusCliError => e
+            say e.message, :red
+            exit e.status_code
+          end
+        end
+
+        desc "update_artifact_custom_info_n3 artifact file", "Updates the artifact custom metadata by pushing the Nexus custom artifact file (n3) from your machine onto the Nexus."
+        def update_artifact_custom_info_n3(artifact, file)
+          begin
+            raise NotNexusProException unless @nexus_remote.kind_of? ProRemote
+            @nexus_remote.update_artifact_custom_info_n3(artifact, file)
             say "Custom metadata for artifact #{artifact} has been successfully pushed to Nexus.", :green
           rescue NexusCliError => e
             say e.message, :red

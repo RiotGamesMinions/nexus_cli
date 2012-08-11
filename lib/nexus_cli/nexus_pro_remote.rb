@@ -21,7 +21,29 @@ module NexusCli
       end
     end
 
-    def update_artifact_custom_info(artifact, file)
+    def update_artifact_custom_info(artifact, params)
+      # Check if artifact exists before posting custom metadata.
+      get_artifact_info(artifact)
+      group_id, artifact_id, version, extension = parse_artifact_string(artifact)
+      tags = parse_n3_params(params)
+      n3UserUrns = { "head" => "<urn:maven/artifact##{group_id}:#{artifact_id}:#{version}::#{extension}> a <urn:maven#artifact>" }
+      tags.each { |tag, value|
+        n3UserUrns[tag] = "\t<urn:nexus/user##{tag}> \"#{value}\"" unless tag.empty? || value.empty?
+      }
+
+      # Create n3 file containing all tags.
+      n3_temp = Tempfile.new("nexus_n3")
+      begin
+        n3_temp.write(n3UserUrns.values.join(" ;\n") + " .")
+        n3_temp.rewind
+        update_artifact_custom_info_n3(artifact, n3_temp.path)
+      ensure
+        n3_temp.close
+        n3_temp.unlink
+      end
+    end
+
+    def update_artifact_custom_info_n3(artifact, file)
       # Check if artifact exists before posting custom metadata.
       get_artifact_info(artifact)
       # Update the custom metadata using the n3 file.
@@ -102,7 +124,7 @@ module NexusCli
           raise ArtifactNotFoundException
         end
       }
-      result = docs.inject {|memo,doc| get_common_set(memo, doc)}
+      result = docs.inject(docs.first) {|memo,doc| get_common_artifact_set(memo, doc)}
       return result.nil? ? "" : result.to_xml(:indent => 4)
     end
 
@@ -127,6 +149,20 @@ module NexusCli
       return tag, value
     end
 
+    def parse_n3_params(params)
+      begin
+        parsed_params = Hash.new
+        params.split(",").each { |param|
+          k,v = param.split(":")
+          raise if /^[a-zA-Z0-9]+$/.match(k).nil?
+          parsed_params[k] = v
+        }
+        return parsed_params
+      rescue
+        raise N3ParameterMalformedException
+      end
+    end
+
     def parse_search_params(params)
       parsed_params = params.split(",").collect {|param| param.split(":")}
       parsed_params.each { |param|
@@ -135,8 +171,27 @@ module NexusCli
       return parsed_params
     end
 
-    def get_common_set(set1, set2)
-      return Nokogiri::XML((set1.to_s.split("\n").collect {|x| x.to_s.strip} & set2.to_s.split("\n").collect {|x| x.to_s.strip}).join).root
+    # Expects the XML set with `data` as root.
+    def get_common_artifact_set(set1, set2)
+      intersection = get_artifact_array(set1) & get_artifact_array(set2)
+      return intersection.count > 0 ? Nokogiri::XML("<data>#{intersection.join}</data>").root : Nokogiri::XML("").root
+    end
+
+    def get_artifact_array(set)
+      artifacts = Array.new
+      artifact = nil
+      set.to_s.split("\n").collect {|x| x.to_s.strip}.each { |piece|
+        if piece == "<artifact>"
+          artifact = piece
+        elsif piece == "</artifact>"
+          artifact += piece
+          artifacts.push(artifact)
+          artifact = nil
+        elsif !artifact.nil?
+          artifact += piece
+        end
+      }
+      return artifacts
     end
   end
 end
