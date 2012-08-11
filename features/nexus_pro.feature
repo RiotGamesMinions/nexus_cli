@@ -20,7 +20,7 @@ Feature: Use the Nexus Pro CLI
     And the exit status should be 0
 
 	Scenario: Get an artifact's custom metadata when it does not exist
-		When I call the nexus "custom com.test:myprotest:1.0.0:tgz" command
+		When I call the nexus "custom_raw com.test:myprotest:1.0.0:tgz" command
 		Then the output should contain:
 			"""
 			The artifact you requested information for could not be found. Please ensure it exists inside the Nexus.
@@ -35,7 +35,6 @@ Feature: Use the Nexus Pro CLI
 			"""
 		And the exit status should be 112
 
-	@test
 	Scenario: Update an artifact's custom metadata
 		When I call the nexus "update_artifact_custom_info com.test:myprotest:1.0.0:tgz teemoHat:equipped" command
 		Then the output should contain:
@@ -45,25 +44,34 @@ Feature: Use the Nexus Pro CLI
 		And the exit status should be 0
 
 	Scenario: Update an artifact's custom metadata with multiple parameters
-		When I call the nexus "update_artifact_custom_info com.test:myprotest:1.0.0:tgz teemoHat:equipped_,viktorStrong:false" command
+		When I call the nexus "update_artifact_custom_info com.test:myprotest:1.0.0:tgz teemoHat:equipped_,teemoSkins:many" command
 		Then the output should contain:
 			"""
 			Custom metadata for artifact com.test:myprotest:1.0.0:tgz has been successfully pushed to Nexus.
 			"""
 		And the exit status should be 0
 
-	@test
 	Scenario: Get an artifact's custom metadata
 		When I call the nexus "custom com.test:myprotest:1.0.0:tgz" command
-		Then the output should contain "<teemoHat>equipped_</teemoHat>"
+		Then the output should contain:
+			"""
+			<teemoHat>equipped_</teemoHat>
+			"""
+		Then the output should contain:
+			"""
+			<teemoSkins>many</teemoSkins>
+			"""
 		And the exit status should be 0
 
-	@test
 	Scenario: Get an artifact's raw custom metadata
 		When I call the nexus "custom_raw com.test:myprotest:1.0.0:tgz" command
 		Then the output should contain:
 			"""
 			<urn:nexus/user#teemoHat> "equipped_"
+			"""
+		Then the output should contain:
+			"""
+			<urn:nexus/user#teemoSkins> "many"
 			"""
 		And the exit status should be 0
 
@@ -71,7 +79,7 @@ Feature: Use the Nexus Pro CLI
 		When I call the nexus "search_custom teemoHat:matches:equip*" command
 		Then the output should contain:
 			"""
-
+			<artifactId>myprotest</artifactId>
 			"""
 		And the exit status should be 0
 
@@ -79,7 +87,7 @@ Feature: Use the Nexus Pro CLI
 		When I call the nexus "search_custom teemoHat:equal:equipped_" command
 		Then the output should contain:
 			"""
-
+			<artifactId>myprotest</artifactId>
 			"""
 		And the exit status should be 0
 
@@ -87,7 +95,15 @@ Feature: Use the Nexus Pro CLI
 		When I call the nexus "search_custom teemoHat:matches:equip*,teemoHat:equal:equipped_" command
 		Then the output should contain:
 			"""
+			<artifactId>myprotest</artifactId>
+			"""
+		And the exit status should be 0
 
+	Scenario: Search for artifacts by custom metadata that return an empty result set
+		When I call the nexus "search_custom bestTeemo:equal:malady" command
+		Then the output should contain:
+			"""
+			No search results.
 			"""
 		And the exit status should be 0
 
@@ -98,6 +114,14 @@ Feature: Use the Nexus Pro CLI
 			Custom metadata for artifact com.test:myprotest:1.0.0:tgz has been successfully cleared.
 			"""
 		And the exit status should be 0
+
+	Scenario: Clear an artifact's custom metadata where the artifact does not exist
+		When I call the nexus "clear_artifact_custom_info com.test:missingno:1.0.0:tgz" command
+		Then the output should contain:
+			"""
+			The artifact you requested information for could not be found. Please ensure it exists inside the Nexus.
+			"""
+		And the exit status should be 101
 
   @delete
   Scenario: Attempt to delete an artifact

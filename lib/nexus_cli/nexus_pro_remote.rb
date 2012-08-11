@@ -16,8 +16,7 @@ module NexusCli
       get_string = "content/repositories/#{configuration['repository']}/.meta/#{group_id.gsub(".", "/")}/#{artifact_id.gsub(".", "/")}/#{version}/#{file_name}"
       begin
         n3 = nexus[get_string].get
-        # If only the header and deleted tag exist, this artifact is deleted.
-        if n3.split("\n") == 2 && /<urn:maven#deleted>/.match(n3).nil? == false
+        if /<urn:maven#deleted>/.match(n3).nil? == false
           raise ArtifactNotFoundException
         else
           return n3
@@ -102,7 +101,6 @@ module NexusCli
     end
 
     def clear_artifact_custom_info(artifact)
-      # Check if artifact exists before posting custom metadata.
       get_artifact_info(artifact)
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
       file_name = "#{artifact_id}-#{version}.#{extension}.n3"
