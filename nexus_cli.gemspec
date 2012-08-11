@@ -10,7 +10,6 @@ Gem::Specification.new do |s|
   s.homepage    = "https://github.com/RiotGames/nexus_cli"
   s.summary     = %q{A command-line wrapper for making REST calls to Sonatype Nexus.}
   s.description = s.summary
-  s.full_name   = "wtf mang"
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
