@@ -22,7 +22,7 @@ module NexusCli
           return n3
         end
       rescue RestClient::ResourceNotFound => e
-        raise  ArtifactNotFoundException
+        raise ArtifactNotFoundException
       end
     end
 
