@@ -48,7 +48,6 @@ module NexusCli
           artifact_file = File.open(destination, "wb") do |io|
             response.read_body do |chunk|
               io.write(chunk)
-              sleep(0.005) # http://stackoverflow.com/a/6964173
             end
           end
         end
