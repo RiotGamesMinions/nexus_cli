@@ -116,6 +116,10 @@ module NexusCli
           @nexus_remote.reset_global_settings
           say "Your Nexus global settings have been reset to their default values", :blue
         end
+
+        desc "create_repository"
+        def create_repository
+        end
       end
     end
   end

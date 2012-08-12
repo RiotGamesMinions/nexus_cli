@@ -100,3 +100,11 @@ Feature: Use the Nexus CLI
     "forceBaseUrl": false
     """
     And the exit status should be 0
+
+  Scenario: Create a new repository in Nexus
+    When I call the nexus "create_repository artifacts" command
+    Then the output should contain:
+    """
+    Something
+    """
+    And the exist status should be 0
