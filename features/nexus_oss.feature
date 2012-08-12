@@ -111,8 +111,9 @@ Feature: Use the Nexus CLI
 
   Scenario: Delete a repository in Nexus
     When I call the nexus "delete_repository Artifacts" command
+    And I call the nexus "get_repository_info Artifacts" command
     Then the output should contain:
     """
-    The Repository named Artifacts has been deleted.
+    The repository you requested information could not be found. Please ensure the repository exists.
     """
-    And the exit status should be 0
+    And the exit status should be 114

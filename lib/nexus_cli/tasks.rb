@@ -128,6 +128,11 @@ module NexusCli
           @nexus_remote.delete_repository(name)
           say "The Repository named #{name} has been deleted.", :blue
         end
+
+        desc "get_repository_info name", "Finds and returns information about the provided Repository."
+        def get_repository_info(name)
+          say @nexus_remote.get_repository_info(name), :green
+        end
       end
     end
   end

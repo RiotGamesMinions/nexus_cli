@@ -133,6 +133,16 @@ module NexusCli
       end
     end
 
+    def get_repository_info(name)
+      begin
+        nexus["service/local/repositories/#{name.downcase}"].get
+      rescue Errno::ECONNREFUSED => e
+        raise CouldNotConnectToNexusException
+      rescue RestClient::ResourceNotFound => e
+        raise RepositoryNotFoundException
+      end
+    end
+
     private
     def format_search_results(doc, group_id, artifact_id)
       versions = doc.xpath("//version").inject([]) {|array,node| array << "#{node.content()}"}
