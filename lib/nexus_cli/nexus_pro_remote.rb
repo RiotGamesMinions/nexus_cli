@@ -7,16 +7,15 @@ module NexusCli
   class ProRemote < OSSRemote
 
     def get_artifact_custom_info(artifact)
-      parse_n3(get_artifact_custom_info_n3(artifact))
+      return N3Metadata::n3_to_xml(get_artifact_custom_info_n3(artifact))
     end
 
     def get_artifact_custom_info_n3(artifact)
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
-      file_name = "#{artifact_id}-#{version}.#{extension}.n3"
-      get_string = "content/repositories/#{configuration['repository']}/.meta/#{group_id.gsub(".", "/")}/#{artifact_id.gsub(".", "/")}/#{version}/#{file_name}"
+      get_string = N3Metadata::generate_n3_path(group_id, artifact_id, version, extension, configuration['repository'])
       begin
         n3 = nexus[get_string].get
-        if /<urn:maven#deleted>/.match(n3).nil? == false
+        if /<urn:maven#deleted>/.match(n3)
           raise ArtifactNotFoundException
         else
           return n3
@@ -27,20 +26,13 @@ module NexusCli
     end
 
     def update_artifact_custom_info(artifact, params)
-      # Check if artifact exists before posting custom metadata.
-      get_artifact_info(artifact)
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
-      tags = parse_n3_params(params)
-      n3UserUrns = { "head" => "<urn:maven/artifact##{group_id}:#{artifact_id}:#{version}::#{extension}> a <urn:maven#artifact>" }
-      tags.each { |tag, value|
-        n3UserUrns[tag] = "\t<urn:nexus/user##{tag}> \"#{value}\"" unless tag.empty? || value.empty?
-      }
+      n3_user_urns = { "n3_header" => N3Metadata::get_n3_header(group_id, artifact_id, version, extension) }.merge(N3Metadata::generate_n3_contents_from_hash(parse_n3_params(params)))
 
-      # Create n3 file containing all tags.
       n3_temp = Tempfile.new("nexus_n3")
       begin
-        n3_temp.write(n3UserUrns.values.join(" ;\n") + " .")
-        n3_temp.rewind
+        n3_temp.write(N3Metadata::parse_n3_hash(n3_user_urns))
+        n3_temp.close
         update_artifact_custom_info_n3(artifact, n3_temp.path)
       ensure
         n3_temp.close
@@ -53,9 +45,9 @@ module NexusCli
       get_artifact_info(artifact)
       # Update the custom metadata using the n3 file.
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
-      file_name = "#{artifact_id}-#{version}.#{extension}.n3"
-      post_string = "content/repositories/#{configuration['repository']}/.meta/#{group_id.gsub(".", "/")}/#{artifact_id.gsub(".", "/")}/#{version}/#{file_name}"
+      post_string = N3Metadata::generate_n3_path(group_id, artifact_id, version, extension, configuration['repository'])
 
+      # Get all the urn:nexus/user# keys and consolidate.
       # Read in nexus n3 file. If this is a newly-added artifact, there will be no n3 file so escape the exception.
       begin
         nexus_n3 = get_artifact_custom_info_n3(artifact)
@@ -66,33 +58,15 @@ module NexusCli
       # Read in local n3 file.
       local_n3 = File.open(file).read
 
-      n3_user_urns = { "head" => "<urn:maven/artifact##{group_id}:#{artifact_id}:#{version}::#{extension}> a <urn:maven#artifact>" }
-      # Get all the urn:nexus/user# keys and consolidate.
-      # First, get the nexus keys.
-      nexus_n3.each_line { |line|
-        if line.match(/urn:nexus\/user#/)
-          tag, value = parse_n3_line(line)
-          n3_user_urns[tag] = "\t<urn:nexus/user##{tag}> \"#{value}\"" unless tag.empty? || value.empty?
-        end
-      }
-      # Next, get the local keys and update the nexus keys.
-      local_n3.each_line { |line|
-        if line.match(/urn:nexus\/user#/)
-          tag, value = parse_n3_line(line)
-          # Delete the nexus key if the local key has no value.
-          if n3_user_urns.has_key?(tag) && value.empty?
-            n3_user_urns.delete(tag)
-          else
-            n3_user_urns[tag] = "\t<urn:nexus/user##{tag}> \"#{value}\"" unless tag.empty? || value.empty?
-          end
-        end
-      }
-
-      n3_data = n3_user_urns.values.join(" ;\n") + " ."
+      n3_user_urns = { "n3_header" => N3Metadata::get_n3_header(group_id, artifact_id, version, extension) }
+      # Get the nexus keys.
+      n3_user_urns = N3Metadata::generate_n3_contents_from_n3(nexus_n3, n3_user_urns)
+      # Get the local keys and update the nexus keys.
+      n3_user_urns = N3Metadata::generate_n3_contents_from_n3(local_n3, n3_user_urns)
       n3_temp = Tempfile.new("nexus_n3")
       begin
-        n3_temp.write(n3_data)
-        n3_temp.rewind
+        n3_temp.write(N3Metadata::parse_n3_hash(n3_user_urns))
+        n3_temp.close
         Kernel.quietly {`curl -T #{n3_temp.path} #{File.join(configuration['url'], post_string)} -u #{configuration['username']}:#{configuration['password']}`}
       ensure
         n3_temp.close
@@ -103,12 +77,12 @@ module NexusCli
     def clear_artifact_custom_info(artifact)
       get_artifact_info(artifact)
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
-      file_name = "#{artifact_id}-#{version}.#{extension}.n3"
-      post_string = "content/repositories/#{configuration['repository']}/.meta/#{group_id.gsub(".", "/")}/#{artifact_id.gsub(".", "/")}/#{version}/#{file_name}"
+      post_string = N3Metadata::generate_n3_path(group_id, artifact_id, version, extension, configuration['repository'])
+      n3_user_urns = { "n3_header" => N3Metadata::get_n3_header(group_id, artifact_id, version, extension) }
       n3_temp = Tempfile.new("nexus_n3")
       begin
-        n3_temp.write("<urn:maven/artifact##{group_id}:#{artifact_id}:#{version}::#{extension}> a <urn:maven#artifact> .")
-        n3_temp.rewind
+        n3_temp.write(N3Metadata::parse_n3_hash(n3_user_urns))
+        n3_temp.close
         Kernel.quietly {`curl -T #{n3_temp.path} #{File.join(configuration['url'], post_string)} -u #{configuration['username']}:#{configuration['password']}`}
       ensure
         n3_temp.close
@@ -133,26 +107,6 @@ module NexusCli
     end
 
     private
-    def parse_n3(data)
-      builder = Nokogiri::XML::Builder.new do |xml|
-        xml.send("artifact-resolution") {
-          xml.data {
-            data.each_line { |line|
-              tag, value = parse_n3_line(line)
-              xml.send(tag, value) unless tag.empty? || value.empty?
-            }
-          }
-        }
-      end
-      return builder.doc.root.to_s
-    end
-
-    def parse_n3_line(line)
-      tag = line.match(/#(\w*)>/) ? "#{$1}" : ""
-      value = line.match(/"([^"]*)"/)  ? "#{$1}" : ""
-      return tag, value
-    end
-
     def parse_n3_params(params)
       begin
         parsed_params = Hash.new
