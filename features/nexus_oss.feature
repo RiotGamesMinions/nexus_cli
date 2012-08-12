@@ -109,3 +109,12 @@ Feature: Use the Nexus CLI
     A new Repository named Artifacts has been created.
     """
     And the exit status should be 0
+
+  @wip
+  Scenario: Delete a repository in Nexus
+    When I call the nexus "delete_repository Artifacts" command
+    Then the output should contain:
+    """
+    Something
+    """
+    And the exit status should be 0
