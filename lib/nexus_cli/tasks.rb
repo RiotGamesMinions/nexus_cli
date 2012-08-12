@@ -117,8 +117,10 @@ module NexusCli
           say "Your Nexus global settings have been reset to their default values", :blue
         end
 
-        desc "create_repository"
-        def create_repository
+        desc "create_repository name", "Creates a new Repository with the provided name."
+        def create_repository(name)
+          @nexus_remote.create_repository(name)
+          say "A new Repository named #{name} has been created.", :blue
         end
       end
     end

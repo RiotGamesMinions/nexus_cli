@@ -105,4 +105,16 @@ The output from the server was:
     end
     status_code(111)
   end
+
+  class CreateRepsitoryException < NexusCliError
+    def initialize(body)
+      @server_response = JSON.pretty_generate(JSON.parse(body))
+    end
+
+    def message
+      %{Your create repository command failed due to the following:
+        #{@server_response}}
+    end
+    status_code(112)
+  end
 end

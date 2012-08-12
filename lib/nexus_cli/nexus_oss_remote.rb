@@ -115,6 +115,15 @@ module NexusCli
       nexus['service/local/global_settings/current'].put(default_json, {:content_type => "application/json"})
     end
 
+    def create_repository(name)
+      nexus['service/local/repositories'].post(create_repository_json(name), {:content_type => "application/json"}) do |response|
+        case response.code
+        when 400
+          raise CreateRepsitoryException.new(response.body)
+        end
+      end
+    end
+
     private
     def format_search_results(doc, group_id, artifact_id)
       versions = doc.xpath("//version").inject([]) {|array,node| array << "#{node.content()}"}
@@ -134,6 +143,23 @@ module NexusCli
       group_id, artifact_id, version, extension = split_artifact
       version.upcase! if version.casecmp("latest")
       return group_id, artifact_id, version, extension
+    end
+
+    def create_repository_json(name)
+      %{
+        {
+          "data" : {
+            "provider" : "maven2",
+            "providerRole" : "org.sonatype.nexus.proxy.repository.Repository",
+            "exposed" : true,
+            "repoType" : "hosted",
+            "repoPolicy" : "RELEASE",
+            "name" : #{name},
+            "id" : #{name.downcase},
+            "format" : "maven2"
+          }
+        }
+      }
     end
   end
 end

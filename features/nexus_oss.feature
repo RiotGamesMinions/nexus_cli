@@ -101,10 +101,11 @@ Feature: Use the Nexus CLI
     """
     And the exit status should be 0
 
+  @wip
   Scenario: Create a new repository in Nexus
-    When I call the nexus "create_repository artifacts" command
+    When I call the nexus "create_repository Artifacts" command
     Then the output should contain:
     """
-    Something
+    A new Repository named Artifacts has been created.
     """
-    And the exist status should be 0
+    And the exit status should be 0
