@@ -57,7 +57,7 @@ Feature: Use the Nexus Pro CLI
 			"""
 			<teemoHat>equipped_</teemoHat>
 			"""
-		Then the output should contain:
+		And the output should contain:
 			"""
 			<teemoSkins>many</teemoSkins>
 			"""
@@ -69,7 +69,7 @@ Feature: Use the Nexus Pro CLI
 			"""
 			<urn:nexus/user#teemoHat> "equipped_"
 			"""
-		Then the output should contain:
+		And the output should contain:
 			"""
 			<urn:nexus/user#teemoSkins> "many"
 			"""
