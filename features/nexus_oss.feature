@@ -101,7 +101,6 @@ Feature: Use the Nexus CLI
     """
     And the exit status should be 0
 
-  @wip
   Scenario: Create a new repository in Nexus
     When I call the nexus "create_repository Artifacts" command
     Then the output should contain:
@@ -110,11 +109,10 @@ Feature: Use the Nexus CLI
     """
     And the exit status should be 0
 
-  @wip
   Scenario: Delete a repository in Nexus
     When I call the nexus "delete_repository Artifacts" command
     Then the output should contain:
     """
-    Something
+    The Repository named Artifacts has been deleted.
     """
     And the exit status should be 0

@@ -117,4 +117,11 @@ The output from the server was:
     end
     status_code(112)
   end
+
+  class RepositoryDoesNotExistException < NexusCliError
+    def message
+      "The repository you are trying to delete does not exist."
+    end
+    status_code(113)
+  end
 end

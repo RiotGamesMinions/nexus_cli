@@ -124,6 +124,15 @@ module NexusCli
       end
     end
 
+    def delete_repository(name)
+      nexus["service/local/repositories/#{name.downcase}"].delete do |response|
+        case response.code
+        when 404
+          raise RepositoryDoesNotExistException
+        end
+      end
+    end
+
     private
     def format_search_results(doc, group_id, artifact_id)
       versions = doc.xpath("//version").inject([]) {|array,node| array << "#{node.content()}"}

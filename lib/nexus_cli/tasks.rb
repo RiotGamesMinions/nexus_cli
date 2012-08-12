@@ -122,6 +122,12 @@ module NexusCli
           @nexus_remote.create_repository(name)
           say "A new Repository named #{name} has been created.", :blue
         end
+
+        desc "delete_repository name", "Deletes a Repository with the provided name."
+        def delete_repository(name)
+          @nexus_remote.delete_repository(name)
+          say "The Repository named #{name} has been deleted.", :blue
+        end
       end
     end
   end
