@@ -92,7 +92,7 @@ module NexusCli
 
     def search_artifacts(params)
       docs = Array.new
-      parse_search_params(params).each { |param|
+      parse_search_params(params).each do |param|
         begin
           nexus['service/local/search/m2/freeform'].get ({params: {p: param[0], t: param[1], v: param[2]}}) do |response|
             raise BadSearchRequestException if response.code == 400
@@ -101,7 +101,7 @@ module NexusCli
         rescue RestClient::ResourceNotFound => e
           raise ArtifactNotFoundException
         end
-      }
+      end
       result = docs.inject(docs.first) {|memo,doc| get_common_artifact_set(memo, doc)}
       return result.nil? ? "" : result.to_xml(:indent => 4)
     end
@@ -110,11 +110,11 @@ module NexusCli
     def parse_n3_params(params)
       begin
         parsed_params = Hash.new
-        params.split(",").each { |param|
+        params.split(",").each do |param|
           k,v = param.split(":")
           raise if /^[a-zA-Z0-9]+$/.match(k).nil?
           parsed_params[k] = v
-        }
+        end
         return parsed_params
       rescue
         raise N3ParameterMalformedException
@@ -123,9 +123,9 @@ module NexusCli
 
     def parse_search_params(params)
       parsed_params = params.split(",").collect {|param| param.split(":")}
-      parsed_params.each { |param|
+      parsed_params.each do |param|
         raise SearchParameterMalformedException unless param.count == 3
-      }
+      end
       return parsed_params
     end
 
@@ -135,10 +135,12 @@ module NexusCli
       return intersection.count > 0 ? Nokogiri::XML("<data>#{intersection.join}</data>").root : Nokogiri::XML("").root
     end
 
+    # Collect <artifact>...</artifact> elements into an array.
+    # This will allow use of array intersection to find common artifacts in searches.
     def get_artifact_array(set)
       artifacts = Array.new
       artifact = nil
-      set.to_s.split("\n").collect {|x| x.to_s.strip}.each { |piece|
+      set.to_s.split("\n").collect {|x| x.to_s.strip}.each do |piece|
         if piece == "<artifact>"
           artifact = piece
         elsif piece == "</artifact>"
@@ -148,7 +150,7 @@ module NexusCli
         elsif !artifact.nil?
           artifact += piece
         end
-      }
+      end
       return artifacts
     end
   end

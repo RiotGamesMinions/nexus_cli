@@ -53,10 +53,10 @@ module NexusCli
         builder = Nokogiri::XML::Builder.new do |xml|
           xml.send("artifact-resolution") {
             xml.data {
-              n3.each_line { |line|
+              n3.each_line do |line|
                 tag, value = parse_n3_item(line)
                 xml.send(tag, value) unless tag.empty? || value.empty?
-              }
+              end
             }
           }
         end
