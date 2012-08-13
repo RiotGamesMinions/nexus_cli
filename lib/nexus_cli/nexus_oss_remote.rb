@@ -98,23 +98,31 @@ module NexusCli
     end
 
     def get_global_settings
-      nexus['service/local/global_settings/current'].get({:accept => "application/json"}) do |response|
-        pretty_json = JSON.pretty_generate(JSON.parse(response.body))
-        destination = File.join(File.expand_path("."), "global_settings.json")
-        artifact_file = File.open(destination, 'wb') do |file|
-          file.write(pretty_json)
-        end
+      json = get_global_settings_json
+      pretty_json = JSON.pretty_generate(JSON.parse(json))
+      destination = File.join(File.expand_path("."), "global_settings.json")
+      artifact_file = File.open(destination, 'wb') do |file|
+        file.write(pretty_json)
       end
     end
 
-    def upload_global_settings
-      global_settings_file = File.join(File.expand_path("."), "global_settings.json")
-      nexus['service/local/global_settings/current'].put(File.read(global_settings_file), {:content_type => "application/json"}) do |response|
+    def upload_global_settings(json=nil)
+      global_settings = nil
+      if json == nil
+        global_settings = File.read(File.join(File.expand_path("."), "global_settings.json"))
+      else
+        global_settings = json
+      end
+      nexus['service/local/global_settings/current'].put(global_settings, {:content_type => "application/json"}) do |response|
         case response.code
         when 400
           raise BadSettingsException.new(response.body)
         end
       end
+    end
+
+    def get_global_settings_json
+      nexus['service/local/global_settings/current'].get({:accept => "application/json"})
     end
 
     def reset_global_settings

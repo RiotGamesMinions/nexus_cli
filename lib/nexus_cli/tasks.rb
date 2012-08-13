@@ -121,9 +121,13 @@ module NexusCli
           say "Your current Nexus global settings have been written to the file: global_settings.json", :blue
         end
 
+        method_option :json, 
+          :type => :string,
+          :default => nil,
+          :desc => "A String of the JSON you wish to upload."
         desc "upload_global_settings", "Uploads a global_settings.json file to your Nexus to update its settings."
         def upload_global_settings
-          @nexus_remote.upload_global_settings
+          @nexus_remote.upload_global_settings(options[:json])
           say "Your global_settings.json file has been uploaded to Nexus", :blue
         end
 
