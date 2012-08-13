@@ -88,7 +88,6 @@ Feature: Use the Nexus CLI
       """
     And the exit status should be 0
   
-  @wip
   Scenario: Update the global settings of Nexus with a string
     When I update global settings uiTimeout to 61 and upload the json string
     And I call the nexus "get_global_settings" command
