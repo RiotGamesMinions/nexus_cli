@@ -106,10 +106,47 @@ The output from the server was:
     status_code(111)
   end
 
+  class CreateRepsitoryException < NexusCliError
+    def initialize(body)
+      @server_response = JSON.pretty_generate(JSON.parse(body))
+    end
+
+    def message
+      %{Your create repository command failed due to the following:
+        #{@server_response}}
+    end
+    status_code(112)
+  end
+
+  class RepositoryDoesNotExistException < NexusCliError
+    def message
+      "The repository you are trying to delete does not exist."
+    end
+    status_code(113)
+  end
+
+  class RepositoryNotFoundException < NexusCliError
+    def message
+      "The repository you requested information could not be found. Please ensure the repository exists."
+    end
+    status_code(114)
+  end
+
+  class UnexpectedStatusCodeException < NexusCliError
+    def initialize(code)
+      @code = code
+    end
+
+    def  message
+      "The server responded with a #{@code} status code which is unexpected. Please submit a bug."
+    end
+    status_code(115)
+  end
+
   class N3ParameterMalformedException < NexusCliError
     def message
       "Submit your tag request specifying one or more 2 colon-separated values: `key:value`. The key can only consist of alphanumeric characters."
     end
-    status_code(112)
+    status_code(116)
   end
 end
