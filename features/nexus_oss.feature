@@ -87,6 +87,16 @@ Feature: Use the Nexus CLI
       "forceBaseUrl": true
       """
     And the exit status should be 0
+  
+  @wip
+  Scenario: Update the global settings of Nexus with a string
+    When I update global settings uiTimeout to 61 and upload the json string
+    And I call the nexus "get_global_settings" command
+    Then the file "global_settings.json" should contain:
+    """
+    "uiTimeout": 61
+    """
+    And the exit status should be 0
 
   Scenario: Reset the global settings of Nexus
     When I call the nexus "reset_global_settings" command
