@@ -67,7 +67,7 @@ module NexusCli
       begin
         n3_temp.write(N3Metadata::parse_n3_hash(n3_user_urns))
         n3_temp.close
-        Kernel.quietly {`curl -T #{n3_temp.path} #{File.join(configuration['url'], post_string)} -u #{configuration['username']}:#{configuration['password']}`}
+        nexus[post_string].put({:file => File.new(n3_temp.path)})
       ensure
         n3_temp.close
         n3_temp.unlink
@@ -83,7 +83,7 @@ module NexusCli
       begin
         n3_temp.write(N3Metadata::parse_n3_hash(n3_user_urns))
         n3_temp.close
-        Kernel.quietly {`curl -T #{n3_temp.path} #{File.join(configuration['url'], post_string)} -u #{configuration['username']}:#{configuration['password']}`}
+        nexus[post_string].put({:file => File.new(n3_temp.path)})
       ensure
         n3_temp.close
         n3_temp.unlink
