@@ -131,4 +131,15 @@ The output from the server was:
     end
     status_code(114)
   end
+
+  class UnexpectedStatusCodeException < NexusCliError
+    def initialize(code)
+      @code = code
+    end
+
+    def  message
+      "The server responded with a #{@code} status code which is unexpected. Please submit a bug."
+    end
+    status_code(115)
+  end
 end

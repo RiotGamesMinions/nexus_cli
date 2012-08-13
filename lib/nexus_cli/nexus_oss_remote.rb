@@ -120,15 +120,24 @@ module NexusCli
         case response.code
         when 400
           raise CreateRepsitoryException.new(response.body)
+        when 201
+          return true
+        else
+          raise UnexpectedStatusCodeException.new(response.code)
         end
       end
     end
 
     def delete_repository(name)
       nexus["service/local/repositories/#{name.downcase}"].delete do |response|
+        puts response.code
         case response.code
         when 404
           raise RepositoryDoesNotExistException
+        when 204
+          return true
+        else
+          raise UnexpectedStatusCodeException.new(response.code)
         end
       end
     end
