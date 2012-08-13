@@ -14,7 +14,7 @@ module NexusCli
 
       # Generates a hash containing the Nexus .n3 contents for the tempfile that will be used to update an artifact's custom metadata.
       # If a hash of n3 user urns is provided, the contents will override existing key/value pairs.
-      def generate_n3_contents_from_n3(contents, n3_user_urns)
+      def generate_n3_urns_from_n3(contents, n3_user_urns=nil)
         n3_user_urns ||= Hash.new
         contents.each_line do |line|
           if line.match(/urn:nexus\/user#/)
@@ -26,18 +26,24 @@ module NexusCli
               n3_user_urns[tag] = generate_n3_item(tag, value) unless tag.empty? || value.empty?
             end
           end
-          return n3_user_urns
-        end
-      end
-
-      def generate_n3_contents_from_hash(contents, n3_user_urns)
-        n3_user_urns = Hash.new
-        contents.each do |tag, value|
-          n3_user_urns[tag] = generate_n3_item(tag, value) unless tag.empty? || value.empty?
         end
         return n3_user_urns
       end
 
+      def generate_n3_urns_from_hash(contents, n3_user_urns=nil)
+        n3_user_urns ||= Hash.new
+        contents.each do |tag, value|
+          # Delete the nexus key if the local key has no value.
+          if n3_user_urns.has_key?(tag) && value.empty?
+            n3_user_urns.delete(tag)
+          else
+            n3_user_urns[tag] = generate_n3_item(tag, value) unless tag.empty? || value.empty?
+          end
+        end
+        return n3_user_urns
+      end
+
+      # Parses a hash of n3 user urns and returns it as an n3-formatted string.
       def parse_n3_hash(contents)
         return contents.values.count == 1 ? contents.values[0] + " ." : contents.values.join(" ;\n") + " ."
       end

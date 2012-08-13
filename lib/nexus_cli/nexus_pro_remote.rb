@@ -27,7 +27,7 @@ module NexusCli
 
     def update_artifact_custom_info(artifact, params)
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
-      n3_user_urns = { "n3_header" => N3Metadata::get_n3_header(group_id, artifact_id, version, extension) }.merge(N3Metadata::generate_n3_contents_from_hash(parse_n3_params(params)))
+      n3_user_urns = { "n3_header" => N3Metadata::generate_n3_header(group_id, artifact_id, version, extension) }.merge(N3Metadata::generate_n3_urns_from_hash(parse_n3_params(params)))
 
       n3_temp = Tempfile.new("nexus_n3")
       begin
@@ -58,11 +58,11 @@ module NexusCli
       # Read in local n3 file.
       local_n3 = File.open(file).read
 
-      n3_user_urns = { "n3_header" => N3Metadata::get_n3_header(group_id, artifact_id, version, extension) }
+      n3_user_urns = { "n3_header" => N3Metadata::generate_n3_header(group_id, artifact_id, version, extension) }
       # Get the nexus keys.
-      n3_user_urns = N3Metadata::generate_n3_contents_from_n3(nexus_n3, n3_user_urns)
+      n3_user_urns = N3Metadata::generate_n3_urns_from_n3(nexus_n3, n3_user_urns)
       # Get the local keys and update the nexus keys.
-      n3_user_urns = N3Metadata::generate_n3_contents_from_n3(local_n3, n3_user_urns)
+      n3_user_urns = N3Metadata::generate_n3_urns_from_n3(local_n3, n3_user_urns)
       n3_temp = Tempfile.new("nexus_n3")
       begin
         n3_temp.write(N3Metadata::parse_n3_hash(n3_user_urns))
@@ -78,7 +78,7 @@ module NexusCli
       get_artifact_info(artifact)
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
       post_string = N3Metadata::generate_n3_path(group_id, artifact_id, version, extension, configuration['repository'])
-      n3_user_urns = { "n3_header" => N3Metadata::get_n3_header(group_id, artifact_id, version, extension) }
+      n3_user_urns = { "n3_header" => N3Metadata::generate_n3_header(group_id, artifact_id, version, extension) }
       n3_temp = Tempfile.new("nexus_n3")
       begin
         n3_temp.write(N3Metadata::parse_n3_hash(n3_user_urns))
