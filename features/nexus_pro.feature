@@ -28,7 +28,7 @@ Feature: Use the Nexus Pro CLI
 		And the exit status should be 0
 
 	Scenario: Update an artifact's custom metadata with multiple parameters
-		When I call the nexus "update_artifact_custom_info com.test:myprotest:1.0.0:tgz teemoHat:equipped_,teemoSkins:many" command
+		When I call the nexus "update_artifact_custom_info com.test:myprotest:1.0.0:tgz teemoHat:equipped_ \"teemoSkins:many skins!!1\"" command
 		Then the output should contain:
 			"""
 			Custom metadata for artifact com.test:myprotest:1.0.0:tgz has been successfully pushed to Nexus.
@@ -43,7 +43,7 @@ Feature: Use the Nexus Pro CLI
 			"""
 		And the output should contain:
 			"""
-			<teemoSkins>many</teemoSkins>
+			<teemoSkins>many skins!!1</teemoSkins>
 			"""
 		And the exit status should be 0
 
@@ -55,7 +55,7 @@ Feature: Use the Nexus Pro CLI
 			"""
 		And the output should contain:
 			"""
-			<urn:nexus/user#teemoSkins> "many"
+			<urn:nexus/user#teemoSkins> "many skins!!1"
 			"""
 		And the exit status should be 0
 
@@ -76,7 +76,7 @@ Feature: Use the Nexus Pro CLI
 		And the exit status should be 0
 
 	Scenario: Search for artifacts by custom metadata using multiple parameters
-		When I call the nexus "search_custom teemoHat:matches:equip*,teemoHat:equal:equipped_" command
+		When I call the nexus "search_custom teemoHat:matches:equip* teemoHat:equal:equipped_" command
 		Then the output should contain:
 			"""
 			<artifactId>myprotest</artifactId>

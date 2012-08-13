@@ -15,7 +15,7 @@ module NexusCli
       get_string = N3Metadata::generate_n3_path(group_id, artifact_id, version, extension, configuration['repository'])
       begin
         n3 = nexus[get_string].get
-        if /<urn:maven#deleted>/.match(n3)
+        if !n3.match(/<urn:maven#deleted>/).nil?
           raise ArtifactNotFoundException
         else
           return n3
@@ -25,9 +25,9 @@ module NexusCli
       end
     end
 
-    def update_artifact_custom_info(artifact, params)
+    def update_artifact_custom_info(artifact, *params)
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
-      n3_user_urns = { "n3_header" => N3Metadata::generate_n3_header(group_id, artifact_id, version, extension) }.merge(N3Metadata::generate_n3_urns_from_hash(parse_n3_params(params)))
+      n3_user_urns = { "n3_header" => N3Metadata::generate_n3_header(group_id, artifact_id, version, extension) }.merge(N3Metadata::generate_n3_urns_from_hash(parse_update_params(*params)))
 
       n3_temp = Tempfile.new("nexus_n3")
       begin
@@ -90,9 +90,9 @@ module NexusCli
       end
     end
 
-    def search_artifacts(params)
+    def search_artifacts(*params)
       docs = Array.new
-      parse_search_params(params).each do |param|
+      parse_search_params(*params).each do |param|
         begin
           nexus['service/local/search/m2/freeform'].get ({params: {p: param[0], t: param[1], v: param[2]}}) do |response|
             raise BadSearchRequestException if response.code == 400
@@ -107,13 +107,15 @@ module NexusCli
     end
 
     private
-    def parse_n3_params(params)
+    def parse_update_params(*params)
       begin
         parsed_params = Hash.new
-        params.split(",").each do |param|
-          k,v = param.split(":")
-          raise if /^[a-zA-Z0-9]+$/.match(k).nil?
-          parsed_params[k] = v
+        params.each do |param|
+          # The first colon separates key and value.
+          c1 = param.index(":")
+          key = param[0..(c1 - 1)]
+          value = param[(c1 + 1)..-1]
+          !c1.nil? && N3Metadata::valid_n3_key?(key) && N3Metadata::valid_n3_value?(value) ? parsed_params[key] = value : raise
         end
         return parsed_params
       rescue
@@ -121,12 +123,22 @@ module NexusCli
       end
     end
 
-    def parse_search_params(params)
-      parsed_params = params.split(",").collect {|param| param.split(":")}
-      parsed_params.each do |param|
-        raise SearchParameterMalformedException unless param.count == 3
+    def parse_search_params(*params)
+      begin
+        parsed_params = Array.new
+        params.each do |param|
+          # The first two colons separate key, type, and value.
+          c1 = param.index(":")
+          c2 = param.index(":", (c1 + 1))
+          key = param[0..(c1 - 1)]
+          type = param[(c1 + 1)..(c2 - 1)]
+          value = param[(c2 + 1)..-1]
+          !c1.nil? && !c2.nil? && N3Metadata::valid_n3_key?(key) && N3Metadata::valid_n3_value?(value) && N3Metadata::valid_n3_search_type?(type) ? parsed_params.push([key, type, value]) : raise
+        end
+        return parsed_params
+      rescue
+        raise SearchParameterMalformedException
       end
-      return parsed_params
     end
 
     # Expects the XML set with `data` as root.

@@ -68,10 +68,10 @@ module NexusCli
           say @nexus_remote.get_artifact_custom_info_n3(artifact), :green
         end
 
-        desc "update_artifact_custom_info artifact param1,param2,...", "Updates the artifact custom metadata with the given key-value pairs."
-        def update_artifact_custom_info(artifact, params)
+        desc "update_artifact_custom_info artifact param1 param2 ...", "Updates the artifact custom metadata with the given key-value pairs."
+        def update_artifact_custom_info(artifact, *params)
           raise NotNexusProException unless @nexus_remote.kind_of? ProRemote
-          @nexus_remote.update_artifact_custom_info(artifact, params)
+          @nexus_remote.update_artifact_custom_info(artifact, *params)
           say "Custom metadata for artifact #{artifact} has been successfully pushed to Nexus.", :green
         end
 
@@ -89,10 +89,10 @@ module NexusCli
           say "Custom metadata for artifact #{artifact} has been successfully cleared.", :green
         end
 
-        desc "search_artifacts param1,param2,... ", "Searches for artifacts using artifact metadata and returns the result as a list with items in XML format."
-        def search_artifacts(params)
+        desc "search_artifacts param1 param2 ... ", "Searches for artifacts using artifact metadata and returns the result as a list with items in XML format."
+        def search_artifacts(*params)
           raise NotNexusProException unless @nexus_remote.kind_of? ProRemote
-          say (s = @nexus_remote.search_artifacts(params)) == "" ? "No search results." : s, :green
+          say (s = @nexus_remote.search_artifacts(*params)) == "" ? "No search results." : s, :green
         end
 
         desc "get_nexus_configuration", "Prints out configuration from the .nexus_cli file that helps inform where artifacts will be uploaded."

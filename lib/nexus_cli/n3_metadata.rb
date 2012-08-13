@@ -7,6 +7,18 @@ module NexusCli
         return "content/repositories/#{repository}/.meta/#{group_id.gsub(".", "/")}/#{artifact_id.gsub(".", "/")}/#{version}/#{artifact_id}-#{version}.#{extension}.n3"
       end
 
+      def valid_n3_key?(element)
+        return !element.match(/^[a-zA-Z0-9]+$/).nil? ? true : false
+      end
+
+      def valid_n3_value?(element)
+        return !element.match(/^[^"'\\]*$/).nil? ? true : false
+      end
+
+      def valid_n3_search_type?(element)
+        return ["equal", "notequal", "matches", "bounded"].include?(element)
+      end
+
       # Generates the Nexus .n3 header for the tempfile that will be used to update an artifact's custom metadata.
       def generate_n3_header(group_id, artifact_id, version, extension)
         return "<urn:maven/artifact##{group_id}:#{artifact_id}:#{version}::#{extension}> a <urn:maven#artifact>"
@@ -14,10 +26,9 @@ module NexusCli
 
       # Generates a hash containing the Nexus .n3 contents for the tempfile that will be used to update an artifact's custom metadata.
       # If a hash of n3 user urns is provided, the contents will override existing key/value pairs.
-      def generate_n3_urns_from_n3(contents, n3_user_urns=nil)
-        n3_user_urns ||= Hash.new
+      def generate_n3_urns_from_n3(contents, n3_user_urns={})
         contents.each_line do |line|
-          if line.match(/urn:nexus\/user#/)
+          if !line.match(/urn:nexus\/user#/).nil?
             tag, value = parse_n3_item(line)
             # Delete the nexus key if the local key has no value.
             if n3_user_urns.has_key?(tag) && value.empty?
@@ -30,8 +41,7 @@ module NexusCli
         return n3_user_urns
       end
 
-      def generate_n3_urns_from_hash(contents, n3_user_urns=nil)
-        n3_user_urns ||= Hash.new
+      def generate_n3_urns_from_hash(contents, n3_user_urns={})
         contents.each do |tag, value|
           # Delete the nexus key if the local key has no value.
           if n3_user_urns.has_key?(tag) && value.empty?
