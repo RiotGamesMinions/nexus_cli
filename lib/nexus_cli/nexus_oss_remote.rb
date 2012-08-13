@@ -130,7 +130,6 @@ module NexusCli
 
     def delete_repository(name)
       nexus["service/local/repositories/#{name.downcase}"].delete do |response|
-        puts response.code
         case response.code
         when 404
           raise RepositoryDoesNotExistException
