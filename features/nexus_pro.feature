@@ -19,22 +19,6 @@ Feature: Use the Nexus Pro CLI
 	    """
     And the exit status should be 0
 
-	Scenario: Get an artifact's custom metadata when it does not exist
-		When I call the nexus "custom_raw com.test:myprotest:1.0.0:tgz" command
-		Then the output should contain:
-			"""
-			The artifact you requested information for could not be found. Please ensure it exists inside the Nexus.
-			"""
-		And the exit status should be 101
-
-	Scenario: Update an artifact's custom metadata with invalid parameters
-		When I call the nexus "update_artifact_custom_info com.test:myprotest:1.0.0:tgz teemoHat_:equipped_" command
-		Then the output should contain:
-			"""
-			Submit your tag request specifying one or more 2 colon-separated values: `key:value`. The key can only consist of alphanumeric characters.
-			"""
-		And the exit status should be 112
-
 	Scenario: Update an artifact's custom metadata
 		When I call the nexus "update_artifact_custom_info com.test:myprotest:1.0.0:tgz teemoHat:equipped" command
 		Then the output should contain:
@@ -114,14 +98,6 @@ Feature: Use the Nexus Pro CLI
 			Custom metadata for artifact com.test:myprotest:1.0.0:tgz has been successfully cleared.
 			"""
 		And the exit status should be 0
-
-	Scenario: Clear an artifact's custom metadata where the artifact does not exist
-		When I call the nexus "clear_artifact_custom_info com.test:missingno:1.0.0:tgz" command
-		Then the output should contain:
-			"""
-			The artifact you requested information for could not be found. Please ensure it exists inside the Nexus.
-			"""
-		And the exit status should be 101
 
   @delete
   Scenario: Attempt to delete an artifact
