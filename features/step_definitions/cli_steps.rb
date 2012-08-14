@@ -29,8 +29,8 @@ end
 
 When /^I edit the "(.*?)" files "(.*?)" field to true$/ do |file, field|
   Dir.chdir('tmp/aruba') do
-    json = JSON.parse(File.read(File.join(File.expand_path("."), file)))
-    File.open(File.join(File.expand_path("."), file), "w+") do |opened|
+    json = JSON.parse(File.read(File.join(File.expand_path("~/.nexus"), file)))
+    File.open(File.join(File.expand_path("~/.nexus"), file), "w+") do |opened|
       json["data"]["globalRestApiSettings"][field] = true
       opened.write(JSON.pretty_generate(json))
     end
@@ -41,6 +41,16 @@ When /^I update global settings uiTimeout to (\d+) and upload the json string$/ 
   json = JSON.parse(nexus_remote.get_global_settings_json)
   edited_json = JsonPath.for(json).gsub("$..uiTimeout") {|v| value.to_i}.to_hash
   nexus_remote.upload_global_settings(JSON.dump(edited_json))
+end
+
+Then /^a file named "(.*?)" should exist in my nexus folder$/ do |file|
+  path = File.join(File.expand_path("~/.nexus"), file)
+  step "a file named \"#{path}\" should exist"
+end
+
+Then /^the file "(.*?)" in my nexus folder should contain:$/ do |file, partial_content|
+  path = File.join(File.expand_path("~/.nexus"), file)
+  check_file_content(path, partial_content, true)
 end
 
 Then /^the file "([^"]*)" should contain:$/ do |file, partial_content|

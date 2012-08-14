@@ -100,7 +100,8 @@ module NexusCli
     def get_global_settings
       json = get_global_settings_json
       pretty_json = JSON.pretty_generate(JSON.parse(json))
-      destination = File.join(File.expand_path("."), "global_settings.json")
+      Dir.mkdir(File.expand_path("~/.nexus")) unless Dir.exists?(File.expand_path("~/.nexus"))
+      destination = File.join(File.expand_path("~/.nexus"), "global_settings.json")
       artifact_file = File.open(destination, 'wb') do |file|
         file.write(pretty_json)
       end
@@ -109,7 +110,7 @@ module NexusCli
     def upload_global_settings(json=nil)
       global_settings = nil
       if json == nil
-        global_settings = File.read(File.join(File.expand_path("."), "global_settings.json"))
+        global_settings = File.read(File.join(File.expand_path("~/.nexus"), "global_settings.json"))
       else
         global_settings = json
       end
