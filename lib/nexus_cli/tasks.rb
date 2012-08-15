@@ -187,44 +187,82 @@ module NexusCli
           :require => false,
           :desc => "An array of roles."
         desc "create_user", "Creates a new user"
-        def create_user
-          username = options[:username]
-          first_name = options[:first_name]
-          last_name = options[:last_name]
-          email = options[:email]
-          enabled = options[:enabled]
-          roles = options[:roles]
-          
-          if username.nil?
-            username = ask "Please enter the new user's username:" 
-          end
-          if first_name.nil?
-            first_name = ask "Please enter the new user's first name:"
-          end
-          if last_name.nil?
-            last_name = ask "Please enter the new user's last name:"
-          end
-          if email.nil?
-            email = ask "Please enter the new user's email:"
-          end
-          if enabled.nil?
-            status = ask "Is this new user enabled for use?", :limited_to => ["true", "false"]
-          end
-          if roles.size == 0
-            roles = ask "Please enter the new user's roles:"
-          end
+        def create_user         
+          username, first_name, last_name, email, enabled, roles = ask_user(options)
 
           params = {:userId => username}
           params[:firstName] = first_name
           params[:lastName] = last_name
           params[:email] = email
-          params[:status] = status == "true" ? "active" : "disabled"
+          params[:status] = enabled == "true" ? "active" : "disabled"
           params[:roles] = roles.kind_of?(Array) ? roles : roles.split(' ')
 
-          @nexus_remote.create_user(params)
+          if @nexus_remote.create_user(params) 
+            say "A user with the ID of #{params[:userId]} has been created.", :blue
+          end
+        end
+
+        method_option :username,
+          :type => :string,
+          :default => nil,
+          :desc => "The username."
+        method_option :first_name,
+          :type => :string,
+          :default => nil,
+          :desc => "The first name."
+        method_option :last_name,
+          :type => :string,
+          :default => nil,
+          :desc => "The last name."
+        method_option :email,
+          :type => :string,
+          :default => nil,
+          :desc => "The email."
+        method_option :enabled,
+          :type => :boolean,
+          :default => nil,
+          :desc => "Whether this new user is enabled or disabled."
+        method_option :roles,
+          :type => :array,
+          :default => [],
+          :require => false,
+          :desc => "An array of roles."
+        desc "update_user id", "Updates a user's details."
+        def update_user
+
         end
 
         private
+
+          def ask_user(params)
+            username = params[:username]
+            first_name = params[:first_name]
+            last_name = params[:last_name]
+            email = params[:email]
+            enabled = params[:enabled]
+            roles = params[:roles]
+            
+            if username.nil?
+              username = ask "Please enter the new user's username:" 
+            end
+            if first_name.nil?
+              first_name = ask "Please enter the new user's first name:"
+            end
+            if last_name.nil?
+              last_name = ask "Please enter the new user's last name:"
+            end
+            if email.nil?
+              email = ask "Please enter the new user's email:"
+            end
+            if enabled.nil?
+              status = ask "Is this new user enabled for use?", :limited_to => ["true", "false"]
+            end
+            if roles.size == 0
+              roles = ask "Please enter the new user's roles:"
+            end
+            [username, first_name, last_name, email, enabled, roles]
+          end
+
           def ask_password(message)
             HighLine.new.ask(message) do |q| 
               q.echo = false

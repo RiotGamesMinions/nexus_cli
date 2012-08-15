@@ -171,7 +171,7 @@ module NexusCli
       nexus["service/local/users"].get
     end
 
-    def create_user(params={})
+    def create_user(params)
       nexus["service/local/users"].post(create_user_json(params), :content_type => "application/json") do |response|
         case response.code
         when 201

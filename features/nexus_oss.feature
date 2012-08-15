@@ -136,6 +136,7 @@ Feature: Use the Nexus CLI
       """
     And the exit status should be 0
 
+  @wip
   Scenario: Change a users information
     When I call the nexus "update_user" command
     And I call the nexus "get_users" command
