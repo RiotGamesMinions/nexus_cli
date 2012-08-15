@@ -167,8 +167,8 @@ module NexusCli
       end
     end
 
-    def create_user
-      # Use /service/local/users POST
+    def create_user(params={})
+      nexus["service/local/users"].post(create_user_json(params), :content_type => "application/json")
     end
 
     def update_user
@@ -220,6 +220,21 @@ module NexusCli
             "format" : "maven2"
           }
         }
+      }
+    end
+
+    def create_user_json(params)
+      elements = params.inject([]) do |array,entry|
+        array << "\"#{entry[0].to_s}\" : \"#{entry[1]}\"" if entry[1].kind_of? String
+        array << "\"#{entry[0].to_s}\" : #{entry[1]}" if entry[1].kind_of? Array
+        array
+      end
+      %{
+        {
+          "data" : {
+            #{elements.join(',')}
+          }
+        }  
       }
     end
   end
