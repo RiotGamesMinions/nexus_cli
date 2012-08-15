@@ -224,6 +224,7 @@ module NexusCli
         def update_user(id)
           params = ask_user(options, false)
           params[:userId] = id
+
           @nexus_remote.update_user(params)
         end
 
@@ -253,7 +254,7 @@ module NexusCli
             if enabled.nil?
               status = ask "Is this user enabled for use?", :limited_to => ["true", "false"]
             end
-            if roles.size == 0
+            if roles.size == 0 
               roles = ask "Please enter the roles:"
             end
             params = {:userId => username}

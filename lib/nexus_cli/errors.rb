@@ -161,6 +161,17 @@ The output from the server was:
     end
     status_code(117)
   end
+
+  class UserNotFoundException < NexusCliError
+    def initialize(id)
+      @id = id
+    end
+
+    def message
+      "A user with the ID of #{@id} could not be found. Please ensure it exists."
+    end
+    status_code(118)
+  end
   
   class UpdateUserException < NexusCliError
     def initialize(body)
@@ -171,6 +182,6 @@ The output from the server was:
       %{Your update user command failed due to the following:
 #{@server_response}}
     end
-    status_code(118)
+    status_code(119)
   end
 end

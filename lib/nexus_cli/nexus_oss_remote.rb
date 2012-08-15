@@ -186,7 +186,18 @@ module NexusCli
     end
 
     def update_user(params)
-      user_json = JSON.parse(nexus["service/local/users/#{params[:userId]}"].get(:accept => "application/json"))
+      params[:roles] = [] if params[:roles] == [""]
+      user_json = nil
+      nexus["service/local/users/#{params[:userId]}"].get(:accept => "application/json") do |response|
+        case response.code
+        when 200
+          user_json = JSON.parse(response.body)
+        when 404
+          raise UserNotFoundException.new(params[:userId])
+        else
+          raise UnexpectedStatusCodeException.new(response.code)
+        end
+      end
 
       modified_json = JsonPath.for(user_json)
       params.each do |key, value|

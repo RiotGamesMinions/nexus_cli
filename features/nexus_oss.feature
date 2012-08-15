@@ -138,11 +138,12 @@ Feature: Use the Nexus CLI
 
   @wip
   Scenario: Change a users information
-    When I call the nexus "update_user" command
+    When I call the nexus "update_user cucumber" command
     And I call the nexus "get_users" command
     Then the output should contain:
       """
-      Something
+      <firstName>Mike</firstName>
+      <lastName>Ditka</lastName>
       """
     And the exit status should be 0
 
