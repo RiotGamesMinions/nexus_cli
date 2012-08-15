@@ -167,6 +167,24 @@ module NexusCli
       end
     end
 
+    def create_user
+      # Use /service/local/users POST
+    end
+
+    def update_user
+      # Use /service/local/users/{userId} PUT (the docs are wrong in that they describe POST).
+      # Won't work if you try to change your password in here.
+    end
+
+    def update_user_password
+      # Use /service/local/users_changepw POST. Requires old + new passwords.
+      # Use Thor Ask. May need masking.
+    end
+
+    def delete_user
+      # Use /service/local/users/{userId} DELETE.
+    end
+
     private
     def format_search_results(doc, group_id, artifact_id)
       versions = doc.xpath("//version").inject([]) {|array,node| array << "#{node.content()}"}
