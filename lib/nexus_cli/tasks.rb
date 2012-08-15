@@ -188,14 +188,7 @@ module NexusCli
           :desc => "An array of roles."
         desc "create_user", "Creates a new user"
         def create_user         
-          username, first_name, last_name, email, enabled, roles = ask_user(options)
-
-          params = {:userId => username}
-          params[:firstName] = first_name
-          params[:lastName] = last_name
-          params[:email] = email
-          params[:status] = enabled == "true" ? "active" : "disabled"
-          params[:roles] = roles.kind_of?(Array) ? roles : roles.split(' ')
+          params = ask_user(options)
 
           if @nexus_remote.create_user(params) 
             say "A user with the ID of #{params[:userId]} has been created.", :blue
@@ -227,40 +220,49 @@ module NexusCli
           :default => [],
           :require => false,
           :desc => "An array of roles."
-        desc "update_user id", "Updates a user's details."
-        def update_user
-
+        desc "update_user id", "Updates a user's details. Leave fields blank for them to remain their current values."
+        def update_user(id)
+          params = ask_user(options, false)
+          params[:userId] = id
+          @nexus_remote.update_user(params)
         end
 
         private
 
-          def ask_user(params)
+          def ask_user(params, ask_username=true)
             username = params[:username]
             first_name = params[:first_name]
             last_name = params[:last_name]
             email = params[:email]
             enabled = params[:enabled]
             roles = params[:roles]
+            status = enabled
             
-            if username.nil?
-              username = ask "Please enter the new user's username:" 
+            if username.nil? && ask_username
+              username = ask "Please enter the username:" 
             end
             if first_name.nil?
-              first_name = ask "Please enter the new user's first name:"
+              first_name = ask "Please enter the first name:"
             end
             if last_name.nil?
-              last_name = ask "Please enter the new user's last name:"
+              last_name = ask "Please enter the last name:"
             end
             if email.nil?
-              email = ask "Please enter the new user's email:"
+              email = ask "Please enter the email:"
             end
             if enabled.nil?
-              status = ask "Is this new user enabled for use?", :limited_to => ["true", "false"]
+              status = ask "Is this user enabled for use?", :limited_to => ["true", "false"]
             end
             if roles.size == 0
-              roles = ask "Please enter the new user's roles:"
+              roles = ask "Please enter the roles:"
             end
-            [username, first_name, last_name, email, enabled, roles]
+            params = {:userId => username}
+            params[:firstName] = first_name
+            params[:lastName] = last_name
+            params[:email] = email
+            params[:status] = status == "true" ? "active" : "disabled"
+            params[:roles] = roles.kind_of?(Array) ? roles : roles.split(' ')
+            params
           end
 
           def ask_password(message)

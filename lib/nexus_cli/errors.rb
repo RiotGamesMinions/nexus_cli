@@ -161,4 +161,16 @@ The output from the server was:
     end
     status_code(117)
   end
+  
+  class UpdateUserException < NexusCliError
+    def initialize(body)
+      @server_response = JSON.pretty_generate(JSON.parse(body))
+    end
+
+    def message
+      %{Your update user command failed due to the following:
+#{@server_response}}
+    end
+    status_code(118)
+  end
 end

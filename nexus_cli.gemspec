@@ -22,10 +22,10 @@ Gem::Specification.new do |s|
   s.add_dependency 'extlib'
   s.add_dependency 'json'
   s.add_dependency 'highline'
+  s.add_dependency 'jsonpath'
 
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'aruba'
   s.add_development_dependency 'cucumber'
   s.add_development_dependency 'rake'
-  s.add_development_dependency 'jsonpath'
 end
