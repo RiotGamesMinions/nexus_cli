@@ -156,6 +156,11 @@ module NexusCli
           say @nexus_remote.get_repository_info(name), :green
         end
 
+        desc "get_users", "Returns XML representing the users in Nexus."
+        def get_users
+          say @nexus_remote.get_users
+        end
+
         method_option :username,
           :type => :string,
           :default => nil,
@@ -189,7 +194,7 @@ module NexusCli
           email = options[:email]
           enabled = options[:enabled]
           roles = options[:roles]
-
+          
           if username.nil?
             username = ask "Please enter the new user's username:" 
           end
@@ -214,7 +219,7 @@ module NexusCli
           params[:lastName] = last_name
           params[:email] = email
           params[:status] = status == "true" ? "active" : "disabled"
-          params[:roles] = roles.split(' ')
+          params[:roles] = roles.kind_of?(Array) ? roles : roles.split(' ')
 
           @nexus_remote.create_user(params)
         end

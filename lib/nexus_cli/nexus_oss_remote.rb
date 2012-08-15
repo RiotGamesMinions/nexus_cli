@@ -167,8 +167,21 @@ module NexusCli
       end
     end
 
+    def get_users
+      nexus["service/local/users"].get
+    end
+
     def create_user(params={})
-      nexus["service/local/users"].post(create_user_json(params), :content_type => "application/json")
+      nexus["service/local/users"].post(create_user_json(params), :content_type => "application/json") do |response|
+        case response.code
+        when 201
+          return true
+        when 400
+          raise CreateUserException.new(response.body)
+        else
+          raise UnexpectedStatusCodeException.new(reponse.code)
+        end
+      end
     end
 
     def update_user

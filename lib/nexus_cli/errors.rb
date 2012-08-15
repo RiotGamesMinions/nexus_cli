@@ -101,7 +101,7 @@ This could mean several things:
     def message
       %{Your global_settings.json file is malformed and could not be uploaded to Nexus.
 The output from the server was:
-  #{@server_response}}
+#{@server_response}}
     end
     status_code(111)
   end
@@ -113,7 +113,7 @@ The output from the server was:
 
     def message
       %{Your create repository command failed due to the following:
-        #{@server_response}}
+#{@server_response}}
     end
     status_code(112)
   end
@@ -148,5 +148,17 @@ The output from the server was:
       "Submit your tag request specifying one or more 2 colon-separated values: `key:value`. The key can only consist of alphanumeric characters."
     end
     status_code(116)
+  end
+
+  class CreateUserException < NexusCliError
+    def initialize(body)
+      @server_response = JSON.pretty_generate(JSON.parse(body))
+    end
+
+    def message
+      %{Your create user command failed due to the following:
+#{@server_response}}
+    end
+    status_code(117)
   end
 end
