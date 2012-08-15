@@ -127,3 +127,38 @@ Feature: Use the Nexus CLI
       """
     And the exit status should be 114
     
+  Scenario: Create a new user
+    When I call the nexus "create_user" command
+    And I call the nexus "get_users" command
+    Then the output should contain:
+      """
+      Something
+      """
+    And the exit status should be 0
+
+  Scenario: Change a users information
+    When I call the nexus "update_user" command
+    And I call the nexus "get_users" command
+    Then the output should contain:
+      """
+      Something
+      """
+    And the exit status should be 0
+
+  Scenario: Change a users password
+    When I call the nexus "update_user_password" command
+    And I call the nexus "get_users" command
+    Then the output should contain:
+      """
+      Something
+      """
+    And the exit status should be 0
+
+  Scenario: Delete a user
+    When I call the nexus "delete_user" command
+    And I call the nexus "get_users" command
+    Then the output should contain:
+      """
+      Something
+      """
+    And the exit status should be 0
