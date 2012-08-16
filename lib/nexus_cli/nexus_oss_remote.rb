@@ -174,6 +174,7 @@ module NexusCli
 
     def create_user(params)
       nexus["service/local/users"].post(create_user_json(params), :content_type => "application/json") do |response|
+        puts response.body
         case response.code
         when 201
           return true
@@ -187,17 +188,7 @@ module NexusCli
 
     def update_user(params)
       params[:roles] = [] if params[:roles] == [""]
-      user_json = nil
-      nexus["service/local/users/#{params[:userId]}"].get(:accept => "application/json") do |response|
-        case response.code
-        when 200
-          user_json = JSON.parse(response.body)
-        when 404
-          raise UserNotFoundException.new(params[:userId])
-        else
-          raise UnexpectedStatusCodeException.new(response.code)
-        end
-      end
+      user_json = get_user(params[:userId])
 
       modified_json = JsonPath.for(user_json)
       params.each do |key, value|
@@ -216,6 +207,19 @@ module NexusCli
       end
     end
 
+    def get_user(user)
+      nexus["service/local/users/#{user}"].get(:accept => "application/json") do |response|
+        case response.code
+        when 200
+          return JSON.parse(response.body)
+        when 404
+          raise UserNotFoundException.new(params[:userId])
+        else
+          raise UnexpectedStatusCodeException.new(response.code)
+        end
+      end
+    end
+
     def update_user_password
       # Use /service/local/users_changepw POST. Requires old + new passwords.
       # Use Thor Ask. May need masking.
@@ -223,6 +227,21 @@ module NexusCli
 
     def delete_user
       # Use /service/local/users/{userId} DELETE.
+    end
+
+    def create_user_json(params)
+      elements = params.inject([]) do |array,entry|
+        array << "\"#{entry[0].to_s}\" : \"#{entry[1]}\"" if entry[1].kind_of? String
+        array << "\"#{entry[0].to_s}\" : #{entry[1]}" if entry[1].kind_of? Array
+        array
+      end
+      %{
+        {
+          "data" : {
+            #{elements.join(',')}
+          }
+        }  
+      }
     end
 
     private
@@ -261,21 +280,6 @@ module NexusCli
               "format" : "maven2"
             }
           }
-        }
-      end
-
-      def create_user_json(params)
-        elements = params.inject([]) do |array,entry|
-          array << "\"#{entry[0].to_s}\" : \"#{entry[1]}\"" if entry[1].kind_of? String
-          array << "\"#{entry[0].to_s}\" : #{entry[1]}" if entry[1].kind_of? Array
-          array
-        end
-        %{
-          {
-            "data" : {
-              #{elements.join(',')}
-            }
-          }  
         }
       end
   end

@@ -1,6 +1,7 @@
-require 'nexus_cli'
+require 'spec_helper'
 
-remote = NexusCli::OSSRemote.new(nil)
+
+remote = NexusCli::OSSRemote.new({'url' => 'http://localhost:8081/nexus', 'repository' => 'releases', 'username' => 'admin', 'password' => 'admin123'})
 
 describe NexusCli do
   it "gives you errors when you attempt to pull an artifact don't give a valid artifact name" do
@@ -20,4 +21,21 @@ describe NexusCli do
     RestClient::Resource.any_instance.stub(:get).and_raise(RestClient::ResourceNotFound)
     expect {remote.get_artifact_info "com.something:something:1.0.0:tgz"}.to raise_error(NexusCli::ArtifactNotFoundException)
   end
+
+  it "gives you an error when you try to update a user that doesnt exist" do
+    stub_request(:get, "http://admin:admin123@localhost:8081/nexus/service/local/users/qwertyasdf").
+         with(:headers => {'Accept'=>'application/json', 'Accept-Encoding'=>'gzip, deflate', 'User-Agent'=>'Ruby'}).
+         to_return(:status => 404, :body => "", :headers => {})
+    expect {remote.update_user(:userId => "qwertyasdf")}.to raise_error(NexusCli::UserNotFoundException)
+  end
+
+  it "generates the appropriate JSON when changing names" do
+    
+  end
+
+  #def cucumber
+  #  %{
+#{"data":{"resourceURI":"http://localhost:8081/nexus/service/local/users/joe","userId":"joe","firstName":"Joe","lastName":"Johnson","status":"active","email":"kyle@foo.com","roles":["nx-admin"]}}    
+ #   }
+  #end
 end
