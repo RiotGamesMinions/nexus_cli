@@ -29,11 +29,11 @@ describe NexusCli do
   end
 
   it "generates the appropriate JSON when there is a string" do
-    remote.create_user_json(:firstName => "RSpec").should eq("{ \"data\" : { \"firstName\" : \"RSpec\"}}")
+    remote.create_user_json(:firstName => "RSpec").should eq("{\"data\":{\"firstName\":\"RSpec\"}}")
   end
 
   it "generates the appropriate JSON when there are many strings" do
-    remote.create_user_json(:firstName => "RSpec", :lastName => "Testing").should eq("{ \"data\" : { \"firstName\" : \"RSpec\",\"lastName\" : \"Testing\"}}")
+    remote.create_user_json(:firstName => "RSpec", :lastName => "Testing").should eq("{\"data\":{\"firstName\":\"RSpec\",\"lastName\":\"Testing\"}}")
   end
 
 end
