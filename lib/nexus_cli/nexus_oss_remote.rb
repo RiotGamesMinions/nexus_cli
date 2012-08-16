@@ -219,9 +219,15 @@ module NexusCli
       end
     end
 
-    def update_user_password
-      # Use /service/local/users_changepw POST. Requires old + new passwords.
-      # Use Thor Ask. May need masking.
+    def change_password(params)
+      nexus["service/local/users_changepw"].post(create_change_password_json(params), :content_type => "application/json") do |response|
+        case response.code
+        when 202
+          return true
+        when 400
+          raise InvalidCredentialsException
+        end
+      end
     end
 
     def delete_user(user_id)
@@ -277,6 +283,10 @@ module NexusCli
       end
 
       def create_user_json(params)
+        JSON.dump({:data => params})
+      end
+
+      def create_change_password_json(params)
         JSON.dump({:data => params})
       end
   end

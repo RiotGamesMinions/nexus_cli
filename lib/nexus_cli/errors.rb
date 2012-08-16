@@ -184,4 +184,11 @@ The output from the server was:
     end
     status_code(119)
   end
+
+  class InvalidCredentialsException < NexusCliError
+    def message
+      "Invalid Credentials were supplied. Please make sure you are passing the correct values."
+    end
+    status_code(120)
+  end
 end

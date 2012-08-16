@@ -129,7 +129,7 @@ Feature: Use the Nexus CLI
 
   @wip
   Scenario: Create a new user
-    When I call the nexus "create_user --username=cucumber --first_name=John --last_name=Smith --email=jsmith@nexus-cli.com --enabled --roles=nx-admin" command
+    When I call the nexus "create_user --username=cucumber --first_name=John --last_name=Smith --email=jsmith@nexus-cli.com --enabled --roles=nx-admin --password=pass" command
     And I call the nexus "get_users" command
     Then the output should contain:
       """
@@ -147,6 +147,7 @@ Feature: Use the Nexus CLI
       """
     And the exit status should be 0
 
+  @wip
   Scenario: Change a users password
     When I call the nexus "update_user_password" command
     And I call the nexus "get_users" command

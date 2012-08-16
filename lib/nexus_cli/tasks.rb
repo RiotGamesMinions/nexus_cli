@@ -1,4 +1,5 @@
 require 'thor'
+require 'highline'
 
 module NexusCli
   module Tasks
@@ -215,17 +216,23 @@ module NexusCli
           :type => :boolean,
           :default => nil,
           :desc => "Whether this new user is enabled or disabled."
+        method_option :password,
+          :type => :string,
+          :default => nil,
+          :desc => "The password."
         method_option :roles,
           :type => :array,
           :default => [],
           :require => false,
           :desc => "An array of roles."
-        desc "update_user id", "Updates a user's details. Leave fields blank for them to remain their current values."
-        def update_user(id)
-          params = ask_user(options, false)
-          params[:userId] = id
+        desc "update_user user_id", "Updates a user's details. Leave fields blank for them to remain their current values."
+        def update_user(user_id)
+          params = ask_user(options, false, false)
+          params[:userId] = user_id
 
-          @nexus_remote.update_user(params)
+          if @nexus_remote.update_user(params)
+            say "User #{user_id} has been updated.", :blue
+          end
         end
 
         desc "delete_user user_id", "Deletes the user with the given id."
@@ -235,14 +242,25 @@ module NexusCli
           end
         end
 
+        desc "change_password user_id", "Changes the given user's passwords to a new one."
+        def change_password(user_id)
+          params = {:userId => user_id}
+          params[:oldPassword] = ask_password("Please enter your old password:")
+          params[:newPassword] = ask_password("Please enter your new password:")
+          if @nexus_remote.change_password(params)
+            say "The password for user #{user_id} has been updated."
+          end
+        end
+
         private
 
-          def ask_user(params, ask_username=true)
+          def ask_user(params, ask_username=true, ask_password=true)
             username = params[:username]
             first_name = params[:first_name]
             last_name = params[:last_name]
             email = params[:email]
             enabled = params[:enabled]
+            password = params[:password]
             roles = params[:roles]
             status = enabled
             
@@ -261,6 +279,9 @@ module NexusCli
             if enabled.nil?
               status = ask "Is this user enabled for use?", :limited_to => ["true", "false"]
             end
+            if password.nil? && ask_password
+              password = ask_password("Please enter a password:")
+            end
             if roles.size == 0 
               roles = ask "Please enter the roles:"
             end
@@ -269,6 +290,7 @@ module NexusCli
             params[:lastName] = last_name
             params[:email] = email
             params[:status] = status == "true" ? "active" : "disabled"
+            params[:password] = password
             params[:roles] = roles.kind_of?(Array) ? roles : roles.split(' ')
             params
           end
