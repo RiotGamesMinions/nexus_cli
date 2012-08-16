@@ -149,11 +149,11 @@ Feature: Use the Nexus CLI
 
   @wip
   Scenario: Change a users password
-    When I call the nexus "change_password cucumber" command
-    And I call the nexus "get_users" command
+    When I call the nexus "change_password cucumber --oldPassword=pass --newPassword=foo" command
+    And I call the nexus "get_users" command as the "cucumber" user with password "wrongPassword"
     Then the output should contain:
       """
-      Something
+      Your request was denied by the Nexus server due to a permissions error
       """
     And the exit status should be 0
 
