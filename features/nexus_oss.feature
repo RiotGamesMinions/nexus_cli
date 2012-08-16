@@ -126,7 +126,7 @@ Feature: Use the Nexus CLI
       The repository you requested information could not be found. Please ensure the repository exists.
       """
     And the exit status should be 114
-  
+
   Scenario: Create a new user
     When I call the nexus "create_user --username=cucumber --first_name=John --last_name=Smith --email=jsmith@nexus-cli.com --enabled --roles=nx-admin" command
     And I call the nexus "get_users" command

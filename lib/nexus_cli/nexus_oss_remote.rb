@@ -230,12 +230,7 @@ module NexusCli
     end
 
     def create_user_json(params)
-      elements = params.inject([]) do |array,entry|
-        array << "\"#{entry[0].to_s}\" : \"#{entry[1]}\"" if entry[1].kind_of? String
-        array << "\"#{entry[0].to_s}\" : #{entry[1]}" if entry[1].kind_of? Array
-        array
-      end
-      %{{ "data" : { #{elements.join(',')}}}}
+      JSON.dump({:data => params})
     end
 
     private
