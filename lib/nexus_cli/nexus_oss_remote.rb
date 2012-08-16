@@ -228,10 +228,6 @@ module NexusCli
       # Use /service/local/users/{userId} DELETE.
     end
 
-    def create_user_json(params)
-      JSON.dump({:data => params})
-    end
-
     private
 
       def format_search_results(doc, group_id, artifact_id)
@@ -270,5 +266,10 @@ module NexusCli
           }
         }
       end
+
+    def create_user_json(params)
+      JSON.dump({:data => params})
+    end
+
   end
 end

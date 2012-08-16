@@ -27,13 +27,4 @@ describe NexusCli do
          to_return(:status => 404, :body => "", :headers => {})
     expect {remote.update_user(:userId => "qwertyasdf")}.to raise_error(NexusCli::UserNotFoundException)
   end
-
-  it "generates the appropriate JSON when there is a string" do
-    remote.create_user_json(:firstName => "RSpec").should eq("{\"data\":{\"firstName\":\"RSpec\"}}")
-  end
-
-  it "generates the appropriate JSON when there are many strings" do
-    remote.create_user_json(:firstName => "RSpec", :lastName => "Testing").should eq("{\"data\":{\"firstName\":\"RSpec\",\"lastName\":\"Testing\"}}")
-  end
-
 end
