@@ -228,6 +228,13 @@ module NexusCli
           @nexus_remote.update_user(params)
         end
 
+        desc "delete_user user_id", "Deletes the user with the given id."
+        def delete_user(user_id)
+          if @nexus_remote.delete_user(user_id)
+            say "User #{user_id} has been deleted.", :blue
+          end
+        end
+
         private
 
           def ask_user(params, ask_username=true)

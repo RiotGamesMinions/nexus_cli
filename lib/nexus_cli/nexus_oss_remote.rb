@@ -224,8 +224,17 @@ module NexusCli
       # Use Thor Ask. May need masking.
     end
 
-    def delete_user
-      # Use /service/local/users/{userId} DELETE.
+    def delete_user(user_id)
+      nexus["service/local/users/#{user_id}"].delete do |response|
+        case response.code
+        when 204
+          return true
+        when 404
+          raise UserNotFoundException.new(user_id)
+        else
+          raise UnexpectedStatusCodeException.new(response.code)
+        end
+      end
     end
 
     private

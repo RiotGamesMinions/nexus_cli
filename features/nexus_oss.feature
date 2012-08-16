@@ -127,6 +127,7 @@ Feature: Use the Nexus CLI
       """
     And the exit status should be 114
 
+  @wip
   Scenario: Create a new user
     When I call the nexus "create_user --username=cucumber --first_name=John --last_name=Smith --email=jsmith@nexus-cli.com --enabled --roles=nx-admin" command
     And I call the nexus "get_users" command
@@ -136,6 +137,7 @@ Feature: Use the Nexus CLI
       """
     And the exit status should be 0
 
+  @wip
   Scenario: Change a users information
     When I call the nexus "update_user cucumber --first_name=Mike --last_name=Ditka --email= --enabled --roles=" command
     And I call the nexus "get_users" command
@@ -154,11 +156,12 @@ Feature: Use the Nexus CLI
       """
     And the exit status should be 0
 
+  @wip
   Scenario: Delete a user
-    When I call the nexus "delete_user" command
+    When I call the nexus "delete_user cucumber" command
     And I call the nexus "get_users" command
-    Then the output should contain:
+    Then the output should not contain:
       """
-      Something
+      <userId>cucumber</userId>
       """
     And the exit status should be 0
