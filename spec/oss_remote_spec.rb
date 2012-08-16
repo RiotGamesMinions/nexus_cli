@@ -1,6 +1,5 @@
 require 'spec_helper'
 
-
 remote = NexusCli::OSSRemote.new({'url' => 'http://localhost:8081/nexus', 'repository' => 'releases', 'username' => 'admin', 'password' => 'admin123'})
 
 describe NexusCli do
@@ -29,13 +28,12 @@ describe NexusCli do
     expect {remote.update_user(:userId => "qwertyasdf")}.to raise_error(NexusCli::UserNotFoundException)
   end
 
-  it "generates the appropriate JSON when changing names" do
-    
+  it "generates the appropriate JSON when there is a string" do
+    remote.create_user_json(:firstName => "RSpec").should eq("{ \"data\" : { \"firstName\" : \"RSpec\"}}")
   end
 
-  #def cucumber
-  #  %{
-#{"data":{"resourceURI":"http://localhost:8081/nexus/service/local/users/joe","userId":"joe","firstName":"Joe","lastName":"Johnson","status":"active","email":"kyle@foo.com","roles":["nx-admin"]}}    
- #   }
-  #end
+  it "generates the appropriate JSON when there are many strings" do
+    remote.create_user_json(:firstName => "RSpec", :lastName => "Testing").should eq("{ \"data\" : { \"firstName\" : \"RSpec\",\"lastName\" : \"Testing\"}}")
+  end
+
 end

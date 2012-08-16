@@ -213,7 +213,7 @@ module NexusCli
         when 200
           return JSON.parse(response.body)
         when 404
-          raise UserNotFoundException.new(params[:userId])
+          raise UserNotFoundException.new(user)
         else
           raise UnexpectedStatusCodeException.new(response.code)
         end
@@ -235,13 +235,7 @@ module NexusCli
         array << "\"#{entry[0].to_s}\" : #{entry[1]}" if entry[1].kind_of? Array
         array
       end
-      %{
-        {
-          "data" : {
-            #{elements.join(',')}
-          }
-        }  
-      }
+      %{{ "data" : { #{elements.join(',')}}}}
     end
 
     private
