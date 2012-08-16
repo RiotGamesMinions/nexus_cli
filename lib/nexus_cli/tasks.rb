@@ -178,6 +178,10 @@ module NexusCli
           :type => :string,
           :default => nil,
           :desc => "The email."
+        method_option :password,
+          :type => :string,
+          :default => nil,
+          :desc => "The password."
         method_option :enabled,
           :type => :boolean,
           :default => nil,
@@ -216,10 +220,6 @@ module NexusCli
           :type => :boolean,
           :default => nil,
           :desc => "Whether this new user is enabled or disabled."
-        method_option :password,
-          :type => :string,
-          :default => nil,
-          :desc => "The password."
         method_option :roles,
           :type => :array,
           :default => [],
@@ -308,7 +308,7 @@ module NexusCli
             params[:firstName] = first_name
             params[:lastName] = last_name
             params[:email] = email
-            params[:status] = status == "true" ? "active" : "disabled"
+            params[:status] = status == true ? "active" : "disabled"
             params[:password] = password
             params[:roles] = roles.kind_of?(Array) ? roles : roles.split(' ')
             params
