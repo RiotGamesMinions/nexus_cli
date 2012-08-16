@@ -242,11 +242,30 @@ module NexusCli
           end
         end
 
+        method_option :oldPassword,
+          :type => :string,
+          :default => nil,
+          :desc => ""
+        method_option :newPassword,
+          :type => :string,
+          :default => nil,
+          :desc => ""
         desc "change_password user_id", "Changes the given user's passwords to a new one."
         def change_password(user_id)
+
+          oldPassword = options[:oldPassword]
+          newPassword = options[:newPassword]
+
+          if oldPassword.nil?
+            oldPassword = ask_password("Please enter your old password:")
+          end
+          if newPassword.nil?
+            newPassword = ask_password("Please enter your new password:")
+          end
+
           params = {:userId => user_id}
-          params[:oldPassword] = ask_password("Please enter your old password:")
-          params[:newPassword] = ask_password("Please enter your new password:")
+          params[:oldPassword] = oldPassword
+          params[:newPassword] = newPassword
           if @nexus_remote.change_password(params)
             say "The password for user #{user_id} has been updated."
           end

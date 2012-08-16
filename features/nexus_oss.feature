@@ -149,7 +149,7 @@ Feature: Use the Nexus CLI
 
   @wip
   Scenario: Change a users password
-    When I call the nexus "update_user_password" command
+    When I call the nexus "change_password cucumber" command
     And I call the nexus "get_users" command
     Then the output should contain:
       """
