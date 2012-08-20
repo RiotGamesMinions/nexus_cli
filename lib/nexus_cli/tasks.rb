@@ -271,6 +271,32 @@ module NexusCli
           end
         end
 
+        desc "pub_sub repository_id", "Returns the publish/subscribe status of the given repository."
+        def pub_sub(repository_id)
+          say @nexus_remote.pub_sub(repository_id)
+        end
+
+        method_option :disable,
+          :type => :boolean,
+          :default => false,
+          :desc => "Set to true if you want to disable artifact publishing."
+        desc "enable_artifact_publish repository_id", "Sets a repository to publish updates about its artifacts."
+        def enable_artifact_publish(repository_id)
+          raise NotNexusProException unless @nexus_remote.kind_of? ProRemote
+          if @nexus_remote.enable_artifact_publish(repository_id, options[:disable])
+            say "The repository #{repository_id} will now publish updates.", :blue
+          end
+        end
+
+        method_option :disable,
+          :type => :boolean,
+          :default => false,
+          :desc => "Set to true if you want to disable artifact subscribing."
+        desc "enable_artifact_subscribe repository_id", "Sets a repository to subscribe to updates about artifacts."
+        def enable_artifact_subscribe(repository_id)
+          @nexus_remote.enable_artifact_subscribe(repository_id, options[:disable])
+        end
+
         private
 
           def ask_user(params, ask_username=true, ask_password=true)

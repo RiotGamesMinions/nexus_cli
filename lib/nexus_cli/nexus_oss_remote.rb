@@ -38,7 +38,7 @@ module NexusCli
       params = {:g => group_id, :a => artifact_id, :v => version, :e => extension, :r => configuration["repository"]}.collect {|k,v| "#{k}=#{URI::escape(v.to_s)}"}.join("&")
       version = Nokogiri::XML(get_artifact_info(artifact)).xpath("//version").first.content() if version.casecmp("latest")
       destination = File.join(File.expand_path(destination || "."), "#{artifact_id}-#{version}.#{extension}")
-      Net::HTTP.start(uri.host, uri.port) do |http|
+      Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https', :verify_mode => OpenSSL::SSL::VERIFY_NONE) do |http|
         request = Net::HTTP::Get.new(URI(http.request_get(uri.request_uri + "?" + params)["location"]).request_uri)
         request.basic_auth(configuration["username"], configuration["password"])
         http.request(request) do |response|

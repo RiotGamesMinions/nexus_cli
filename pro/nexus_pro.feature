@@ -109,18 +109,40 @@ Feature: Use the Nexus Pro CLI
 	    """
     And the exit status should be 101
 
+  @wip
   Scenario: Set a repository to publish updates
-    When I call the nexus "publish releases" command
+    When I call the nexus "enable_artifact_publish releases" command
     And I call the nexus "pub_sub releases" command
     Then the output should contain:
     	"""
-    	Something
+    	<publish>true</publish>
     	"""
+    And the exit status should be 0
+
+  @wip
+  Scenario: Set a repository to not publish updates
+    When I call the nexus "enable_artifact_publish releases --disable" command
+    And I call the nexus "pub_sub releases" command
+    Then the output should contain:
+    	"""
+    	<publish>false</publish>
+    	"""
+    And the exit status should be 0
 
   Scenario: Set a repository to subscribe to updates
-  	When I call the nexus "subscribe releases" command
+  	When I call the nexus "enable_artifact_subscribe central" command
   	And I call the nexus "pub_sub releases" command
   	Then the output should contain:
   		"""
   		Something
   		"""
+  	And the exit status should be 0
+
+  Scenario: Set a repository to not subscribe to updates
+  	When I call the nexus "enable_artifact_subscribe central --disable" command
+  	And I call the nexus "pub_sub releases" command
+  	Then the output should contain:
+  		"""
+  		Something
+  		"""
+  	And the exit status should be 0

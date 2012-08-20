@@ -106,64 +106,103 @@ module NexusCli
       return result.nil? ? "" : result.to_xml(:indent => 4)
     end
 
+    def pub_sub(repository_id)
+      nexus["service/local/smartproxy/pub-sub/#{repository_id}"].get
+    end
+
+    def enable_artifact_publish(repository_id, disable)
+      params = {:repositoryId => repository_id}
+      params[:publish] = disable ? false : true
+
+      nexus["service/local/smartproxy/pub-sub/#{repository_id}"].put(create_pub_sub_json(params), :content_type => "application/json") do |response|
+        case response.code
+        when 200
+          return true
+        else
+          raise UnexpectedStatusCodeException.new(response.code)
+        end
+      end
+    end
+
+    def enable_artifact_subscribe(repository_id, disable)
+      raise NotProxyRepositoryException.new(repository_id) unless Nokogiri::XML(get_repository_info(repository_id)).xpath("/repository/data/repoType").first.content == "proxy"
+
+      params = {:repositoryId => repository_id}
+      params[:subscribe] = disable ? false : true
+
+      nexus["service/local/smartproxy/pub-sub/#{repository_id}"].put(create_pub_sub_json(params), :content_type => "application/json") do |response|
+        case response.code
+        when 200
+          return true
+        else
+          raise UnexpectedStatusCodeException.new(response.code)
+        end
+      end
+    end
+
     private
-    def parse_update_params(*params)
-      begin
-        parsed_params = Hash.new
-        params.each do |param|
-          # The first colon separates key and value.
-          c1 = param.index(":")
-          key = param[0..(c1 - 1)]
-          value = param[(c1 + 1)..-1]
-          !c1.nil? && N3Metadata::valid_n3_key?(key) && N3Metadata::valid_n3_value?(value) ? parsed_params[key] = value : raise
-        end
-        return parsed_params
-      rescue
-        raise N3ParameterMalformedException
+
+      def create_pub_sub_json(params)
+        JSON.dump(:data => params)
       end
-    end
-
-    def parse_search_params(*params)
-      begin
-        parsed_params = Array.new
-        params.each do |param|
-          # The first two colons separate key, type, and value.
-          c1 = param.index(":")
-          c2 = param.index(":", (c1 + 1))
-          key = param[0..(c1 - 1)]
-          type = param[(c1 + 1)..(c2 - 1)]
-          value = param[(c2 + 1)..-1]
-          !c1.nil? && !c2.nil? && N3Metadata::valid_n3_key?(key) && N3Metadata::valid_n3_value?(value) && N3Metadata::valid_n3_search_type?(type) ? parsed_params.push([key, type, value]) : raise
-        end
-        return parsed_params
-      rescue
-        raise SearchParameterMalformedException
-      end
-    end
-
-    # Expects the XML set with `data` as root.
-    def get_common_artifact_set(set1, set2)
-      intersection = get_artifact_array(set1) & get_artifact_array(set2)
-      return intersection.count > 0 ? Nokogiri::XML("<data>#{intersection.join}</data>").root : Nokogiri::XML("").root
-    end
-
-    # Collect <artifact>...</artifact> elements into an array.
-    # This will allow use of array intersection to find common artifacts in searches.
-    def get_artifact_array(set)
-      artifacts = Array.new
-      artifact = nil
-      set.to_s.split("\n").collect {|x| x.to_s.strip}.each do |piece|
-        if piece == "<artifact>"
-          artifact = piece
-        elsif piece == "</artifact>"
-          artifact += piece
-          artifacts.push(artifact)
-          artifact = nil
-        elsif !artifact.nil?
-          artifact += piece
+    
+      def parse_update_params(*params)
+        begin
+          parsed_params = Hash.new
+          params.each do |param|
+            # The first colon separates key and value.
+            c1 = param.index(":")
+            key = param[0..(c1 - 1)]
+            value = param[(c1 + 1)..-1]
+            !c1.nil? && N3Metadata::valid_n3_key?(key) && N3Metadata::valid_n3_value?(value) ? parsed_params[key] = value : raise
+          end
+          return parsed_params
+        rescue
+          raise N3ParameterMalformedException
         end
       end
-      return artifacts
-    end
+
+      def parse_search_params(*params)
+        begin
+          parsed_params = Array.new
+          params.each do |param|
+            # The first two colons separate key, type, and value.
+            c1 = param.index(":")
+            c2 = param.index(":", (c1 + 1))
+            key = param[0..(c1 - 1)]
+            type = param[(c1 + 1)..(c2 - 1)]
+            value = param[(c2 + 1)..-1]
+            !c1.nil? && !c2.nil? && N3Metadata::valid_n3_key?(key) && N3Metadata::valid_n3_value?(value) && N3Metadata::valid_n3_search_type?(type) ? parsed_params.push([key, type, value]) : raise
+          end
+          return parsed_params
+        rescue
+          raise SearchParameterMalformedException
+        end
+      end
+
+      # Expects the XML set with `data` as root.
+      def get_common_artifact_set(set1, set2)
+        intersection = get_artifact_array(set1) & get_artifact_array(set2)
+        return intersection.count > 0 ? Nokogiri::XML("<data>#{intersection.join}</data>").root : Nokogiri::XML("").root
+      end
+
+      # Collect <artifact>...</artifact> elements into an array.
+      # This will allow use of array intersection to find common artifacts in searches.
+      def get_artifact_array(set)
+        artifacts = Array.new
+        artifact = nil
+        set.to_s.split("\n").collect {|x| x.to_s.strip}.each do |piece|
+          if piece == "<artifact>"
+            artifact = piece
+          elsif piece == "</artifact>"
+            artifact += piece
+            artifacts.push(artifact)
+            artifact = nil
+          elsif !artifact.nil?
+            artifact += piece
+          end
+        end
+        return artifacts
+      end
   end
 end

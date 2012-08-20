@@ -191,4 +191,15 @@ The output from the server was:
     end
     status_code(120)
   end
+
+  class NotProxyRepositoryException < NexusCliError
+    def initialize(repository_id)
+      @repository_id = repository_id
+    end
+
+    def message
+      "The #{@repository_id} repository is not a Proxy repository and cannot subscribe to artifact updates."
+    end
+    status_code(121)
+  end
 end
