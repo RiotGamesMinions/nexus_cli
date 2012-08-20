@@ -108,3 +108,19 @@ Feature: Use the Nexus Pro CLI
 	    The artifact you requested information for could not be found. Please ensure it exists inside the Nexus.
 	    """
     And the exit status should be 101
+
+  Scenario: Set a repository to publish updates
+    When I call the nexus "publish releases" command
+    And I call the nexus "pub_sub releases" command
+    Then the output should contain:
+    	"""
+    	Something
+    	"""
+
+  Scenario: Set a repository to subscribe to updates
+  	When I call the nexus "subscribe releases" command
+  	And I call the nexus "pub_sub releases" command
+  	Then the output should contain:
+  		"""
+  		Something
+  		"""
