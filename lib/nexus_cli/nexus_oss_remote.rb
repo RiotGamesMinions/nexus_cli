@@ -132,8 +132,14 @@ module NexusCli
       nexus['service/local/global_settings/current'].put(default_json, :content_type => "application/json")
     end
 
-    def create_repository(name)
-      nexus['service/local/repositories'].post(create_repository_json(name), :content_type => "application/json") do |response|
+    def create_repository(name, proxy, url)
+      
+      json = if proxy
+          create_proxy_repository_json(name, url)
+        else
+          create_hosted_repository_json(name)
+        end
+      nexus['service/local/repositories'].post(json, :content_type => "application/json") do |response|
         case response.code
         when 400
           raise CreateRepsitoryException.new(response.body)
@@ -265,21 +271,32 @@ module NexusCli
         return group_id, artifact_id, version, extension
       end
 
-      def create_repository_json(name)
-        %{
-          {
-            "data" : {
-              "provider" : "maven2",
-              "providerRole" : "org.sonatype.nexus.proxy.repository.Repository",
-              "exposed" : true,
-              "repoType" : "hosted",
-              "repoPolicy" : "RELEASE",
-              "name" : #{name},
-              "id" : #{name.downcase},
-              "format" : "maven2"
-            }
-          }
-        }
+      def create_hosted_repository_json(name)
+        params = {:provider => "maven2"}
+        params[:providerRole] = "org.sonatype.nexus.proxy.repository.Repository" 
+        params[:exposed] = true
+        params[:repoType] = "hosted"
+        params[:repoPolicy] = "RELEASE"
+        params[:name] = name
+        params[:id] = name.downcase
+        params[:format] = "maven2"
+        JSON.dump(:data => params)
+      end
+
+      def create_proxy_repository_json(name, url)
+        params = {:provider => "maven2"}
+        params[:providerRole] = "org.sonatype.nexus.proxy.repository.Repository" 
+        params[:exposed] = true
+        params[:repoType] = "proxy"
+        params[:repoPolicy] = "RELEASE"
+        params[:checksumPolicy] = "WARN"
+        params[:writePolicy] = "READ_ONLY"
+        params[:downloadRemoteIndexes] = true
+        params[:autoBlockActive] = true
+        params[:name] = name
+        params[:id] = name.downcase
+        params[:remoteStorage] = {:remoteStorageUrl => url.nil? ? "http://change-me.com/" : url}
+        JSON.dump(:data => params)
       end
 
       def create_user_json(params)
