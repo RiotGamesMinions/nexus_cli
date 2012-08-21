@@ -163,7 +163,6 @@ module NexusCli
     def add_trusted_key(certificate, description)
       params = {:description => description}
       params[:certificate] = File.read(File.expand_path(certificate))
-      puts params
       nexus["service/local/smartproxy/trusted-keys"].post(create_add_trusted_key_json(params), :content_type => "application/json") do |response|
         case response.code
         when 201
