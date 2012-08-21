@@ -294,7 +294,9 @@ module NexusCli
           :desc => "Set to true if you want to disable artifact subscribing."
         desc "enable_artifact_subscribe repository_id", "Sets a repository to subscribe to updates about artifacts."
         def enable_artifact_subscribe(repository_id)
-          @nexus_remote.enable_artifact_subscribe(repository_id, options[:disable])
+          if @nexus_remote.enable_artifact_subscribe(repository_id, options[:disable])
+            say "The repository #{repository_id} is now subscribed for artifact updates."
+          end
         end
 
         private

@@ -129,20 +129,22 @@ Feature: Use the Nexus Pro CLI
     	"""
     And the exit status should be 0
 
+  @wip
   Scenario: Set a repository to subscribe to updates
   	When I call the nexus "enable_artifact_subscribe central" command
-  	And I call the nexus "pub_sub releases" command
+  	And I call the nexus "pub_sub central" command
   	Then the output should contain:
   		"""
-  		Something
+  		<subscribe>true</subscribe>
   		"""
   	And the exit status should be 0
 
+  @wip
   Scenario: Set a repository to not subscribe to updates
   	When I call the nexus "enable_artifact_subscribe central --disable" command
-  	And I call the nexus "pub_sub releases" command
+  	And I call the nexus "pub_sub central" command
   	Then the output should contain:
   		"""
-  		Something
+  		<subscribe>false</subscribe>
   		"""
   	And the exit status should be 0
