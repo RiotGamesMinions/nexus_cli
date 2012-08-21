@@ -160,7 +160,24 @@ module NexusCli
       nexus["service/local/smartproxy/settings"].get
     end
 
+    def add_trusted_key
+      params = {:description => "A description"}
+      params[:certificate] = certificate
+      nexus["service/local/smartproxy/trusted-keys"].post(create_add_trusted_key_json(params), :content_type => "application/json") do |response|
+        puts response.code
+        puts response.body
+      end
+    end
+
+    def delete_trusted_key(key_id)
+      nexus["service/local/smartproxy/trusted-keys/#{key_id}"].delete
+    end
+
     private
+
+      def create_add_trusted_key_json(params)
+        JSON.dump(:data => params)
+      end
 
       def create_smart_proxy_settings_json(params)
         JSON.dump(:data => params)

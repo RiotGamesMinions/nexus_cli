@@ -323,6 +323,17 @@ module NexusCli
           say @nexus_remote.smart_proxy_settings
         end
 
+        desc "add_trusted_key", "Adds a new trusted key to the smart proxy configuration."
+        def add_trusted_key
+          raise NotNexusProException unless @nexus_remote.kind_of? ProRemote
+          say @nexus_remote.add_trusted_key
+        end
+
+        desc "delete_trusted_key key_id", "Deletes a trusted key using the given key_id."
+        def delete_trusted_key(key_id)
+          @nexus_remote.delete_trusted_key
+        end
+
         private
 
           def ask_user(params, ask_username=true, ask_password=true)
