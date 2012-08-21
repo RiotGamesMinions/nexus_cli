@@ -156,6 +156,10 @@ module NexusCli
       end
     end
 
+    def smart_proxy_settings
+      nexus["service/local/smartproxy/settings"].get
+    end
+
     private
 
       def create_smart_proxy_settings_json(params)

@@ -317,6 +317,12 @@ module NexusCli
           say @nexus_remote.enable_smart_proxy(options[:disable], options[:host], options[:port])
         end
 
+        desc "smart_proxy_settings", "Returns the smart proxy settings of the server."
+        def smart_proxy_settings
+          raise NotNexusProException unless @nexus_remote.kind_of? ProRemote
+          say @nexus_remote.smart_proxy_settings
+        end
+
         private
 
           def ask_user(params, ask_username=true, ask_password=true)
