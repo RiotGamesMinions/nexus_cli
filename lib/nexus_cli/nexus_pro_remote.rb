@@ -140,7 +140,27 @@ module NexusCli
       end
     end
 
+    def enable_smart_proxy(disable, host, port)
+      params = {}
+      params[:enabled] = disable ? false : true
+      params[:host] = host unless host.nil?
+      params[:port] = port unless port.nil?      
+    
+      nexus["service/local/smartproxy/settings"].put(create_smart_proxy_settings_json(params), :content_type => "application/json") do |response|
+        case response.code
+        when 200
+          return true
+        else
+          raise UnexpectedStatusCodeException.new(response.code)
+        end
+      end
+    end
+
     private
+
+      def create_smart_proxy_settings_json(params)
+        JSON.dump(:data => params)
+      end
 
       def create_pub_sub_json(params)
         JSON.dump(:data => params)

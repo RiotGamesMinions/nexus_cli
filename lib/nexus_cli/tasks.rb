@@ -273,6 +273,7 @@ module NexusCli
 
         desc "pub_sub repository_id", "Returns the publish/subscribe status of the given repository."
         def pub_sub(repository_id)
+          raise NotNexusProException unless @nexus_remote.kind_of? ProRemote
           say @nexus_remote.pub_sub(repository_id)
         end
 
@@ -294,9 +295,26 @@ module NexusCli
           :desc => "Set to true if you want to disable artifact subscribing."
         desc "enable_artifact_subscribe repository_id", "Sets a repository to subscribe to updates about artifacts."
         def enable_artifact_subscribe(repository_id)
+          raise NotNexusProException unless @nexus_remote.kind_of? ProRemote
           if @nexus_remote.enable_artifact_subscribe(repository_id, options[:disable])
             say "The repository #{repository_id} is now subscribed for artifact updates."
           end
+        end
+
+        method_option :disable,
+          :type => :boolean,
+          :default => false,
+          :desc => "Set to true if you want to disable smart proxy."
+        method_option :host,
+          :type => :string,
+          :desc => "An IP address for the Nexus server at which publishing will be available."
+        method_option :port,
+          :type => :numeric,
+          :desc => "An available port that will be used for smart proxy connections."
+        desc "enable_smart_proxy", "Enables Smart Proxy on the server."
+        def enable_smart_proxy
+          raise NotNexusProException unless @nexus_remote.kind_of? ProRemote
+          say @nexus_remote.enable_smart_proxy(options[:disable], options[:host], options[:port])
         end
 
         private
