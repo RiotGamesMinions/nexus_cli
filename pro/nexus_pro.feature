@@ -188,3 +188,22 @@ Feature: Use the Nexus Pro CLI
       <enabled>false</enabled>
       """
     And the exit status should be 0
+
+  @wip
+  Scenario: Add a trusted key
+    When I call the nexus "add_trusted_key" command
+    And I call the nexus "trusted_keys" command
+    Then the output should contain:
+      """
+      Something
+      """
+    And the exit status should be 0
+
+  @wip
+  Scenario: Delete a trusted key
+    When I call the nexus "delete_trusted_key" command
+    And I call the nexus "trusted_keys" command
+    Then the output should not contain:
+      """
+      """
+    And the exit status should be 0
