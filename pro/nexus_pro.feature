@@ -109,101 +109,92 @@ Feature: Use the Nexus Pro CLI
 	    """
     And the exit status should be 101
 
-  @wip
   Scenario: Set a repository to publish updates
     When I call the nexus "enable_artifact_publish releases" command
-    And I call the nexus "pub_sub releases" command
+    And I call the nexus "get_pub_sub releases" command
     Then the output should contain:
     	"""
     	<publish>true</publish>
     	"""
     And the exit status should be 0
 
-  @wip
   Scenario: Set a repository to not publish updates
     When I call the nexus "enable_artifact_publish releases --disable" command
-    And I call the nexus "pub_sub releases" command
+    And I call the nexus "get_pub_sub releases" command
     Then the output should contain:
     	"""
     	<publish>false</publish>
     	"""
     And the exit status should be 0
 
-  @wip
   Scenario: Set a repository to subscribe to updates
   	When I call the nexus "enable_artifact_subscribe central" command
-  	And I call the nexus "pub_sub central" command
+  	And I call the nexus "get_pub_sub central" command
   	Then the output should contain:
   		"""
   		<subscribe>true</subscribe>
   		"""
   	And the exit status should be 0
 
-  @wip
   Scenario: Set a repository to not subscribe to updates
   	When I call the nexus "enable_artifact_subscribe central --disable" command
-  	And I call the nexus "pub_sub central" command
+  	And I call the nexus "get_pub_sub central" command
   	Then the output should contain:
   		"""
   		<subscribe>false</subscribe>
   		"""
   	And the exit status should be 0
 
-  @wip
   Scenario: Enable Smart Proxy on the Server
     When I call the nexus "enable_smart_proxy" command
-    And I call the nexus "smart_proxy_settings" command
+    And I call the nexus "get_smart_proxy_settings" command
     Then the output should contain:
       """
       <enabled>true</enabled>
       """
     And the exit status should be 0
 
-  @wip
   Scenario: Enable Smart Proxy and set the host
     When I call the nexus "enable_smart_proxy --host=0.0.0.1" command
-    And I call the nexus "smart_proxy_settings" command
+    And I call the nexus "get_smart_proxy_settings" command
     Then the output should contain:
       """
       <host>0.0.0.1</host>
       """
     And the exit status should be 0
 
-  @wip
   Scenario: Enable Smart Proxy and set the host
     When I call the nexus "enable_smart_proxy --port=1234" command
-    And I call the nexus "smart_proxy_settings" command
+    And I call the nexus "get_smart_proxy_settings" command
     Then the output should contain:
       """
       <port>1234</port>
       """
     And the exit status should be 0
 
-  @wip
   Scenario: Disable Smart Proxy on the Server
     When I call the nexus "enable_smart_proxy --disable" command
-    And I call the nexus "smart_proxy_settings" command
+    And I call the nexus "get_smart_proxy_settings" command
     Then the output should contain:
       """
       <enabled>false</enabled>
       """
     And the exit status should be 0
 
-  @wip
   Scenario: Add a trusted key
-    When I call the nexus "add_trusted_key" command
-    And I call the nexus "trusted_keys" command
+    When I add a trusted key to nexus
+    And I call the nexus "get_trusted_keys" command
     Then the output should contain:
       """
-      Something
+      cucumber
       """
     And the exit status should be 0
 
-  @wip
   Scenario: Delete a trusted key
-    When I call the nexus "delete_trusted_key" command
-    And I call the nexus "trusted_keys" command
+    When I delete a trusted key in nexus
+    And I call the nexus "get_trusted_keys" command
     Then the output should not contain:
       """
+      cucumber
       """
     And the exit status should be 0

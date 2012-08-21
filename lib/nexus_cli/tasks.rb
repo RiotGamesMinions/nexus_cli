@@ -159,7 +159,7 @@ module NexusCli
 
         desc "get_users", "Returns XML representing the users in Nexus."
         def get_users
-          say @nexus_remote.get_users
+          say @nexus_remote.get_users, :green
         end
 
         method_option :username,
@@ -267,14 +267,14 @@ module NexusCli
           params[:oldPassword] = oldPassword
           params[:newPassword] = newPassword
           if @nexus_remote.change_password(params)
-            say "The password for user #{user_id} has been updated."
+            say "The password for user #{user_id} has been updated.", :blue
           end
         end
 
-        desc "pub_sub repository_id", "Returns the publish/subscribe status of the given repository."
-        def pub_sub(repository_id)
+        desc "get_pub_sub repository_id", "Returns the publish/subscribe status of the given repository."
+        def get_pub_sub(repository_id)
           raise NotNexusProException unless @nexus_remote.kind_of? ProRemote
-          say @nexus_remote.pub_sub(repository_id)
+          say @nexus_remote.get_pub_sub(repository_id), :green
         end
 
         method_option :disable,
@@ -297,7 +297,7 @@ module NexusCli
         def enable_artifact_subscribe(repository_id)
           raise NotNexusProException unless @nexus_remote.kind_of? ProRemote
           if @nexus_remote.enable_artifact_subscribe(repository_id, options[:disable])
-            say "The repository #{repository_id} is now subscribed for artifact updates."
+            say "The repository #{repository_id} is now subscribed for artifact updates.", :blue
           end
         end
 
@@ -317,21 +317,40 @@ module NexusCli
           say @nexus_remote.enable_smart_proxy(options[:disable], options[:host], options[:port])
         end
 
-        desc "smart_proxy_settings", "Returns the smart proxy settings of the server."
-        def smart_proxy_settings
+        desc "get_smart_proxy_settings", "Returns the smart proxy settings of the server."
+        def get_smart_proxy_settings
           raise NotNexusProException unless @nexus_remote.kind_of? ProRemote
-          say @nexus_remote.smart_proxy_settings
+          say @nexus_remote.get_smart_proxy_settings, :green
         end
 
+        method_option :certificate,
+          :type => :string,
+          :required => :true,
+          :desc => "A path to a file containing a certificate."
+        method_option :description,
+          :type => :string,
+          :required => true,
+          :desc => "A description to give to the trusted key. It is probably best to make this meaningful."
         desc "add_trusted_key", "Adds a new trusted key to the smart proxy configuration."
         def add_trusted_key
           raise NotNexusProException unless @nexus_remote.kind_of? ProRemote
-          say @nexus_remote.add_trusted_key
+          if @nexus_remote.add_trusted_key(options[:certificate], options[:description])
+            say "A new trusted key has been added to the nexus.", :blue
+          end
         end
 
         desc "delete_trusted_key key_id", "Deletes a trusted key using the given key_id."
         def delete_trusted_key(key_id)
-          @nexus_remote.delete_trusted_key
+          raise NotNexusProException unless @nexus_remote.kind_of? ProRemote
+          if @nexus_remote.delete_trusted_key(key_id)
+            say "The trusted key with an id of #{key_id} has been deleted.", :blue
+          end
+        end
+
+        desc "get_trusted_keys", "Returns the trusted keys of the server."
+        def get_trusted_keys
+          raise NotNexusProException unless @nexus_remote.kind_of? ProRemote
+          say @nexus_remote.get_trusted_keys, :green
         end
 
         private

@@ -106,7 +106,7 @@ module NexusCli
       return result.nil? ? "" : result.to_xml(:indent => 4)
     end
 
-    def pub_sub(repository_id)
+    def get_pub_sub(repository_id)
       nexus["service/local/smartproxy/pub-sub/#{repository_id}"].get
     end
 
@@ -156,21 +156,37 @@ module NexusCli
       end
     end
 
-    def smart_proxy_settings
+    def get_smart_proxy_settings
       nexus["service/local/smartproxy/settings"].get
     end
 
-    def add_trusted_key
-      params = {:description => "A description"}
-      params[:certificate] = certificate
+    def add_trusted_key(certificate, description)
+      params = {:description => description}
+      params[:certificate] = File.read(File.expand_path(certificate))
+      puts params
       nexus["service/local/smartproxy/trusted-keys"].post(create_add_trusted_key_json(params), :content_type => "application/json") do |response|
-        puts response.code
-        puts response.body
+        case response.code
+        when 201
+          return true
+        else
+          raise UnexpectedStatusCodeException.new(response.code)
+        end
       end
     end
 
     def delete_trusted_key(key_id)
-      nexus["service/local/smartproxy/trusted-keys/#{key_id}"].delete
+      nexus["service/local/smartproxy/trusted-keys/#{key_id}"].delete do |response|
+        case response.code
+        when 204
+          return true
+        else 
+          raise UnexpectedStatusCodeException.new(response.code)
+        end
+      end
+    end
+
+    def get_trusted_keys
+      nexus["service/local/smartproxy/trusted-keys"].get
     end
 
     private

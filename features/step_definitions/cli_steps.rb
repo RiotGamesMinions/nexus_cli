@@ -1,6 +1,7 @@
 require 'aruba/api'
 require 'json'
 require 'jsonpath'
+require 'nokogiri'
 World(Aruba::Api)
 
 When /^I call the nexus "(.*?)" command$/ do |command|
@@ -47,6 +48,36 @@ When /^I update global settings uiTimeout to (\d+) and upload the json string$/ 
   json = JSON.parse(nexus_remote.get_global_settings_json)
   edited_json = JsonPath.for(json).gsub("$..uiTimeout") {|v| value.to_i}.to_hash
   nexus_remote.upload_global_settings(JSON.dump(edited_json))
+end
+
+When /^I add a trusted key to nexus$/ do
+  Dir.chdir(temp_dir) do
+    File.open("cert.txt", "w+") do |opened|
+      opened.write("-----BEGIN CERTIFICATE-----
+MIICiTCCAfICCQDIKBRH7YO5mTANBgkqhkiG9w0BAQUFADCBiDELMAkGA1UEBhMC
+VVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFTATBgNVBAcTDFNhbnRhIE1vbmljYTET
+MBEGA1UEChMKUmlvdCBHYW1lczETMBEGA1UEAxMKS3lsZSBBbGxhbjEjMCEGCSqG
+SIb3DQEJARYUa2FsbGFuQHJpb3RnYW1lcy5jb20wHhcNMTIwNjIwMjMxOTQ1WhcN
+MTMwNjIwMjMxOTQ1WjCBiDELMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3Ju
+aWExFTATBgNVBAcTDFNhbnRhIE1vbmljYTETMBEGA1UEChMKUmlvdCBHYW1lczET
+MBEGA1UEAxMKS3lsZSBBbGxhbjEjMCEGCSqGSIb3DQEJARYUa2FsbGFuQHJpb3Rn
+YW1lcy5jb20wgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAM8Yz96KDxzv7eEt
+DQNLV/3ipXJ5U/lQOQ2BrjSB6qrAHP2u4f+tzJtANXHcRrhXI3oOE993fg82adZg
+XpWLl9wcPHDKP8s5l4TUxMjVJ4UYLJeINwOh/s3cpFq/ni/Klb+QWKG8Vyp6ossF
+VGOc0IiU4ZaC38+jlqvCkHwdCQ4hAgMBAAEwDQYJKoZIhvcNAQEFBQADgYEAG6Eh
+2QO0D69W+9wFvMQAC8YvHNMW9S9A+YRDa5vOeWzUZpeAYuawFSVfjT3fof2ovCU8
+/AR2PyVwJvXRp0Yon2sUfaaFVP4x0BFAwWHk4vLBtqviBhKRdF1D/rR1g4KRowsh
+P5KVneepzhtEt9G/uO4MU89cdUR0IMyUwdhq2dg=
+-----END CERTIFICATE-----
+")
+    end
+    step "I run `nexus-cli add_trusted_key --certificate=#{File.join(temp_dir, "cert.txt")} --description=cucumber`"
+  end
+end
+
+When /^I delete a trusted key in nexus$/ do
+  key_id = Nokogiri::XML(nexus_remote.get_trusted_keys).xpath("/trusted-keys-response/data/trusted-key/id").first.content
+  step "I run `nexus-cli delete_trusted_key #{key_id}`"
 end
 
 Then /^a file named "(.*?)" should exist in my nexus folder$/ do |file|
