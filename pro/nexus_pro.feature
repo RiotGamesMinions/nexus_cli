@@ -148,3 +148,33 @@ Feature: Use the Nexus Pro CLI
   		<subscribe>false</subscribe>
   		"""
   	And the exit status should be 0
+
+  @wip
+  Scenario: Enable Smart Proxy on the Server
+    When I call the nexus "enable_smart_proxy" command
+    And I call the nexus "smart_proxy_settings" command
+    Then the output should contain:
+      """
+      Something
+      """
+    And the exit status should be 0
+
+  @wip
+  Scenario: Disable Smart Proxy on the Server
+    When I call the nexus "enable_smart_proxy --disable" command
+    And I call the nexus "smart_proxy_settings" command
+    Then the output should contain:
+      """
+      Something
+      """
+    And the exit status should be 0
+
+  @wip
+  Scenario: Enable Smart Proxy and set the host and port
+    When I call the nexus "enable_smart_proxy --host=0.0.0.1 --port=1234" command
+    And I call the nexus "smart_proxy_settings" command
+    Then the output should contain:
+      """
+      Something
+      """
+    And the exit status should be 0
