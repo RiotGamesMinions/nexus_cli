@@ -150,7 +150,7 @@ Feature: Use the Nexus Pro CLI
     And I call the nexus "get_smart_proxy_settings" command
     Then the output should contain:
       """
-      <enabled>true</enabled>
+      "enabled": true
       """
     And the exit status should be 0
 
@@ -159,7 +159,7 @@ Feature: Use the Nexus Pro CLI
     And I call the nexus "get_smart_proxy_settings" command
     Then the output should contain:
       """
-      <host>0.0.0.1</host>
+      "host": "0.0.0.1"
       """
     And the exit status should be 0
 
@@ -168,7 +168,7 @@ Feature: Use the Nexus Pro CLI
     And I call the nexus "get_smart_proxy_settings" command
     Then the output should contain:
       """
-      <port>1234</port>
+      "port": 1234
       """
     And the exit status should be 0
 
@@ -177,7 +177,7 @@ Feature: Use the Nexus Pro CLI
     And I call the nexus "get_smart_proxy_settings" command
     Then the output should contain:
       """
-      <enabled>false</enabled>
+      "enabled": false
       """
     And the exit status should be 0
 
@@ -189,7 +189,7 @@ Feature: Use the Nexus Pro CLI
       cucumber
       """
     And the exit status should be 0
-
+  
   Scenario: Delete a trusted key
     When I delete a trusted key in nexus
     And I call the nexus "get_trusted_keys" command

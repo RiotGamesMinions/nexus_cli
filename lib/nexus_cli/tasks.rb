@@ -326,7 +326,7 @@ module NexusCli
         desc "get_smart_proxy_settings", "Returns the smart proxy settings of the server."
         def get_smart_proxy_settings
           raise NotNexusProException unless @nexus_remote.kind_of? ProRemote
-          say @nexus_remote.get_smart_proxy_settings, :green
+          say JSON.pretty_generate(JSON.parse(@nexus_remote.get_smart_proxy_settings)), :green
         end
 
         method_option :certificate,
@@ -356,7 +356,7 @@ module NexusCli
         desc "get_trusted_keys", "Returns the trusted keys of the server."
         def get_trusted_keys
           raise NotNexusProException unless @nexus_remote.kind_of? ProRemote
-          say @nexus_remote.get_trusted_keys, :green
+          say JSON.pretty_generate(JSON.parse(@nexus_remote.get_trusted_keys)), :green
         end
 
         private

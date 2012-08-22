@@ -1,7 +1,6 @@
 require 'aruba/api'
 require 'json'
 require 'jsonpath'
-require 'nokogiri'
 World(Aruba::Api)
 
 When /^I call the nexus "(.*?)" command$/ do |command|
@@ -76,7 +75,8 @@ P5KVneepzhtEt9G/uO4MU89cdUR0IMyUwdhq2dg=
 end
 
 When /^I delete a trusted key in nexus$/ do
-  key_id = Nokogiri::XML(nexus_remote.get_trusted_keys).xpath("/trusted-keys-response/data/trusted-key/id").first.content
+  json = JSON.parse(nexus_remote.get_trusted_keys)
+  key_id = json["data"].first["id"]
   step "I run `nexus-cli delete_trusted_key #{key_id}`"
 end
 

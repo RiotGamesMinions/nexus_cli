@@ -140,7 +140,7 @@ module NexusCli
       end
     end
 
-    def enable_smart_proxy(disable, host, port)
+    def enable_smart_proxy(disable, host=nil, port=nil)
       params = {}
       params[:enabled] = disable ? false : true
       params[:host] = host unless host.nil?
@@ -157,12 +157,12 @@ module NexusCli
     end
 
     def get_smart_proxy_settings
-      nexus["service/local/smartproxy/settings"].get
+      nexus["service/local/smartproxy/settings"].get(:accept => "application/json")
     end
 
-    def add_trusted_key(certificate, description)
+    def add_trusted_key(certificate, description, path=true)
       params = {:description => description}
-      params[:certificate] = File.read(File.expand_path(certificate))
+      params[:certificate] = path ? File.read(File.expand_path(certificate)) : certificate
       nexus["service/local/smartproxy/trusted-keys"].post(create_add_trusted_key_json(params), :content_type => "application/json") do |response|
         case response.code
         when 201
@@ -185,7 +185,7 @@ module NexusCli
     end
 
     def get_trusted_keys
-      nexus["service/local/smartproxy/trusted-keys"].get
+      nexus["service/local/smartproxy/trusted-keys"].get(:accept => "application/json")
     end
 
     private
