@@ -216,12 +216,13 @@ module NexusCli
       nexus["service/local/smartproxy/trusted-keys"].get(:accept => "application/json")
     end
 
-    #def foo(license_key)
-    #  nexus["service/local/licensing"].post(license_key) do |response|
-    #    puts response.code
-    #    puts response.body
-    #  end
-    #end
+    def install_license(license_file)
+      file = File.read(File.expand_path(license_file))
+      nexus["service/local/licensing"].post(file) do |response|
+        puts response.code
+        puts response.body
+      end
+    end
 
     private
 

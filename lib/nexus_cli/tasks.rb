@@ -320,7 +320,7 @@ module NexusCli
           :desc => "An IP address for the Nexus server at which publishing will be available."
         method_option :port,
           :type => :numeric,
-          :desc => "An available port that will be used for smart proxy connections."
+          :desc => "An available port that will be used for Smart Proxy connections."
         desc "enable_smart_proxy", "Enables Smart Proxy on the server."
         def enable_smart_proxy
           raise NotNexusProException unless @nexus_remote.kind_of? ProRemote
@@ -333,7 +333,7 @@ module NexusCli
           say @nexus_remote.disable_smart_proxy          
         end
 
-        desc "get_smart_proxy_settings", "Returns the smart proxy settings of the server."
+        desc "get_smart_proxy_settings", "Returns the Smart Proxy settings of the server."
         def get_smart_proxy_settings
           raise NotNexusProException unless @nexus_remote.kind_of? ProRemote
           say JSON.pretty_generate(JSON.parse(@nexus_remote.get_smart_proxy_settings)), :green
@@ -347,7 +347,7 @@ module NexusCli
           :type => :string,
           :required => true,
           :desc => "A description to give to the trusted key. It is probably best to make this meaningful."
-        desc "add_trusted_key", "Adds a new trusted key to the smart proxy configuration."
+        desc "add_trusted_key", "Adds a new trusted key to the Smart Proxy configuration."
         def add_trusted_key
           raise NotNexusProException unless @nexus_remote.kind_of? ProRemote
           if @nexus_remote.add_trusted_key(options[:certificate], options[:description])
@@ -367,6 +367,11 @@ module NexusCli
         def get_trusted_keys
           raise NotNexusProException unless @nexus_remote.kind_of? ProRemote
           say JSON.pretty_generate(JSON.parse(@nexus_remote.get_trusted_keys)), :green
+        end
+
+        desc "install_license license_file", "Installs a license file into the server."
+        def install_license(license_file)
+          @nexus_remote.install_license(license_file)
         end
 
         private
