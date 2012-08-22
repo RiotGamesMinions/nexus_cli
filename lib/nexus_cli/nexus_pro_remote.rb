@@ -110,10 +110,19 @@ module NexusCli
       nexus["service/local/smartproxy/pub-sub/#{repository_id}"].get
     end
 
-    def enable_artifact_publish(repository_id, disable)
+    def enable_artifact_publish(repository_id)
       params = {:repositoryId => repository_id}
-      params[:publish] = disable ? false : true
+      params[:publish] = true
+      artifact_publish(repository_id, params)
+    end
 
+    def disable_artifact_publish(repository_id)
+      params = {:repositoryId => repository_id}
+      params[:publish] = false
+      artifact_publish(repository_id, params)
+    end
+
+    def artifact_publish(repository_id, params)
       nexus["service/local/smartproxy/pub-sub/#{repository_id}"].put(create_pub_sub_json(params), :content_type => "application/json") do |response|
         case response.code
         when 200
@@ -124,12 +133,24 @@ module NexusCli
       end
     end
 
-    def enable_artifact_subscribe(repository_id, disable)
+
+    def enable_artifact_subscribe(repository_id)
       raise NotProxyRepositoryException.new(repository_id) unless Nokogiri::XML(get_repository_info(repository_id)).xpath("/repository/data/repoType").first.content == "proxy"
 
       params = {:repositoryId => repository_id}
-      params[:subscribe] = disable ? false : true
+      params[:subscribe] = true
+      artifact_subscribe(repository_id, params)
+    end
 
+    def disable_artifact_subscribe(repository_id)
+      raise NotProxyRepositoryException.new(repository_id) unless Nokogiri::XML(get_repository_info(repository_id)).xpath("/repository/data/repoType").first.content == "proxy"
+
+      params = {:repositoryId => repository_id}
+      params[:subscribe] = false
+      artifact_subscribe(repository_id, params)
+    end
+
+    def artifact_subscribe(repository_id, params)
       nexus["service/local/smartproxy/pub-sub/#{repository_id}"].put(create_pub_sub_json(params), :content_type => "application/json") do |response|
         case response.code
         when 200
@@ -140,12 +161,19 @@ module NexusCli
       end
     end
 
-    def enable_smart_proxy(disable, host=nil, port=nil)
-      params = {}
-      params[:enabled] = disable ? false : true
+    def enable_smart_proxy(host=nil, port=nil)
+      params = {:enabled => true}
       params[:host] = host unless host.nil?
       params[:port] = port unless port.nil?      
-    
+      smart_proxy(params)
+    end
+
+    def disable_smart_proxy
+      params = {:enabled => false}
+      smart_proxy(params)      
+    end
+
+    def smart_proxy(params)
       nexus["service/local/smartproxy/settings"].put(create_smart_proxy_settings_json(params), :content_type => "application/json") do |response|
         case response.code
         when 200
@@ -187,6 +215,13 @@ module NexusCli
     def get_trusted_keys
       nexus["service/local/smartproxy/trusted-keys"].get(:accept => "application/json")
     end
+
+    #def foo(license_key)
+    #  nexus["service/local/licensing"].post(license_key) do |response|
+    #    puts response.code
+    #    puts response.body
+    #  end
+    #end
 
     private
 

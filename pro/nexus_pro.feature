@@ -119,7 +119,7 @@ Feature: Use the Nexus Pro CLI
     And the exit status should be 0
 
   Scenario: Set a repository to not publish updates
-    When I call the nexus "enable_artifact_publish releases --disable" command
+    When I call the nexus "disable_artifact_publish releases" command
     And I call the nexus "get_pub_sub releases" command
     Then the output should contain:
     	"""
@@ -137,7 +137,7 @@ Feature: Use the Nexus Pro CLI
   	And the exit status should be 0
 
   Scenario: Set a repository to not subscribe to updates
-  	When I call the nexus "enable_artifact_subscribe central --disable" command
+  	When I call the nexus "disable_artifact_subscribe central" command
   	And I call the nexus "get_pub_sub central" command
   	Then the output should contain:
   		"""
@@ -173,7 +173,7 @@ Feature: Use the Nexus Pro CLI
     And the exit status should be 0
 
   Scenario: Disable Smart Proxy on the Server
-    When I call the nexus "enable_smart_proxy --disable" command
+    When I call the nexus "disable_smart_proxy" command
     And I call the nexus "get_smart_proxy_settings" command
     Then the output should contain:
       """
