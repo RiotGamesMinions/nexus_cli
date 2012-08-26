@@ -369,6 +369,11 @@ module NexusCli
           say JSON.pretty_generate(JSON.parse(@nexus_remote.get_trusted_keys)), :green
         end
 
+        desc "get_license_info", "Returns the license information of the server."
+        def get_license_info
+          say @nexus_remote.get_license_info, :green
+        end
+
         desc "install_license license_file", "Installs a license file into the server."
         def install_license(license_file)
           @nexus_remote.install_license(license_file)

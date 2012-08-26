@@ -220,6 +220,10 @@ module NexusCli
       nexus["service/local/smartproxy/trusted-keys"].get(:accept => "application/json")
     end
 
+    def get_license_info
+      nexus["service/local/licensing"].get(:accept => "application/json")
+    end
+
     def install_license(license_file)
       file = File.read(File.expand_path(license_file))
       nexus["service/local/licensing/upload"].post(file, :content_type => "application/octet-stream") do |response|
