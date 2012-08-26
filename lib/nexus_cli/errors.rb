@@ -202,4 +202,11 @@ The output from the server was:
     end
     status_code(121)
   end
+
+  class LicenseInstallFailure < NexusCliError
+    def message
+      "Either your Nexus already has a license installed or there was a problem with the file you uploaded."
+    end
+    status_code(122)
+  end
 end

@@ -188,6 +188,10 @@ module NexusCli
       nexus["service/local/smartproxy/settings"].get(:accept => "application/json")
     end
 
+    def get_smart_proxy_key
+      nexus["service/local/smartproxy/settings"].get(:accept => "application/json")
+    end
+
     def add_trusted_key(certificate, description, path=true)
       params = {:description => description}
       params[:certificate] = path ? File.read(File.expand_path(certificate)) : certificate
@@ -218,9 +222,28 @@ module NexusCli
 
     def install_license(license_file)
       file = File.read(File.expand_path(license_file))
-      nexus["service/local/licensing"].post(file) do |response|
-        puts response.code
-        puts response.body
+      nexus["service/local/licensing/upload"].post(file, :content_type => "application/octet-stream") do |response|
+        case response.code
+        when 201
+          return true
+        when 403
+          raise LicenseInstallFailure
+        else
+          raise UnexpectedStatusCodeException.new(response.code)
+        end
+      end
+    end
+
+    def install_license_bytes(bytes)
+      nexus["service/local/licensing/upload"].post(bytes, :content_type => "application/octet-stream") do |response|
+        case response.code
+        when 201
+          return true
+        when 403
+          raise LicenseInstallFailure
+        else
+          raise UnexpectedStatusCodeException.new(response.code)
+        end
       end
     end
 
