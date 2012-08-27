@@ -249,6 +249,10 @@ module NexusCli
       end
     end
 
+    def running_nexus_pro?
+      status['edition_long'] == "Professional"
+    end
+
     private
 
       def format_search_results(doc, group_id, artifact_id)
