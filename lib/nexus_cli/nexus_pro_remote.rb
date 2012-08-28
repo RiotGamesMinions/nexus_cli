@@ -94,7 +94,7 @@ module NexusCli
       docs = Array.new
       parse_search_params(*params).each do |param|
         begin
-          nexus['service/local/search/m2/freeform'].get({:params => {:p => param[0], :t => param[1], :v => param[2]}}) do |response|
+          nexus['service/local/search/m2/freeform'].get(:params => {:p => param[0], :t => param[1], :v => param[2]}) do |response|
             raise BadSearchRequestException if response.code == 400
             docs.push(Nokogiri::XML(response.body).xpath("/search-results/data"))
           end
