@@ -133,7 +133,6 @@ module NexusCli
     end
 
     def create_repository(name, proxy, url)
-      
       json = if proxy
           create_proxy_repository_json(name, url)
         else
@@ -166,7 +165,7 @@ module NexusCli
 
     def get_repository_info(name)
       begin
-        nexus["service/local/repositories/#{name.downcase}"].get
+        nexus["service/local/repositories/#{name.gsub(" ", "_").downcase}"].get
       rescue Errno::ECONNREFUSED => e
         raise CouldNotConnectToNexusException
       rescue RestClient::ResourceNotFound => e
@@ -282,7 +281,7 @@ module NexusCli
         params[:repoType] = "hosted"
         params[:repoPolicy] = "RELEASE"
         params[:name] = name
-        params[:id] = name.downcase
+        params[:id] = name.gsub(" ", "_").downcase
         params[:format] = "maven2"
         JSON.dump(:data => params)
       end
@@ -298,7 +297,7 @@ module NexusCli
         params[:downloadRemoteIndexes] = true
         params[:autoBlockActive] = true
         params[:name] = name
-        params[:id] = name.downcase
+        params[:id] = name.gsub(" ", "_").downcase
         params[:remoteStorage] = {:remoteStorageUrl => url.nil? ? "http://change-me.com/" : url}
         JSON.dump(:data => params)
       end
