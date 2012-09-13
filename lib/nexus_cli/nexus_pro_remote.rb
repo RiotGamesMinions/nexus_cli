@@ -7,7 +7,7 @@ module NexusCli
   class ProRemote < OSSRemote
     def get_artifact_custom_info_raw(artifact)
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
-      encoded_string = Base64.encode64(N3Metadata::create_custom_metadata_subject(group_id, artifact_id, version, extension))
+      encoded_string = Base64.urlsafe_encode64(N3Metadata::create_custom_metadata_subject(group_id, artifact_id, version, extension))
       begin
         custom_metadata = nexus["service/local/index/custom_metadata/#{configuration['repository']}/#{encoded_string}"].get
         if N3Metadata::missing_custom_metadata?(custom_metadata)
@@ -31,12 +31,12 @@ module NexusCli
       # Read in nexus n3 file. If this is a newly-added artifact, there will be no n3 file so escape the exception.
       begin
         nexus_n3 = N3Metadata::parse_request_into_hash(get_artifact_custom_info_raw(artifact))
-      rescue ArtifactNotFoundException
+      rescue N3NotFoundException
         nexus_n3 = {}
       end
 
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
-      encoded_string = Base64.encode64(N3Metadata::create_custom_metadata_subject(group_id, artifact_id, version, extension))
+      encoded_string = Base64.urlsafe_encode64(N3Metadata::create_custom_metadata_subject(group_id, artifact_id, version, extension))
       nexus["service/local/index/custom_metadata/#{configuration['repository']}/#{encoded_string}"].post(create_custom_metadata_update_json(nexus_n3, target_n3), :content_type => "application/json") do |response|
         case response.code
         when 201
@@ -50,7 +50,7 @@ module NexusCli
     def clear_artifact_custom_info(artifact)
       get_artifact_custom_info(artifact) # Check that artifact has custom metadata
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
-      encoded_string = Base64.encode64(N3Metadata::create_custom_metadata_subject(group_id, artifact_id, version, extension))
+      encoded_string = Base64.urlsafe_encode64(N3Metadata::create_custom_metadata_subject(group_id, artifact_id, version, extension))
       nexus["service/local/index/custom_metadata/#{configuration['repository']}/#{encoded_string}"].post(create_custom_metadata_clear_json, :content_type => "application/json") do |response|
         case response.code
         when 201
@@ -66,8 +66,14 @@ module NexusCli
       parse_custom_metadata_search_params(*params).each do |param|
         begin
           nexus['service/local/search/m2/freeform'].get(:params => {:p => param[0], :t => param[1], :v => param[2]}) do |response|
-            raise BadSearchRequestException if response.code == 400
-            docs.push(Nokogiri::XML(response.body).xpath("/search-results/data"))
+            case response.code
+            when 200
+              docs.push(Nokogiri::XML(response.body).xpath("/search-results/data"))
+            when 400
+              raise BadSearchRequestException
+            else
+              raise UnexpectedStatusCodeException.new(response.code)
+            end
           end
         rescue RestClient::ResourceNotFound => e
           raise ArtifactNotFoundException
