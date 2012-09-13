@@ -19,8 +19,9 @@ Feature: Use the Nexus Pro CLI
 	    """
     And the exit status should be 0
 
+@test
 	Scenario: Update an artifact's custom metadata
-		When I call the nexus "update_artifact_custom_info com.test:myprotest:1.0.0:tgz teemoHat:equipped" command
+		When I call the nexus "update_artifact_custom_info com.test:myprotest:1.0.0:tgz somekey:somevalue_1!" command
 		Then the output should contain:
 			"""
 			Custom metadata for artifact com.test:myprotest:1.0.0:tgz has been successfully pushed to Nexus.
@@ -28,7 +29,15 @@ Feature: Use the Nexus Pro CLI
 		And the exit status should be 0
 
 	Scenario: Update an artifact's custom metadata with multiple parameters
-		When I call the nexus "update_artifact_custom_info com.test:myprotest:1.0.0:tgz teemoHat:equipped_ \"teemoSkins:many skins!!1\"" command
+		When I call the nexus "update_artifact_custom_info com.test:myprotest:1.0.0:tgz somekey:somevalue \"someotherkey:some other value\" tempkey:tempvalue" command
+		Then the output should contain:
+			"""
+			Custom metadata for artifact com.test:myprotest:1.0.0:tgz has been successfully pushed to Nexus.
+			"""
+		And the exit status should be 0
+		
+	Scenario: Update an artifact's custom metadata and remove a key
+		When I call the nexus "update_artifact_custom_info com.test:myprotest:1.0.0:tgz tempkey:" command
 		Then the output should contain:
 			"""
 			Custom metadata for artifact com.test:myprotest:1.0.0:tgz has been successfully pushed to Nexus.
@@ -39,28 +48,16 @@ Feature: Use the Nexus Pro CLI
 		When I call the nexus "custom com.test:myprotest:1.0.0:tgz" command
 		Then the output should contain:
 			"""
-			<teemoHat>equipped_</teemoHat>
+			<somekey>some value</somekey>
 			"""
 		And the output should contain:
 			"""
-			<teemoSkins>many skins!!1</teemoSkins>
-			"""
-		And the exit status should be 0
-
-	Scenario: Get an artifact's raw custom metadata
-		When I call the nexus "custom_raw com.test:myprotest:1.0.0:tgz" command
-		Then the output should contain:
-			"""
-			<urn:nexus/user#teemoHat> "equipped_"
-			"""
-		And the output should contain:
-			"""
-			<urn:nexus/user#teemoSkins> "many skins!!1"
+			<someotherkey>some other value</someotherkey>
 			"""
 		And the exit status should be 0
 
 	Scenario: Search for artifacts by custom metadata using matches
-		When I call the nexus "search_custom teemoHat:matches:equip*" command
+		When I call the nexus "search_custom somekey:matches:equip*" command
 		Then the output should contain:
 			"""
 			<artifactId>myprotest</artifactId>
@@ -68,7 +65,7 @@ Feature: Use the Nexus Pro CLI
 		And the exit status should be 0
 
 	Scenario: Search for artifacts by custom metadata using equal
-		When I call the nexus "search_custom teemoHat:equal:equipped_" command
+		When I call the nexus "search_custom somekey:equal:somevalue_1!" command
 		Then the output should contain:
 			"""
 			<artifactId>myprotest</artifactId>
@@ -76,7 +73,7 @@ Feature: Use the Nexus Pro CLI
 		And the exit status should be 0
 
 	Scenario: Search for artifacts by custom metadata using multiple parameters
-		When I call the nexus "search_custom teemoHat:matches:equip* teemoHat:equal:equipped_" command
+		When I call the nexus "search_custom somekey:matches:equip* somekey:equal:somevalue_1!" command
 		Then the output should contain:
 			"""
 			<artifactId>myprotest</artifactId>
@@ -84,7 +81,7 @@ Feature: Use the Nexus Pro CLI
 		And the exit status should be 0
 
 	Scenario: Search for artifacts by custom metadata that return an empty result set
-		When I call the nexus "search_custom bestTeemo:equal:malady" command
+		When I call the nexus "search_custom fakekey:equal:fakevalue" command
 		Then the output should contain:
 			"""
 			No search results.
