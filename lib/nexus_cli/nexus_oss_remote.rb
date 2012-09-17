@@ -1,4 +1,5 @@
 require 'restclient'
+require 'httpclient'
 require 'nokogiri'
 require 'yaml'
 require 'json'
@@ -31,44 +32,48 @@ module NexusCli
     end
 
     def pull_artifact(artifact, destination)
-      # Using net/http because restclient dies on large files.
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
-      uri = URI(File.join(configuration["url"], "service/local/artifact/maven/redirect"))
-      params = {:g => group_id, :a => artifact_id, :v => version, :e => extension, :r => configuration["repository"]}.collect {|k,v| "#{k}=#{URI::escape(v.to_s)}"}.join("&")
       version = Nokogiri::XML(get_artifact_info(artifact)).xpath("//version").first.content() if version.casecmp("latest")
       destination = File.join(File.expand_path(destination || "."), "#{artifact_id}-#{version}.#{extension}")
-      Net::HTTP.start(uri.host, uri.port, :use_ssl => uri.scheme == 'https', :verify_mode => OpenSSL::SSL::VERIFY_NONE) do |http|
-        request = Net::HTTP::Get.new(URI(http.request_get(uri.request_uri + "?" + params)["location"]).request_uri)
-        request.basic_auth(configuration["username"], configuration["password"])
-        http.request(request) do |response|
-          case response.code.to_i
-          when 404
-            raise ArtifactNotFoundException
-          end
-          artifact_file = File.open(destination, "wb") do |io|
-            response.read_body do |chunk|
-              io.write(chunk)
-            end
+      nexus_httpclient = HTTPClient.new
+      url = File.join(configuration['url'], "service/local/artifact/maven/redirect")
+      nexus_httpclient.set_auth(url, configuration['username'], configuration['password'])
+      response = nexus_httpclient.get(url, :query => {:g => group_id, :a => artifact_id, :v => version, :e => extension, :r => configuration['repository']})
+      case response.status
+      when 301
+        # Follow redirect and stream in chunks.
+        artifact_file = File.open(destination, "wb") do |io|
+          nexus_httpclient.get(response.content.gsub(/If you are not automatically redirected use this url: /, "")) do |chunk|
+            io.write(chunk)
           end
         end
+      when 404
+        raise ArtifactNotFoundException
+      else
+        raise UnexpectedStatusCodeException.new(response.code)
       end
       File.expand_path(destination)
     end
 
     def push_artifact(artifact, file)
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
-      nexus['service/local/artifact/maven/content'].post(:hasPom => false, :g => group_id, :a => artifact_id, :v => version, :e => extension, :p => extension, :r => configuration['repository'],
-      :file => File.new(file)) do |response|
-        case response.code
-        when 400
-          raise BadUploadRequestException
-        when 401
-          raise PermissionsException
-        when 403
-          raise PermissionsException
-        when 404
-          raise CouldNotConnectToNexusException
-        end
+      nexus_httpclient = HTTPClient.new
+      url = File.join(configuration['url'], "service/local/artifact/maven/content")
+      nexus_httpclient.set_auth(url, configuration['username'], configuration['password'])
+      response = nexus_httpclient.post(url, {:hasPom => false, :g => group_id, :a => artifact_id, :v => version, :e => extension, :p => extension, :r => configuration['repository'], :file => File.open(file)})
+      case response.code
+      when 201
+        return true
+      when 400
+        raise BadUploadRequestException
+      when 401
+        raise PermissionsException
+      when 403
+        raise PermissionsException
+      when 404
+        raise CouldNotConnectToNexusException
+      else
+        raise UnexpectedStatusCodeException.new(response.code)
       end
     end
 
