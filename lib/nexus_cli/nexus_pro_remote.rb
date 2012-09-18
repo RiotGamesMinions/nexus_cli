@@ -40,7 +40,7 @@ module NexusCli
 
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
       encoded_string = Base64.urlsafe_encode64(N3Metadata::create_custom_metadata_subject(group_id, artifact_id, version, extension))
-      response = nexus.post(nexus_url("service/local/index/custom_metadata/#{configuration['repository']}/#{encoded_string}"), :body => create_custom_metadata_update_json(nexus_n3, target_n3), :header => {:content_type => "application/json"})
+      response = nexus.post(nexus_url("service/local/index/custom_metadata/#{configuration['repository']}/#{encoded_string}"), :body => create_custom_metadata_update_json(nexus_n3, target_n3), :header => {"Content-Type" => "application/json"})
       case response.code
       when 201
         return true
@@ -53,7 +53,7 @@ module NexusCli
       get_artifact_custom_info(artifact) # Check that artifact has custom metadata
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
       encoded_string = Base64.urlsafe_encode64(N3Metadata::create_custom_metadata_subject(group_id, artifact_id, version, extension))
-      response = nexus.post(nexus_url("service/local/index/custom_metadata/#{configuration['repository']}/#{encoded_string}"), :body => create_custom_metadata_clear_json, :header => {:content_type => "application/json"})
+      response = nexus.post(nexus_url("service/local/index/custom_metadata/#{configuration['repository']}/#{encoded_string}"), :body => create_custom_metadata_clear_json, :header => {"Content-Type" => "application/json"})
       case response.status
       when 201
         return true
@@ -104,7 +104,7 @@ module NexusCli
     end
 
     def artifact_publish(repository_id, params)
-      response = nexus.put(nexus_url("service/local/smartproxy/pub-sub/#{repository_id}"), :body => create_pub_sub_json(params), :header => {:content_type => "application/json"})
+      response = nexus.put(nexus_url("service/local/smartproxy/pub-sub/#{repository_id}"), :body => create_pub_sub_json(params), :header => {"Content-Type" => "application/json"})
       case response.status
       when 200
         return true
@@ -130,7 +130,7 @@ module NexusCli
     end
 
     def artifact_subscribe(repository_id, params)
-      response = nexus.put(nexus_url("service/local/smartproxy/pub-sub/#{repository_id}"), :body => create_pub_sub_json(params), :header => {:content_type => "application/json"})
+      response = nexus.put(nexus_url("service/local/smartproxy/pub-sub/#{repository_id}"), :body => create_pub_sub_json(params), :header => {"Content-Type" => "application/json"})
       case response.status
       when 200
         return true
@@ -152,7 +152,7 @@ module NexusCli
     end
 
     def smart_proxy(params)
-      response = nexus.put(nexus_url("service/local/smartproxy/settings"), :body => create_smart_proxy_settings_json(params), :header => {:content_type => "application/json"})
+      response = nexus.put(nexus_url("service/local/smartproxy/settings"), :body => create_smart_proxy_settings_json(params), :header => {"Content-Type" => "application/json"})
       case response.status
       when 200
         return true
@@ -162,7 +162,7 @@ module NexusCli
     end
 
     def get_smart_proxy_settings
-      response = nexus.get(nexus_url("service/local/smartproxy/settings"), :header => {:accept => "application/json"})
+      response = nexus.get(nexus_url("service/local/smartproxy/settings"), :header => {"Accept" => "application/json"})
       case response.status
       when 200
         return response.content
@@ -172,7 +172,7 @@ module NexusCli
     end
 
     def get_smart_proxy_key
-      response = nexus.get(nexus_url("service/local/smartproxy/settings"), :header => {:accept => "application/json"})
+      response = nexus.get(nexus_url("service/local/smartproxy/settings"), :header => {"Accept" => "application/json"})
       case response.status
       when 200
         return response.content
@@ -184,7 +184,7 @@ module NexusCli
     def add_trusted_key(certificate, description, path=true)
       params = {:description => description}
       params[:certificate] = path ? File.read(File.expand_path(certificate)) : certificate
-      response = nexus.post(nexus_url("service/local/smartproxy/trusted-keys"), :body => create_add_trusted_key_json(params), :header => {:content_type => "application/json"})
+      response = nexus.post(nexus_url("service/local/smartproxy/trusted-keys"), :body => create_add_trusted_key_json(params), :header => {"Content-Type" => "application/json"})
       case response.status
       when 201
         return true
@@ -204,7 +204,7 @@ module NexusCli
     end
 
     def get_trusted_keys
-      response = nexus.get(nexus_url("service/local/smartproxy/trusted-keys"), :header => {:accept => "application/json"})
+      response = nexus.get(nexus_url("service/local/smartproxy/trusted-keys"), :header => {"Accept" => "application/json"})
       case response.status
       when 200
         return response.content
@@ -214,7 +214,7 @@ module NexusCli
     end
 
     def get_license_info
-      response = nexus.get(nexus_url("service/local/licensing"), :header => {:accept => "application/json"})
+      response = nexus.get(nexus_url("service/local/licensing"), :header => {"Accept" => "application/json"})
       case response.status
       when 200
         return response.content
@@ -225,7 +225,7 @@ module NexusCli
 
     def install_license(license_file)
       file = File.read(File.expand_path(license_file))
-      response = nexus.post(nexus_url("service/local/licensing/upload"), :body => file, :header => {:content_type => "application/octet-stream"})
+      response = nexus.post(nexus_url("service/local/licensing/upload"), :body => file, :header => {"Content-Type" => "application/octet-stream"})
       case response.status
       when 201
         return true
@@ -237,7 +237,7 @@ module NexusCli
     end
 
     def install_license_bytes(bytes)
-      response = nexus.post(nexus_url("service/local/licensing/upload"), :body => bytes, :header => {:content_type => "application/octet-stream"})
+      response = nexus.post(nexus_url("service/local/licensing/upload"), :body => bytes, :header => {"Content-Type" => "application/octet-stream"})
       case response.status
       when 201
         return true
