@@ -162,3 +162,19 @@ Feature: Use the Nexus CLI
       <userId>cucumber</userId>
       """
     And the exit status should be 0
+
+  Scenario: Get Logging Info
+    When I call the nexus "get_logging_info" command
+    Then the output should contain:
+      """
+      Something
+      """
+    And the exit status should be 0
+
+  Scenario: Change the logging level
+    When I call the nexus "update_logging" command
+    Then the output should contain:
+      """
+      Something
+      """
+    And the exit status should be 0
