@@ -257,6 +257,7 @@ module NexusCli
     end
 
     def set_logger_level(level)
+      raise InvalidLoggingLevelException unless ["INFO", "DEBUG", "ERROR"].include?(level.upcase)
       nexus["service/local/log/config"].put(create_logger_level_json(level), :content_type => "application/json") do |response|
         case response.code
         when 200

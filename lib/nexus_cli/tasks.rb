@@ -386,7 +386,6 @@ module NexusCli
 
         desc "set_logger_level level", "Updates the log4j logging level to a new value."
         def set_logger_level(level)
-          raise InvalidLoggingLevelException unless ["INFO", "DEBUG", "ERROR"].include?(level.upcase)
           if @nexus_remote.set_logger_level(level)
             say "The logging level of Nexus has been set to #{level.upcase}", :blue
           end
