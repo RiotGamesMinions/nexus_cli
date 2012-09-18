@@ -84,12 +84,19 @@ module NexusCli
 
     def get_artifact_info(artifact)
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
-      begin
-        nexus['service/local/artifact/maven/resolve'].get(:params => {:r => configuration['repository'], :g => group_id, :a => artifact_id, :v => version, :e => extension})
-      rescue Errno::ECONNREFUSED => e
-        raise CouldNotConnectToNexusException
-      rescue RestClient::ResourceNotFound => e
+      nexus_httpclient = HTTPClient.new
+      url = File.join(configuration['url'], "service/local/artifact/maven/resolve")
+      nexus_httpclient.set_auth(url, configuration['username'], configuration['password'])
+      response = nexus_httpclient.get(url, :query => {:g => group_id, :a => artifact_id, :v => version, :e => extension, :r => configuration['repository']})
+      case response.code
+      when 200
+        return response.content
+      when 404
         raise ArtifactNotFoundException
+      when 503
+        raise CouldNotConnectToNexusException
+      else
+        raise UnexpectedStatusCodeException.new(response.code)
       end
     end
 
