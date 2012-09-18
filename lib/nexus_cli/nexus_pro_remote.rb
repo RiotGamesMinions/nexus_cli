@@ -1,4 +1,4 @@
-require 'restclient'
+require 'httpclient'
 require 'nokogiri'
 require 'yaml'
 require 'base64'
@@ -8,15 +8,18 @@ module NexusCli
     def get_artifact_custom_info_raw(artifact)
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
       encoded_string = Base64.urlsafe_encode64(N3Metadata::create_custom_metadata_subject(group_id, artifact_id, version, extension))
-      begin
-        custom_metadata = nexus["service/local/index/custom_metadata/#{configuration['repository']}/#{encoded_string}"].get
-        if N3Metadata::missing_custom_metadata?(custom_metadata)
+      response = nexus.get(nexus_url("service/local/index/custom_metadata/#{configuration['repository']}/#{encoded_string}"))
+      case response.status
+      when 200
+        if N3Metadata::missing_custom_metadata?(response.content)
           raise N3NotFoundException
         else
-          return custom_metadata
+          return response.content
         end
-      rescue RestClient::ResourceNotFound
+      when 404
         raise ArtifactNotFoundException
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
       end
     end
 
@@ -37,13 +40,12 @@ module NexusCli
 
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
       encoded_string = Base64.urlsafe_encode64(N3Metadata::create_custom_metadata_subject(group_id, artifact_id, version, extension))
-      nexus["service/local/index/custom_metadata/#{configuration['repository']}/#{encoded_string}"].post(create_custom_metadata_update_json(nexus_n3, target_n3), :content_type => "application/json") do |response|
-        case response.code
-        when 201
-          return true
-        else
-          raise UnexpectedStatusCodeException.new(response.code)
-        end
+      response = nexus.post(nexus_url("service/local/index/custom_metadata/#{configuration['repository']}/#{encoded_string}"), :body => create_custom_metadata_update_json(nexus_n3, target_n3), :header => {:content_type => "application/json"})
+      case response.code
+      when 201
+        return true
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
       end
     end
 
@@ -51,32 +53,28 @@ module NexusCli
       get_artifact_custom_info(artifact) # Check that artifact has custom metadata
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
       encoded_string = Base64.urlsafe_encode64(N3Metadata::create_custom_metadata_subject(group_id, artifact_id, version, extension))
-      nexus["service/local/index/custom_metadata/#{configuration['repository']}/#{encoded_string}"].post(create_custom_metadata_clear_json, :content_type => "application/json") do |response|
-        case response.code
-        when 201
-          return true
-        else
-          raise UnexpectedStatusCodeException.new(response.code)
-        end
+      response = nexus.post(nexus_url("service/local/index/custom_metadata/#{configuration['repository']}/#{encoded_string}"), :body => create_custom_metadata_clear_json, :header => {:content_type => "application/json"})
+      case response.status
+      when 201
+        return true
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
       end
     end
 
     def search_artifacts(*params)
       docs = Array.new
       parse_custom_metadata_search_params(*params).each do |param|
-        begin
-          nexus['service/local/search/m2/freeform'].get(:params => {:p => param[0], :t => param[1], :v => param[2]}) do |response|
-            case response.code
-            when 200
-              docs.push(Nokogiri::XML(response.body).xpath("/search-results/data"))
-            when 400
-              raise BadSearchRequestException
-            else
-              raise UnexpectedStatusCodeException.new(response.code)
-            end
-          end
-        rescue RestClient::ResourceNotFound => e
+        response = nexus.get(nexus_url("service/local/search/m2/freeform"), :query => {:p => param[0], :t => param[1], :v => param[2]})
+        case response.status
+        when 200
+          docs.push(Nokogiri::XML(response.body).xpath("/search-results/data"))
+        when 400
+          raise BadSearchRequestException
+        when 404
           raise ArtifactNotFoundException
+        else
+          raise UnexpectedStatusCodeException.new(response.status)
         end
       end
       result = docs.inject(docs.first) {|memo,doc| get_common_artifact_set(memo, doc)}
@@ -84,7 +82,13 @@ module NexusCli
     end
 
     def get_pub_sub(repository_id)
-      nexus["service/local/smartproxy/pub-sub/#{repository_id}"].get
+      response = nexus.get(nexus_url("service/local/smartproxy/pub-sub/#{repository_id}"))
+      case response.status
+      when 200
+        return response.content
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
+      end
     end
 
     def enable_artifact_publish(repository_id)
@@ -100,13 +104,12 @@ module NexusCli
     end
 
     def artifact_publish(repository_id, params)
-      nexus["service/local/smartproxy/pub-sub/#{repository_id}"].put(create_pub_sub_json(params), :content_type => "application/json") do |response|
-        case response.code
-        when 200
-          return true
-        else
-          raise UnexpectedStatusCodeException.new(response.code)
-        end
+      response = nexus.put(nexus_url("service/local/smartproxy/pub-sub/#{repository_id}"), :body => create_pub_sub_json(params), :header => {:content_type => "application/json"})
+      case response.status
+      when 200
+        return true
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
       end
     end
 
@@ -127,13 +130,12 @@ module NexusCli
     end
 
     def artifact_subscribe(repository_id, params)
-      nexus["service/local/smartproxy/pub-sub/#{repository_id}"].put(create_pub_sub_json(params), :content_type => "application/json") do |response|
-        case response.code
-        when 200
-          return true
-        else
-          raise UnexpectedStatusCodeException.new(response.code)
-        end
+      response = nexus.put(nexus_url("service/local/smartproxy/pub-sub/#{repository_id}"), :body => create_pub_sub_json(params), :header => {:content_type => "application/json"})
+      case response.status
+      when 200
+        return true
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
       end
     end
 
@@ -150,80 +152,99 @@ module NexusCli
     end
 
     def smart_proxy(params)
-      nexus["service/local/smartproxy/settings"].put(create_smart_proxy_settings_json(params), :content_type => "application/json") do |response|
-        case response.code
-        when 200
-          return true
-        else
-          raise UnexpectedStatusCodeException.new(response.code)
-        end
+      response = nexus.put(nexus_url("service/local/smartproxy/settings"), :body => create_smart_proxy_settings_json(params), :header => {:content_type => "application/json"})
+      case response.status
+      when 200
+        return true
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
       end
     end
 
     def get_smart_proxy_settings
-      nexus["service/local/smartproxy/settings"].get(:accept => "application/json")
+      response = nexus.get(nexus_url("service/local/smartproxy/settings"), :header => {:accept => "application/json"})
+      case response.status
+      when 200
+        return response.content
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
+      end
     end
 
     def get_smart_proxy_key
-      nexus["service/local/smartproxy/settings"].get(:accept => "application/json")
+      response = nexus.get(nexus_url("service/local/smartproxy/settings"), :header => {:accept => "application/json"})
+      case response.status
+      when 200
+        return response.content
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
+      end
     end
 
     def add_trusted_key(certificate, description, path=true)
       params = {:description => description}
       params[:certificate] = path ? File.read(File.expand_path(certificate)) : certificate
-      nexus["service/local/smartproxy/trusted-keys"].post(create_add_trusted_key_json(params), :content_type => "application/json") do |response|
-        case response.code
-        when 201
-          return true
-        else
-          raise UnexpectedStatusCodeException.new(response.code)
-        end
+      response = nexus.post(nexus_url("service/local/smartproxy/trusted-keys"), :body => create_add_trusted_key_json(params), :header => {:content_type => "application/json"})
+      case response.status
+      when 201
+        return true
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
       end
     end
 
     def delete_trusted_key(key_id)
-      nexus["service/local/smartproxy/trusted-keys/#{key_id}"].delete do |response|
-        case response.code
-        when 204
-          return true
-        else
-          raise UnexpectedStatusCodeException.new(response.code)
-        end
+      response = nexus.delete(nexus_url("service/local/smartproxy/trusted-keys/#{key_id}"))
+      case response.status
+      when 204
+        return true
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
       end
     end
 
     def get_trusted_keys
-      nexus["service/local/smartproxy/trusted-keys"].get(:accept => "application/json")
+      response = nexus.get(nexus_url("service/local/smartproxy/trusted-keys"), :header => {:accept => "application/json"})
+      case response.status
+      when 200
+        return response.content
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
+      end
     end
 
     def get_license_info
-      nexus["service/local/licensing"].get(:accept => "application/json")
+      response = nexus.get(nexus_url("service/local/licensing"), :header => {:accept => "application/json"})
+      case response.status
+      when 200
+        return response.content
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
+      end
     end
 
     def install_license(license_file)
       file = File.read(File.expand_path(license_file))
-      nexus["service/local/licensing/upload"].post(file, :content_type => "application/octet-stream") do |response|
-        case response.code
-        when 201
-          return true
-        when 403
-          raise LicenseInstallFailure
-        else
-          raise UnexpectedStatusCodeException.new(response.code)
-        end
+      response = nexus.post(nexus_url("service/local/licensing/upload"), :body => file, :header => {:content_type => "application/octet-stream"})
+      case response.status
+      when 201
+        return true
+      when 403
+        raise LicenseInstallFailure
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
       end
     end
 
     def install_license_bytes(bytes)
-      nexus["service/local/licensing/upload"].post(bytes, :content_type => "application/octet-stream") do |response|
-        case response.code
-        when 201
-          return true
-        when 403
-          raise LicenseInstallFailure
-        else
-          raise UnexpectedStatusCodeException.new(response.code)
-        end
+      response = nexus.post(nexus_url("service/local/licensing/upload"), :body => bytes, :header => {:content_type => "application/octet-stream"})
+      case response.status
+      when 201
+        return true
+      when 403
+        raise LicenseInstallFailure
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
       end
     end
 

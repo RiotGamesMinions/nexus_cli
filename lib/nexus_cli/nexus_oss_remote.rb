@@ -1,4 +1,3 @@
-require 'restclient'
 require 'httpclient'
 require 'nokogiri'
 require 'yaml'
@@ -16,52 +15,64 @@ module NexusCli
     end
 
     def nexus
-      RestClient::Resource.new configuration["url"], :user => configuration["username"], :password => configuration["password"], :timeout => 1000000, :open_timeout => 1000000
+      client = HTTPClient.new
+      client.send_timeout = 600
+      client.receive_timeout = 600
+      # https://github.com/nahi/httpclient/issues/63
+      client.set_auth(nil, configuration['username'], configuration['password'])
+      client.www_auth.basic_auth.challenge(configuration['url'])
+      return client
+    end
+
+    def nexus_url(url)
+      File.join(configuration['url'], url)
     end
 
     def status
-      doc = Nokogiri::XML(nexus['service/local/status'].get).xpath("/status/data")
-      data = Hash.new
-      data['app_name'] = doc.xpath("appName")[0].text
-      data['version'] = doc.xpath("version")[0].text
-      data['edition_long'] = doc.xpath("editionLong")[0].text
-      data['state'] = doc.xpath("state")[0].text
-      data['started_at'] = doc.xpath("startedAt")[0].text
-      data['base_url'] = doc.xpath("baseUrl")[0].text
-      return data
+      response = nexus.get(nexus_url("service/local/status"))
+      case response.status
+      when 200
+        doc = Nokogiri::XML(response.content).xpath("/status/data")
+        data = Hash.new
+        data['app_name'] = doc.xpath("appName")[0].text
+        data['version'] = doc.xpath("version")[0].text
+        data['edition_long'] = doc.xpath("editionLong")[0].text
+        data['state'] = doc.xpath("state")[0].text
+        data['started_at'] = doc.xpath("startedAt")[0].text
+        data['base_url'] = doc.xpath("baseUrl")[0].text
+        return data
+      when 503
+        raise CouldNotConnectToNexusException
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
+      end
     end
 
     def pull_artifact(artifact, destination)
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
       version = Nokogiri::XML(get_artifact_info(artifact)).xpath("//version").first.content() if version.casecmp("latest")
       destination = File.join(File.expand_path(destination || "."), "#{artifact_id}-#{version}.#{extension}")
-      nexus_httpclient = HTTPClient.new
-      url = File.join(configuration['url'], "service/local/artifact/maven/redirect")
-      nexus_httpclient.set_auth(url, configuration['username'], configuration['password'])
-      response = nexus_httpclient.get(url, :query => {:g => group_id, :a => artifact_id, :v => version, :e => extension, :r => configuration['repository']})
+      response = nexus.get(nexus_url("service/local/artifact/maven/redirect"), :query => {:g => group_id, :a => artifact_id, :v => version, :e => extension, :r => configuration['repository']})
       case response.status
       when 301
         # Follow redirect and stream in chunks.
         artifact_file = File.open(destination, "wb") do |io|
-          nexus_httpclient.get(response.content.gsub(/If you are not automatically redirected use this url: /, "")) do |chunk|
+          nexus.get(nexus_url(response.content.gsub(/If you are not automatically redirected use this url: /, ""))) do |chunk|
             io.write(chunk)
           end
         end
       when 404
         raise ArtifactNotFoundException
       else
-        raise UnexpectedStatusCodeException.new(response.code)
+        raise UnexpectedStatusCodeException.new(response.status)
       end
       File.expand_path(destination)
     end
 
     def push_artifact(artifact, file)
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
-      nexus_httpclient = HTTPClient.new
-      url = File.join(configuration['url'], "service/local/artifact/maven/content")
-      nexus_httpclient.set_auth(url, configuration['username'], configuration['password'])
-      response = nexus_httpclient.post(url, {:hasPom => false, :g => group_id, :a => artifact_id, :v => version, :e => extension, :p => extension, :r => configuration['repository'], :file => File.open(file)})
-      case response.code
+      response = nexus.post(nexus_url("service/local/artifact/maven/content"), {:hasPom => false, :g => group_id, :a => artifact_id, :v => version, :e => extension, :p => extension, :r => configuration['repository'], :file => File.open(file)})
+      case response.status
       when 201
         return true
       when 400
@@ -73,22 +84,25 @@ module NexusCli
       when 404
         raise CouldNotConnectToNexusException
       else
-        raise UnexpectedStatusCodeException.new(response.code)
+        raise UnexpectedStatusCodeException.new(response.status)
       end
     end
 
     def delete_artifact(artifact)
       group_id, artifact_id, version = parse_artifact_string(artifact)
-      nexus["content/repositories/#{configuration['repository']}/#{group_id.gsub(".", "/")}/#{artifact_id.gsub(".", "/")}/#{version}"].delete
+      response = nexus.delete(nexus_url("content/repositories/#{configuration['repository']}/#{group_id.gsub(".", "/")}/#{artifact_id.gsub(".", "/")}/#{version}"))
+      case response.status
+      when 204
+        return true
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
+      end
     end
 
     def get_artifact_info(artifact)
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
-      nexus_httpclient = HTTPClient.new
-      url = File.join(configuration['url'], "service/local/artifact/maven/resolve")
-      nexus_httpclient.set_auth(url, configuration['username'], configuration['password'])
-      response = nexus_httpclient.get(url, :query => {:g => group_id, :a => artifact_id, :v => version, :e => extension, :r => configuration['repository']})
-      case response.code
+      response = nexus.get(nexus_url("service/local/artifact/maven/resolve"), :query => {:g => group_id, :a => artifact_id, :v => version, :e => extension, :r => configuration['repository']})
+      case response.status
       when 200
         return response.content
       when 404
@@ -96,15 +110,19 @@ module NexusCli
       when 503
         raise CouldNotConnectToNexusException
       else
-        raise UnexpectedStatusCodeException.new(response.code)
+        raise UnexpectedStatusCodeException.new(response.status)
       end
     end
 
     def search_for_artifacts(artifact)
       group_id, artifact_id = artifact.split(":")
-      nexus['service/local/data_index'].get(:params => {:g => group_id, :a => artifact_id}) do |response|
-        doc = Nokogiri::XML(response.body)
+      response = nexus.get(nexus_url("service/local/data_index"), :query => {:g => group_id, :a => artifact_id})
+      case response.status
+      when 200
+        doc = Nokogiri::XML(response.content)
         return format_search_results(doc, group_id, artifact_id)
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
       end
     end
 
@@ -118,6 +136,16 @@ module NexusCli
       end
     end
 
+    def get_global_settings_json
+      response = nexus.get(nexus_url("service/local/global_settings/current"), :header => {:accept => "application/json"})
+      case response.status
+      when 200
+        return response.content
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
+      end
+    end
+
     def upload_global_settings(json=nil)
       global_settings = nil
       if json == nil
@@ -125,21 +153,31 @@ module NexusCli
       else
         global_settings = json
       end
-      nexus['service/local/global_settings/current'].put(global_settings, {:content_type => "application/json"}) do |response|
-        case response.code
-        when 400
-          raise BadSettingsException.new(response.body)
-        end
+      response = nexus.put(nexus_url("service/local/global_settings/current"), :body => global_settings, :header => {:content_type => "application/json"})
+      case response.status
+      when 204
+        return true
+      when 400
+        raise BadSettingsException.new(response.content)
       end
     end
 
-    def get_global_settings_json
-      nexus['service/local/global_settings/current'].get(:accept => "application/json")
-    end
-
     def reset_global_settings
-      default_json = nexus['service/local/global_settings/default'].get(:accept => "application/json")
-      nexus['service/local/global_settings/current'].put(default_json, :content_type => "application/json")
+      response = nexus.get(nexus_url("service/local/global_settings/default"), :header => {:accept => "application/json"})
+      case response.status
+      when 200
+        default_json = response.content
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
+      end
+
+      response = nexus.put(nexus_url("service/local/global_settings/current"), :body => default_json, :header => {:content_type => "application/json"})
+      case response.status
+      when 204
+        return true
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
+      end
     end
 
     def create_repository(name, proxy, url)
@@ -148,55 +186,62 @@ module NexusCli
       else
         create_hosted_repository_json(name)
       end
-      nexus['service/local/repositories'].post(json, :content_type => "application/json") do |response|
-        case response.code
-        when 400
-          raise CreateRepsitoryException.new(response.body)
-        when 201
-          return true
-        else
-          raise UnexpectedStatusCodeException.new(response.code)
-        end
+      response = nexus.post(nexus_url("service/local/repositories"), :body => json, :header => {:content_type => "application/json"})
+      case response.status
+      when 201
+        return true
+      when 400
+        raise CreateRepsitoryException.new(response.content)
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
       end
     end
 
     def delete_repository(name)
-      nexus["service/local/repositories/#{name.downcase}"].delete do |response|
-        case response.code
-        when 404
-          raise RepositoryDoesNotExistException
-        when 204
-          return true
-        else
-          raise UnexpectedStatusCodeException.new(response.code)
-        end
+      response = nexus.delete(nexus_url("service/local/repositories/#{name.downcase}"))
+      case response.status
+      when 204
+        return true
+      when 404
+        raise RepositoryDoesNotExistException
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
       end
     end
 
     def get_repository_info(name)
-      begin
-        nexus["service/local/repositories/#{name.gsub(" ", "_").downcase}"].get
-      rescue Errno::ECONNREFUSED => e
-        raise CouldNotConnectToNexusException
-      rescue RestClient::ResourceNotFound => e
+      response = nexus.get(nexus_url("service/local/repositories/#{name.gsub(" ", "_").downcase}"))
+      case response.status
+      when 200
+        return response.content
+      when 404
         raise RepositoryNotFoundException
+      when 503
+        raise CouldNotConnectToNexusException
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
       end
     end
 
     def get_users
-      nexus["service/local/users"].get
+      response = nexus.get(nexus_url("service/local/users"))
+      case response.status
+      when 200
+        return response.content
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
+      end
     end
 
     def create_user(params)
-      nexus["service/local/users"].post(create_user_json(params), :content_type => "application/json") do |response|
-        case response.code
-        when 201
-          return true
-        when 400
-          raise CreateUserException.new(response.body)
-        else
-          raise UnexpectedStatusCodeException.new(reponse.code)
-        end
+      response = nexus.post(nexus_url("service/local/users"), :body => create_user_json(params), :header => {:content_type => "application/json"})
+      case response.status
+      when 201
+        return true
+      when 400
+        raise CreateUserException.new(response.content)
+      else
+        raise UnexpectedStatusCodeException.new(reponse.code)
       end
     end
 
@@ -209,52 +254,48 @@ module NexusCli
         modified_json.gsub!("$..#{key}"){|v| value} unless key == "userId" || value.blank?
       end
 
-      nexus["service/local/users/#{params[:userId]}"].put(JSON.dump(modified_json.to_hash), :content_type => "application/json") do |response|
-        case response.code
-        when 200
-          return true
-        when 400
-          raise UpdateUserException.new(response.body)
-        else
-          raise UnexpectedStatusCodeException.new(response.code)
-        end
+      nexus.put(nexus_url("service/local/users/#{params[:userId]}"), JSON.dump(modified_json.to_hash), :header => {:content_type => "application/json"})
+      case response.status
+      when 200
+        return true
+      when 400
+        raise UpdateUserException.new(response.content)
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
       end
     end
 
     def get_user(user)
-      nexus["service/local/users/#{user}"].get(:accept => "application/json") do |response|
-        case response.code
-        when 200
-          return JSON.parse(response.body)
-        when 404
-          raise UserNotFoundException.new(user)
-        else
-          raise UnexpectedStatusCodeException.new(response.code)
-        end
+      nexus.get(nexus_url("service/local/users/#{user}"), :header => {:accept => "application/json"})
+      case response.status
+      when 200
+        return JSON.parse(response.content)
+      when 404
+        raise UserNotFoundException.new(user)
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
       end
     end
 
     def change_password(params)
-      nexus["service/local/users_changepw"].post(create_change_password_json(params), :content_type => "application/json") do |response|
-        case response.code
-        when 202
-          return true
-        when 400
-          raise InvalidCredentialsException
-        end
+      response = nexus.post(nexus_url("service/local/users_changepw"), :body => create_change_password_json(params), :header => {:content_type => "application/json"})
+      case response.status
+      when 202
+        return true
+      when 400
+        raise InvalidCredentialsException
       end
     end
 
     def delete_user(user_id)
-      nexus["service/local/users/#{user_id}"].delete do |response|
-        case response.code
-        when 204
-          return true
-        when 404
-          raise UserNotFoundException.new(user_id)
-        else
-          raise UnexpectedStatusCodeException.new(response.code)
-        end
+      response = nexus.delete(nexus_url("service/local/users/#{user_id}"))
+      case response.status
+      when 204
+        return true
+      when 404
+        raise UserNotFoundException.new(user_id)
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
       end
     end
 
