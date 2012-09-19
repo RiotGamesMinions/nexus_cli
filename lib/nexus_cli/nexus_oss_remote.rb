@@ -59,7 +59,7 @@ module NexusCli
       when 301
         # Follow redirect and stream in chunks.
         artifact_file = File.open(destination, "wb") do |io|
-          nexus.get(nexus_url(response.content.gsub(/If you are not automatically redirected use this url: /, ""))) do |chunk|
+          nexus.get(response.content.gsub(/If you are not automatically redirected use this url: /, "")) do |chunk|
             io.write(chunk)
           end
         end
