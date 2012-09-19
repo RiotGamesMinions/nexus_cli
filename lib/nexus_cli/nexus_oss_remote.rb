@@ -41,6 +41,8 @@ module NexusCli
         data['started_at'] = doc.xpath("startedAt")[0].text
         data['base_url'] = doc.xpath("baseUrl")[0].text
         return data
+      when 401
+        raise PermissionsException
       when 503
         raise CouldNotConnectToNexusException
       else
@@ -254,7 +256,7 @@ module NexusCli
         modified_json.gsub!("$..#{key}"){|v| value} unless key == "userId" || value.blank?
       end
 
-      nexus.put(nexus_url("service/local/users/#{params[:userId]}"), JSON.dump(modified_json.to_hash), :header => {"Content-Type" => "application/json"})
+      response = nexus.put(nexus_url("service/local/users/#{params[:userId]}"), :body => JSON.dump(modified_json.to_hash), :header => {"Content-Type" => "application/json"})
       case response.status
       when 200
         return true
@@ -266,7 +268,7 @@ module NexusCli
     end
 
     def get_user(user)
-      nexus.get(nexus_url("service/local/users/#{user}"), :header => {"Accept" => "application/json"})
+      response = nexus.get(nexus_url("service/local/users/#{user}"), :header => {"Accept" => "application/json"})
       case response.status
       when 200
         return JSON.parse(response.content)
@@ -284,6 +286,8 @@ module NexusCli
         return true
       when 400
         raise InvalidCredentialsException
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
       end
     end
 

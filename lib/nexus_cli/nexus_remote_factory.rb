@@ -39,6 +39,8 @@ module NexusCli
           data['started_at'] = doc.xpath("startedAt")[0].text
           data['base_url'] = doc.xpath("baseUrl")[0].text
           return data
+        when 401
+          raise PermissionsException
         when 503
           raise CouldNotConnectToNexusException
         else
