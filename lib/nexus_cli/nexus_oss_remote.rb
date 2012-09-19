@@ -139,7 +139,7 @@ module NexusCli
     end
 
     def get_global_settings_json
-      response = nexus.get(nexus_url("service/local/global_settings/current"), :header => {"Accept" => "application/json"})
+      response = nexus.get(nexus_url("service/local/global_settings/current"), :header => DEFAULT_ACCEPT_HEADER)
       case response.status
       when 200
         return response.content
@@ -155,7 +155,7 @@ module NexusCli
       else
         global_settings = json
       end
-      response = nexus.put(nexus_url("service/local/global_settings/current"), :body => global_settings, :header => {"Content-Type" => "application/json"})
+      response = nexus.put(nexus_url("service/local/global_settings/current"), :body => global_settings, :header => DEFAULT_CONTENT_TYPE_HEADER)
       case response.status
       when 204
         return true
@@ -165,7 +165,7 @@ module NexusCli
     end
 
     def reset_global_settings
-      response = nexus.get(nexus_url("service/local/global_settings/default"), :header => {"Accept" => "application/json"})
+      response = nexus.get(nexus_url("service/local/global_settings/default"), :header => DEFAULT_ACCEPT_HEADER)
       case response.status
       when 200
         default_json = response.content
@@ -173,7 +173,7 @@ module NexusCli
         raise UnexpectedStatusCodeException.new(response.status)
       end
 
-      response = nexus.put(nexus_url("service/local/global_settings/current"), :body => default_json, :header => {"Content-Type" => "application/json"})
+      response = nexus.put(nexus_url("service/local/global_settings/current"), :body => default_json, :header => DEFAULT_CONTENT_TYPE_HEADER)
       case response.status
       when 204
         return true
@@ -188,7 +188,7 @@ module NexusCli
       else
         create_hosted_repository_json(name)
       end
-      response = nexus.post(nexus_url("service/local/repositories"), :body => json, :header => {"Content-Type" => "application/json"})
+      response = nexus.post(nexus_url("service/local/repositories"), :body => json, :header => DEFAULT_CONTENT_TYPE_HEADER)
       case response.status
       when 201
         return true
@@ -236,7 +236,7 @@ module NexusCli
     end
 
     def create_user(params)
-      response = nexus.post(nexus_url("service/local/users"), :body => create_user_json(params), :header => {"Content-Type" => "application/json"})
+      response = nexus.post(nexus_url("service/local/users"), :body => create_user_json(params), :header => DEFAULT_CONTENT_TYPE_HEADER)
       case response.status
       when 201
         return true
@@ -256,7 +256,7 @@ module NexusCli
         modified_json.gsub!("$..#{key}"){|v| value} unless key == "userId" || value.blank?
       end
 
-      response = nexus.put(nexus_url("service/local/users/#{params[:userId]}"), :body => JSON.dump(modified_json.to_hash), :header => {"Content-Type" => "application/json"})
+      response = nexus.put(nexus_url("service/local/users/#{params[:userId]}"), :body => JSON.dump(modified_json.to_hash), :header => DEFAULT_CONTENT_TYPE_HEADER)
       case response.status
       when 200
         return true
@@ -268,7 +268,7 @@ module NexusCli
     end
 
     def get_user(user)
-      response = nexus.get(nexus_url("service/local/users/#{user}"), :header => {"Accept" => "application/json"})
+      response = nexus.get(nexus_url("service/local/users/#{user}"), :header => DEFAULT_ACCEPT_HEADER)
       case response.status
       when 200
         return JSON.parse(response.content)
@@ -280,7 +280,7 @@ module NexusCli
     end
 
     def change_password(params)
-      response = nexus.post(nexus_url("service/local/users_changepw"), :body => create_change_password_json(params), :header => {"Content-Type" => "application/json"})
+      response = nexus.post(nexus_url("service/local/users_changepw"), :body => create_change_password_json(params), :header => DEFAULT_CONTENT_TYPE_HEADER)
       case response.status
       when 202
         return true
