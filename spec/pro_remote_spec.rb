@@ -40,4 +40,34 @@ describe NexusCli do
   it "gives you errors when you attempt to search for artifacts using custom info and don't give valid parameters" do
     expect {remote.search_artifacts("somekey")}.to raise_error(NexusCli::SearchParameterMalformedException)
   end
+
+  describe "tests for custom metadata private helper methods" do
+    it "gives you errors when you attempt to parse custom metadata with bad update keys" do
+      expect {NexusCli::ProRemote.new(nil).send(:parse_custom_metadata_update_params, "goodkey:goodvalue", "badkey_:goodvalue")}.to raise_error(NexusCli::N3ParameterMalformedException)
+    end
+
+    it "gives you errors when you attempt to parse custom metadata with missing update keys" do
+      expect {NexusCli::ProRemote.new(nil).send(:parse_custom_metadata_update_params, ":goodvalue")}.to raise_error(NexusCli::N3ParameterMalformedException)
+    end
+
+    it "gives you errors when you attempt to parse custom metadata with typo" do
+      expect {NexusCli::ProRemote.new(nil).send(:parse_custom_metadata_update_params, "goodkeygoodvalue")}.to raise_error(NexusCli::N3ParameterMalformedException)
+    end
+
+    it "gives you errors when you attempt to parse custom metadata with bad update values" do
+      expect {NexusCli::ProRemote.new(nil).send(:parse_custom_metadata_update_params, "goodkey:goodvalue", "goodkey:badvalue\"'\\")}.to raise_error(NexusCli::N3ParameterMalformedException)
+    end
+
+    it "gives you errors when you attempt to parse custom metadata with missing search type and value" do
+      expect {NexusCli::ProRemote.new(nil).send(:parse_custom_metadata_search_params, "goodkey")}.to raise_error(NexusCli::SearchParameterMalformedException)
+    end
+
+    it "gives you errors when you attempt to parse custom metadata with bad search type" do
+      expect {NexusCli::ProRemote.new(nil).send(:parse_custom_metadata_search_params, "goodkey:eq:goodvalue")}.to raise_error(NexusCli::SearchParameterMalformedException)
+    end
+
+    it "gives you errors when you attempt to parse custom metadata with bad search value" do
+      expect {NexusCli::ProRemote.new(nil).send(:parse_custom_metadata_search_params, "goodkey:equals:badvalue\"'\\")}.to raise_error(NexusCli::SearchParameterMalformedException)
+    end
+  end
 end
