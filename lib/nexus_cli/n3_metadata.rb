@@ -6,18 +6,18 @@ module NexusCli
       # Checks if the custom metadata key is valid.
       # Valid characters are alphanumeric with no special characeters.
       def valid_n3_key?(element)
-        return !element.match(/^[a-zA-Z0-9]+$/).nil? ? true : false
+        return !element.nil? && !element.match(/^[a-zA-Z0-9]+$/).nil? ? true : false
       end
 
       # Checks if the custom metadata value is valid.
       # Valid characters are anything but quotes.
       def valid_n3_value?(element)
-        return !element.match(/^[^"'\\]*$/).nil? ? true : false
+        return !element.nil? && !element.match(/^[^"'\\]*$/).nil? ? true : false
       end
 
       # Check if the custom metadata search type is valid.
       def valid_n3_search_type?(element)
-        return ["equal", "notequal", "matches", "bounded"].include?(element)
+        return !element.nil? && ["equal", "notequal", "matches", "bounded"].include?(element)
       end
 
       # Creates a custom metadata subject for HTTP requests.
