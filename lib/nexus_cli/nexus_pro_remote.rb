@@ -5,6 +5,9 @@ require 'base64'
 
 module NexusCli
   class ProRemote < OSSRemote
+    # Gets the custom metadata for an artifact
+    # @param [String] artifact The GAVE string of the artifact
+    # @result [String] The resulting custom metadata xml from the get operation
     def get_artifact_custom_info_raw(artifact)
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
       encoded_string = Base64.urlsafe_encode64(N3Metadata::create_custom_metadata_subject(group_id, artifact_id, version, extension))
@@ -23,10 +26,17 @@ module NexusCli
       end
     end
 
+    # Gets the custom metadata for an artifact in a simplified XML format
+    # @param [String] artifact The GAVE string of the artifact
+    # @result [String] The resulting custom metadata xml from the get operation
     def get_artifact_custom_info(artifact)
       N3Metadata::parse_request_into_simple(get_artifact_custom_info_raw(artifact))
     end
 
+    # Updates custom metadata for an artifact
+    # @param [String] artifact The GAVE string of the artifact
+    # @param [Array] *params The array of key:value strings
+    # @result [Integer] The resulting exit code of the operation
     def update_artifact_custom_info(artifact, *params)
       target_n3 = parse_custom_metadata_update_params(*params)
 
@@ -49,6 +59,9 @@ module NexusCli
       end
     end
 
+    # Clears all custom metadata from an artifact
+    # @param [String] The GAVE string of the artifact
+    # @result [Integer] The resulting exit code of the operation
     def clear_artifact_custom_info(artifact)
       get_artifact_custom_info(artifact) # Check that artifact has custom metadata
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
@@ -62,13 +75,16 @@ module NexusCli
       end
     end
 
+    # Searches for artifacts using custom metadata
+    # @param [Array] *params The array of key:type:value strings
+    # @result [String] The resulting xml from the search
     def search_artifacts(*params)
-      docs = Array.new
+      nodesets = Array.new
       parse_custom_metadata_search_params(*params).each do |param|
         response = nexus.get(nexus_url("service/local/search/m2/freeform"), :query => {:p => param[0], :t => param[1], :v => param[2]})
         case response.status
         when 200
-          docs.push(Nokogiri::XML(response.body).xpath("/search-results/data"))
+          nodesets.push(Nokogiri::XML(response.body).xpath("/search-results/data"))
         when 400
           raise BadSearchRequestException
         when 404
@@ -77,7 +93,8 @@ module NexusCli
           raise UnexpectedStatusCodeException.new(response.status)
         end
       end
-      result = docs.inject(docs.first) {|memo,doc| get_common_artifact_set(memo, doc)}
+      # Perform array intersection across all NodeSets for the final common set.
+      result = nodesets.inject(nodesets.first) {|memo, nodeset| get_common_artifact_set(memo, nodeset)}
       return result.nil? ? "" : result.to_xml(:indent => 4)
     end
 
@@ -262,45 +279,39 @@ module NexusCli
       JSON.dump(:data => params)
     end
 
+    # Converts an array of parameters used to update custom metadata
+    # @param [Array] *params The array of key:value strings
+    # @return [Hash] The resulting hash of parsed key:value items
+    # @example
+    #   parse_custom_metadata_update_params(["cookie:oatmeal raisin"]) #=> {"cookie"=>"oatmeal raisin"}
     def parse_custom_metadata_update_params(*params)
-      begin
-        parsed_params = {}
-        params.each do |param|
-          # param = key:value
-          c1 = param.index(":")
-          key = param[0..(c1 - 1)]
-          value = param[(c1 + 1)..-1]
-          if !c1.nil? && N3Metadata::valid_n3_key?(key) && N3Metadata::valid_n3_value?(value)
-            parsed_params[key] = value
-          else
-            raise
-          end
+      params.inject({}) do |parsed_params, param|
+        # param = key:value
+        m = /^(?<key>[^:]+):(?<value>.*)$/.match(param)
+        if !m.nil? && N3Metadata::valid_n3_key?(m[:key]) && N3Metadata::valid_n3_value?(m[:value])
+          parsed_params[m[:key]] = m[:value]
+        else
+          raise N3ParameterMalformedException
         end
-        return parsed_params
-      rescue
-        raise N3ParameterMalformedException
+        parsed_params
       end
     end
 
+    # Converts an array of parameters used to search by custom metadata
+    # @param [Array] *params The array of key:type:value strings
+    # @result [Array] The resulting array of parsed key:type:value items
+    # @example
+    #   parse_custom_metadata_search_params(["cookie:matches:oatmeal raisin"]) #=> #=> [["cookie","matches","oatmeal raisin"]]
     def parse_custom_metadata_search_params(*params)
-      begin
-        parsed_params = []
-        params.each do |param|
-          # param = key:type:value
-          c1 = param.index(":")
-          c2 = param.index(":", (c1 + 1))
-          key = param[0..(c1 - 1)]
-          type = param[(c1 + 1)..(c2 - 1)]
-          value = param[(c2 + 1)..-1]
-          if !c1.nil? && !c2.nil? && N3Metadata::valid_n3_key?(key) && N3Metadata::valid_n3_value?(value) && N3Metadata::valid_n3_search_type?(type)
-            parsed_params.push([key, type, value])
-          else
-            raise
-          end
+      params.inject([]) do |parsed_params, param|
+        # param = key:type:value
+        m = /^(?<key>[^:]+):(?<type>[^:]+):(?<value>.+)$/.match(param)
+        if !m.nil? && N3Metadata::valid_n3_key?(m[:key]) && N3Metadata::valid_n3_value?(m[:value]) && N3Metadata::valid_n3_search_type?(m[:type])
+          parsed_params.push([m[:key], m[:type], m[:value]])
+        else
+          raise SearchParameterMalformedException
         end
-        return parsed_params
-      rescue
-        raise SearchParameterMalformedException
+        parsed_params
       end
     end
 
@@ -312,29 +323,23 @@ module NexusCli
       JSON.dump(:data => {})
     end
 
-    # Expects the XML set with `data` as root.
+    # Gets the intersection of two artifact arrays, returning the common set
+    # @param [Array] set1, set2 The two Nokogiri::NodeSet objects to intersect
+    # @result [Nokogiri::NodeSet] The resulting object generated from the array intersect
     def get_common_artifact_set(set1, set2)
       intersection = get_artifact_array(set1) & get_artifact_array(set2)
       return intersection.count > 0 ? Nokogiri::XML("<data>#{intersection.join}</data>").root : Nokogiri::XML("").root
     end
 
-    # Collect <artifact>...</artifact> elements into an array.
-    # This will allow use of array intersection to find common artifacts in searches.
+    # Collect <artifact> elements into an array
+    # @info This will allow use of array intersection to find common artifacts in searches
+    # @param [Nokogiri::NodeSet] set The object to be divided by <artifact> elements
+    # @result [Array] The result array of artifact elements
     def get_artifact_array(set)
-      artifacts = []
-      artifact = nil
-      set.to_s.split("\n").collect {|x| x.to_s.strip}.each do |piece|
-        if piece == "<artifact>"
-          artifact = piece
-        elsif piece == "</artifact>"
-          artifact += piece
-          artifacts.push(artifact)
-          artifact = nil
-        elsif !artifact.nil?
-          artifact += piece
-        end
+      set.search("//artifact").inject([]) do |artifacts, artifact|
+        artifacts.push(artifact.to_s)
+        artifacts
       end
-      return artifacts
     end
   end
 end
