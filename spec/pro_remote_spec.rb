@@ -26,19 +26,19 @@ describe NexusCli do
   end
 
   it "gives you errors when you attempt to search for artifacts using custom info and don't give valid key" do
-    expect {remote.search_artifacts("somekey_:equal:somevalue")}.to raise_error(NexusCli::SearchParameterMalformedException)
+    expect {remote.search_artifacts_custom("somekey_:equal:somevalue")}.to raise_error(NexusCli::SearchParameterMalformedException)
   end
 
   it "gives you errors when you attempt to search for artifacts using custom info and don't give valid value" do
-    expect {remote.search_artifacts("somekey:equal:somevalue \"\'\\/")}.to raise_error(NexusCli::SearchParameterMalformedException)
+    expect {remote.search_artifacts_custom("somekey:equal:somevalue \"\'\\/")}.to raise_error(NexusCli::SearchParameterMalformedException)
   end
 
   it "gives you errors when you attempt to search for artifacts using custom info and don't give valid search type" do
-    expect {remote.search_artifacts("somekey:equals:somevalue")}.to raise_error(NexusCli::SearchParameterMalformedException)
+    expect {remote.search_artifacts_custom("somekey:equals:somevalue")}.to raise_error(NexusCli::SearchParameterMalformedException)
   end
 
   it "gives you errors when you attempt to search for artifacts using custom info and don't give valid parameters" do
-    expect {remote.search_artifacts("somekey")}.to raise_error(NexusCli::SearchParameterMalformedException)
+    expect {remote.search_artifacts_custom("somekey")}.to raise_error(NexusCli::SearchParameterMalformedException)
   end
 
   describe "tests for custom metadata private helper methods" do

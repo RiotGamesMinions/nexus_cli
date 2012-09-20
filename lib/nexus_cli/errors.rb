@@ -210,10 +210,17 @@ The output from the server was:
     status_code(122)
   end
 
+  class InvalidLoggingLevelException < NexusCliError
+    def message
+      "Logging level must be set to one of either INFO, DEBUG, or ERROR."
+    end
+    status_code(123)
+  end
+
   class N3NotFoundException < NexusCliError
     def message
       "The artifact does not have any custom metadata added yet."
     end
-    status_code(123)
+    status_code(124)
   end
 end

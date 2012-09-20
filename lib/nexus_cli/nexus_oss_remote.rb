@@ -50,6 +50,10 @@ module NexusCli
       end
     end
 
+    def running_nexus_pro?
+      status['edition_long'] == "Professional"
+    end
+
     def pull_artifact(artifact, destination)
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
       version = Nokogiri::XML(get_artifact_info(artifact)).xpath("//version").first.content() if version.casecmp("latest")
@@ -303,8 +307,25 @@ module NexusCli
       end
     end
 
-    def running_nexus_pro?
-      status['edition_long'] == "Professional"
+    def get_logging_info
+      response = nexus.get(nexus_url("service/local/log/config"), :header => DEFAULT_ACCEPT_HEADER)
+      case response.status
+      when 200
+        return response.content
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
+      end
+    end
+
+    def set_logger_level(level)
+      raise InvalidLoggingLevelException unless ["INFO", "DEBUG", "ERROR"].include?(level.upcase)
+      response = nexus.put(nexus_url("service/local/log/config"), :body => create_logger_level_json(level), :header => DEFAULT_CONTENT_TYPE_HEADER)
+      case response.status
+      when 200
+        return true
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
+      end
     end
 
     private
@@ -362,6 +383,11 @@ module NexusCli
     end
 
     def create_change_password_json(params)
+      JSON.dump(:data => params)
+    end
+
+    def create_logger_level_json(level)
+      params = {:rootLoggerLevel => level.upcase}
       JSON.dump(:data => params)
     end
   end
