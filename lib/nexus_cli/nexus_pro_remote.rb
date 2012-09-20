@@ -287,9 +287,9 @@ module NexusCli
     def parse_custom_metadata_update_params(*params)
       params.inject({}) do |parsed_params, param|
         # param = key:value
-        m = /^(?<key>[^:]+):(?<value>.*)$/.match(param)
-        if !m.nil? && N3Metadata::valid_n3_key?(m[:key]) && N3Metadata::valid_n3_value?(m[:value])
-          parsed_params[m[:key]] = m[:value]
+        key, value = param.split(":", 2)
+        if N3Metadata::valid_n3_key?(key) && N3Metadata::valid_n3_value?(value)
+          parsed_params[key] = value
         else
           raise N3ParameterMalformedException
         end
@@ -305,9 +305,9 @@ module NexusCli
     def parse_custom_metadata_search_params(*params)
       params.inject([]) do |parsed_params, param|
         # param = key:type:value
-        m = /^(?<key>[^:]+):(?<type>[^:]+):(?<value>.+)$/.match(param)
-        if !m.nil? && N3Metadata::valid_n3_key?(m[:key]) && N3Metadata::valid_n3_value?(m[:value]) && N3Metadata::valid_n3_search_type?(m[:type])
-          parsed_params.push([m[:key], m[:type], m[:value]])
+        key, type, value = param.split(":", 3)
+        if N3Metadata::valid_n3_key?(key) && N3Metadata::valid_n3_value?(value) && N3Metadata::valid_n3_search_type?(type)
+          parsed_params.push([key, type, value])
         else
           raise SearchParameterMalformedException
         end
