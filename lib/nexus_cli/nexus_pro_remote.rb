@@ -10,7 +10,7 @@ module NexusCli
     # @result [String] The resulting custom metadata xml from the get operation
     def get_artifact_custom_info_raw(artifact)
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
-      encoded_string = Base64.urlsafe_encode64(N3Metadata::create_custom_metadata_subject(group_id, artifact_id, version, extension))
+      encoded_string = Base64.urlsafe_encode64(N3Metadata::create_subject(group_id, artifact_id, version, extension))
       response = nexus.get(nexus_url("service/local/index/custom_metadata/#{configuration['repository']}/#{encoded_string}"))
       case response.status
       when 200
@@ -30,7 +30,7 @@ module NexusCli
     # @param [String] artifact The GAVE string of the artifact
     # @result [String] The resulting custom metadata xml from the get operation
     def get_artifact_custom_info(artifact)
-      N3Metadata::parse_request_into_simple(get_artifact_custom_info_raw(artifact))
+      N3Metadata::convert_result_to_simple_xml(get_artifact_custom_info_raw(artifact))
     end
 
     # Updates custom metadata for an artifact
@@ -43,13 +43,13 @@ module NexusCli
       # Get all the urn:nexus/user# keys and consolidate.
       # Read in nexus n3 file. If this is a newly-added artifact, there will be no n3 file so escape the exception.
       begin
-        nexus_n3 = N3Metadata::parse_request_into_hash(get_artifact_custom_info_raw(artifact))
+        nexus_n3 = N3Metadata::convert_result_to_hash(get_artifact_custom_info_raw(artifact))
       rescue N3NotFoundException
         nexus_n3 = {}
       end
 
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
-      encoded_string = Base64.urlsafe_encode64(N3Metadata::create_custom_metadata_subject(group_id, artifact_id, version, extension))
+      encoded_string = Base64.urlsafe_encode64(N3Metadata::create_subject(group_id, artifact_id, version, extension))
       response = nexus.post(nexus_url("service/local/index/custom_metadata/#{configuration['repository']}/#{encoded_string}"), :body => create_custom_metadata_update_json(nexus_n3, target_n3), :header => DEFAULT_CONTENT_TYPE_HEADER)
       case response.code
       when 201
@@ -65,7 +65,7 @@ module NexusCli
     def clear_artifact_custom_info(artifact)
       get_artifact_custom_info(artifact) # Check that artifact has custom metadata
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
-      encoded_string = Base64.urlsafe_encode64(N3Metadata::create_custom_metadata_subject(group_id, artifact_id, version, extension))
+      encoded_string = Base64.urlsafe_encode64(N3Metadata::create_subject(group_id, artifact_id, version, extension))
       response = nexus.post(nexus_url("service/local/index/custom_metadata/#{configuration['repository']}/#{encoded_string}"), :body => create_custom_metadata_clear_json, :header => DEFAULT_CONTENT_TYPE_HEADER)
       case response.status
       when 201
@@ -316,7 +316,7 @@ module NexusCli
     end
 
     def create_custom_metadata_update_json(source, target)
-      JSON.dump(:data => N3Metadata::generate_request_from_hash(source, target))
+      JSON.dump(:data => N3Metadata::create_metadata_hash(source, target))
     end
 
     def create_custom_metadata_clear_json
