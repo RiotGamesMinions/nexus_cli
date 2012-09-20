@@ -8,7 +8,7 @@ describe NexusCli do
   end
 
   it "gives you errors when you attempt to get an artifact's custom info and it cannot be found" do
-    RestClient::Resource.any_instance.stub(:get).and_raise(RestClient::ResourceNotFound)
+    HTTPClient.any_instance.stub(:get).and_raise(NexusCli::ArtifactNotFoundException)
     expect {remote.get_artifact_custom_info("com.something:something:1.0.0:tgz")}.to raise_error(NexusCli::ArtifactNotFoundException)
   end
 
@@ -21,7 +21,7 @@ describe NexusCli do
   end
 
   it "gives you errors when you attempt to clear an artifact's custom info and it cannot be found" do
-    RestClient::Resource.any_instance.stub(:get).and_raise(RestClient::ResourceNotFound)
+    HTTPClient.any_instance.stub(:get).and_raise(NexusCli::ArtifactNotFoundException)
     expect {remote.clear_artifact_custom_info("com.something:something:1.0.0:tgz")}.to raise_error(NexusCli::ArtifactNotFoundException)
   end
 
