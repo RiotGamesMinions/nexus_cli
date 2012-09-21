@@ -78,7 +78,7 @@ module NexusCli
     # Searches for artifacts using custom metadata
     # @param [Array] *params The array of key:type:value strings
     # @result [String] The resulting xml from the search
-    def search_artifacts(*params)
+    def search_artifacts_custom(*params)
       nodesets = Array.new
       parse_custom_metadata_search_params(*params).each do |param|
         response = nexus.get(nexus_url("service/local/search/m2/freeform"), :query => {:p => param[0], :t => param[1], :v => param[2]})
@@ -287,9 +287,9 @@ module NexusCli
     def parse_custom_metadata_update_params(*params)
       params.inject({}) do |parsed_params, param|
         # param = key:value
-        key, value = param.split(":", 2)
-        if N3Metadata::valid_n3_key?(key) && N3Metadata::valid_n3_value?(value)
-          parsed_params[key] = value
+        metadata_key, metadata_value = param.split(":", 2)
+        if N3Metadata::valid_n3_key?(metadata_key) && N3Metadata::valid_n3_value?(metadata_value)
+          parsed_params[metadata_key] = metadata_value
         else
           raise N3ParameterMalformedException
         end
@@ -305,9 +305,9 @@ module NexusCli
     def parse_custom_metadata_search_params(*params)
       params.inject([]) do |parsed_params, param|
         # param = key:type:value
-        key, type, value = param.split(":", 3)
-        if N3Metadata::valid_n3_key?(key) && N3Metadata::valid_n3_value?(value) && N3Metadata::valid_n3_search_type?(type)
-          parsed_params.push([key, type, value])
+        metadata_key, search_type, metadata_value = param.split(":", 3)
+        if N3Metadata::valid_n3_key?(metadata_key) && N3Metadata::valid_n3_value?(metadata_value) && N3Metadata::valid_n3_search_type?(search_type)
+          parsed_params.push([metadata_key, search_type, metadata_value])
         else
           raise SearchParameterMalformedException
         end
