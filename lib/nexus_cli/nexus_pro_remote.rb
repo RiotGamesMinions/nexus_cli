@@ -1,7 +1,6 @@
 require 'httpclient'
 require 'nokogiri'
 require 'yaml'
-require 'base64'
 
 module NexusCli
   class ProRemote < OSSRemote
@@ -10,7 +9,7 @@ module NexusCli
     # @result [String] The resulting custom metadata xml from the get operation
     def get_artifact_custom_info_raw(artifact)
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
-      encoded_string = Base64.urlsafe_encode64(N3Metadata::create_subject(group_id, artifact_id, version, extension))
+      encoded_string = N3Metadata::create_base64_subject(group_id, artifact_id, version, extension)
       response = nexus.get(nexus_url("service/local/index/custom_metadata/#{configuration['repository']}/#{encoded_string}"))
       case response.status
       when 200
@@ -49,7 +48,7 @@ module NexusCli
       end
 
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
-      encoded_string = Base64.urlsafe_encode64(N3Metadata::create_subject(group_id, artifact_id, version, extension))
+      encoded_string = N3Metadata::create_base64_subject(group_id, artifact_id, version, extension)
       response = nexus.post(nexus_url("service/local/index/custom_metadata/#{configuration['repository']}/#{encoded_string}"), :body => create_custom_metadata_update_json(nexus_n3, target_n3), :header => DEFAULT_CONTENT_TYPE_HEADER)
       case response.code
       when 201
@@ -65,7 +64,7 @@ module NexusCli
     def clear_artifact_custom_info(artifact)
       get_artifact_custom_info(artifact) # Check that artifact has custom metadata
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
-      encoded_string = Base64.urlsafe_encode64(N3Metadata::create_subject(group_id, artifact_id, version, extension))
+      encoded_string = N3Metadata::create_base64_subject(group_id, artifact_id, version, extension)
       response = nexus.post(nexus_url("service/local/index/custom_metadata/#{configuration['repository']}/#{encoded_string}"), :body => create_custom_metadata_clear_json, :header => DEFAULT_CONTENT_TYPE_HEADER)
       case response.status
       when 201
