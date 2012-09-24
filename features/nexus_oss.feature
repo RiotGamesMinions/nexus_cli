@@ -188,3 +188,32 @@ Feature: Use the Nexus CLI
       The logging level of Nexus has been set to INFO
       """
     And the exit status should be 0
+
+  Scenario: Create a Nexus Group Repository
+    When I call the nexus "create_group_repository foo" command
+    Then the output should contain:
+      """
+      """
+    And the exit status should be 0
+
+  Scenario: Get information about a Nexus Group Repository
+    When I call the nexus "get_group_repository foo" command
+    Then the output should contain:
+      """
+      """
+    And the exit status should be 0
+
+  Scenario: Add a repository to the Nexus Group Repository
+    When I call the nexus "" command
+    Then the output should contain:
+      """
+      """
+    And the exit status should be 0
+
+  Scenario: Delete a Nexus Group Repository
+    When I call the nexus "delete_group_repository foo" command
+    And I call the nexus "get_group_repository foo" command
+    Then the output should not contain:
+      """
+      """
+    And the exit status should be 0
