@@ -330,6 +330,35 @@ module NexusCli
       end
     end
 
+    def create_group_repository(name)
+      response = nexus.post(nexus_url("service/local/repo_groups"), :body => create_group_repository_json(name), :header => DEFAULT_CONTENT_TYPE_HEADER)
+      case response.status
+      when 201
+        return true
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
+      end
+    end
+
+    def get_group_repository(group_id)
+      response = nexus.get(nexus_url("service/local/repo_groups/#{group_id}"), :header => DEFAULT_ACCEPT_HEADER)
+      case response.status
+      when 200
+        return response.content
+      when 404
+        raise RepositoryNotFoundException
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
+      end
+    end
+
+    def update_group_repository(group_id, repository_to_add_id)
+      response = nexus.put(nexus_url("service/local/repo_groups/#{group_id}"), :body => create_update_group_repository(group_id, repository_to_add_id), :header => DEFAULT_CONTENT_TYPE_HEADER)
+      puts response.status
+      puts response.content
+      #case response.status
+    end
+
     private
 
     def format_search_results(doc, group_id, artifact_id)
@@ -390,6 +419,14 @@ module NexusCli
 
     def create_logger_level_json(level)
       params = {:rootLoggerLevel => level.upcase}
+      JSON.dump(:data => params)
+    end
+
+    def create_group_repository_json(name)
+      params = {:id => name.gsub(" ", "_").downcase}
+      params[:name] = name
+      params[:provider] = "maven2"
+      params[:exposed] = true
       JSON.dump(:data => params)
     end
   end

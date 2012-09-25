@@ -383,6 +383,23 @@ module NexusCli
           end
         end
 
+        desc "create_group_repository name", "Creates a new repository group with the given name."
+        def create_group_repository(name)
+          if @nexus_remote.create_group_repository(name)
+            say "A new group repository named #{name} has been created.", :blue
+          end
+        end
+
+        desc "get_group_repository group_id", "Gets information about the given group repository."
+        def get_group_repository(group_id)
+          say @nexus_remote.get_group_repository(group_id), :green
+        end
+
+        desc "update_group_repository group_id repository_to_add_id","Adds a repository with the given id into the group repository."
+        def update_group_repository(group_id, repository_to_add_id)
+          say @nexus_remote.update_group_repository(group_id, repository_to_add_id)
+        end
+
         private
 
           def ask_user(params, ask_username=true, ask_password=true)

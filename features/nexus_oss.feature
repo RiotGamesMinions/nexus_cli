@@ -190,16 +190,18 @@ Feature: Use the Nexus CLI
     And the exit status should be 0
 
   Scenario: Create a Nexus Group Repository
-    When I call the nexus "create_group_repository foo" command
+    When I call the nexus "create_group_repository cucumber_group" command
     Then the output should contain:
       """
+      A new group repository named cucumber_group has been created.
       """
     And the exit status should be 0
 
   Scenario: Get information about a Nexus Group Repository
-    When I call the nexus "get_group_repository foo" command
+    When I call the nexus "get_group_repository cucumber_group" command
     Then the output should contain:
       """
+      \"id\":\"cucumber_group\"
       """
     And the exit status should be 0
 
@@ -211,9 +213,10 @@ Feature: Use the Nexus CLI
     And the exit status should be 0
 
   Scenario: Delete a Nexus Group Repository
-    When I call the nexus "delete_group_repository foo" command
-    And I call the nexus "get_group_repository foo" command
+    When I call the nexus "delete_group_repository cucumber_group" command
+    And I call the nexus "get_group_repository cucumber_group" command
     Then the output should not contain:
       """
+      \"id\":\"cucumber_group\"
       """
     And the exit status should be 0
