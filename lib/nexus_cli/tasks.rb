@@ -395,9 +395,11 @@ module NexusCli
           say @nexus_remote.get_group_repository(group_id), :green
         end
 
-        desc "update_group_repository group_id repository_to_add_id","Adds a repository with the given id into the group repository."
-        def update_group_repository(group_id, repository_to_add_id)
-          say @nexus_remote.update_group_repository(group_id, repository_to_add_id)
+        desc "add_to_group_repository group_id repository_to_add_id", "Adds a repository with the given id into the group repository."
+        def add_to_group_repository(group_id, repository_to_add_id)
+          if @nexus_remote.add_to_group_repository(group_id, repository_to_add_id)
+            say "The repository #{repository_to_add_id} has been added to the repository group #{group_id}", :blue
+          end
         end
 
         private

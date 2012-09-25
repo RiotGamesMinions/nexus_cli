@@ -206,10 +206,20 @@ Feature: Use the Nexus CLI
     And the exit status should be 0
 
   Scenario: Add a repository to the Nexus Group Repository
-    When I call the nexus "" command
+    When I call the nexus "add_to_group_repository cucumber_group releases" command
     Then the output should contain:
       """
+      The repository releases has been added to the repository group cucumber_group
       """
+    And the exit status should be 0
+
+  Scenario: Remove a repository from a Nexus Group Repository
+    When I call the nexus "remove_from_group_repository cucumber_group releases" command
+    And I call the nexus "get_group_repository cucumber_group" command
+    Then the output should not contain:
+     """
+     \"id\"=>\"releases\"
+     """
     And the exit status should be 0
 
   Scenario: Delete a Nexus Group Repository

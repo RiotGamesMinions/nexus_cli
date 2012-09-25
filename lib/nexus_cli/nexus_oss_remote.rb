@@ -352,11 +352,16 @@ module NexusCli
       end
     end
 
-    def update_group_repository(group_id, repository_to_add_id)
-      response = nexus.put(nexus_url("service/local/repo_groups/#{group_id}"), :body => create_update_group_repository(group_id, repository_to_add_id), :header => DEFAULT_CONTENT_TYPE_HEADER)
-      puts response.status
-      puts response.content
-      #case response.status
+    def add_to_group_repository(group_id, repository_to_add_id)
+      response = nexus.put(nexus_url("service/local/repo_groups/#{group_id}"), :body => create_add_to_group_repository_json(group_id, repository_to_add_id), :header => DEFAULT_CONTENT_TYPE_HEADER)
+      case response.status
+      when 200
+        return true
+      when 400
+        raise RepositoryNotFoundException
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
+      end
     end
 
     private
@@ -427,6 +432,15 @@ module NexusCli
       params[:name] = name
       params[:provider] = "maven2"
       params[:exposed] = true
+      JSON.dump(:data => params)
+    end
+
+    def create_add_to_group_repository_json(group_id, repository_to_add_id)
+      group_repository_json = get_group_repository(group_id)
+      repositories = JSON.parse(group_repository_json)["data"]["repositories"]
+      repositories << {:id => repository_to_add_id}
+      params = {:repositories => repositories}
+      params[:id] = group_id
       JSON.dump(:data => params)
     end
   end
