@@ -402,6 +402,13 @@ module NexusCli
           end
         end
 
+        desc "remove_from_group_repository group_id repository_to_remove_id", "Remove a repository with the given id from the group repository."
+        def remove_from_group_repository(group_id, repository_to_remove_id)
+          if @nexus_remote.remove_from_group_repository(group_id, repository_to_remove_id)
+            say "", :blue
+          end
+        end
+
         private
 
           def ask_user(params, ask_username=true, ask_password=true)

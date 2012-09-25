@@ -364,6 +364,16 @@ module NexusCli
       end
     end
 
+    def remove_from_group_repository(group_id, repository_to_remove_id)
+      response = nexus.put(nexus_url("service/local/repo_groups/#{group_id}"), :body => create_remove_from_group_repository_json(group_id, repository_to_remove_id), :header => DEFAULT_CONTENT_TYPE_HEADER)
+      case response.status
+      when 200
+        return true
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
+      end
+    end
+
     private
 
     def format_search_results(doc, group_id, artifact_id)
@@ -439,6 +449,21 @@ module NexusCli
       group_repository_json = get_group_repository(group_id)
       repositories = JSON.parse(group_repository_json)["data"]["repositories"]
       repositories << {:id => repository_to_add_id}
+      params = {:repositories => repositories}
+      params[:id] = group_id
+      JSON.dump(:data => params)
+    end
+
+    def create_remove_from_group_repository_json(group_id, repository_to_remove_id)
+      group_repository_json = get_group_repository(group_id)
+      repositories = JSON.parse(group_repository_json)["data"]["repositories"]
+      
+      entry_to_remove = repositories.find{|repository| repository["id"] == repository_to_remove_id}
+      if entry_to_remove.nil?
+        raise RepositoryNotFoundException
+      else
+        repositories.delete(entry_to_remove)
+      end
       params = {:repositories => repositories}
       params[:id] = group_id
       JSON.dump(:data => params)
