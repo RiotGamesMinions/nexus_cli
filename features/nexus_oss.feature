@@ -124,7 +124,7 @@ Feature: Use the Nexus CLI
     And I call the nexus "get_repository_info Artifacts" command
     Then the output should contain:
       """
-      The repository you requested information could not be found. Please ensure the repository exists.
+      The repository you provided could not be found. Please ensure the repository exists.
       """
     And the exit status should be 114
 
@@ -222,6 +222,7 @@ Feature: Use the Nexus CLI
      """
     And the exit status should be 0
 
+  @wip
   Scenario: Delete a Nexus Group Repository
     When I call the nexus "delete_group_repository cucumber_group" command
     And I call the nexus "get_group_repository cucumber_group" command
