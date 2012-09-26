@@ -374,6 +374,18 @@ module NexusCli
       end
     end
 
+    def delete_group_repository(group_id)
+      response = nexus.delete(nexus_url("service/local/repo_groups/#{group_id}"))
+      case response.status
+      when 204
+        return true
+      when 404
+        raise RepositoryNotFoundException
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
+      end
+    end
+
     private
 
     def format_search_results(doc, group_id, artifact_id)

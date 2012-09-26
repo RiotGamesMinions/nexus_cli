@@ -222,7 +222,6 @@ Feature: Use the Nexus CLI
      """
     And the exit status should be 0
 
-  @wip
   Scenario: Delete a Nexus Group Repository
     When I call the nexus "delete_group_repository cucumber_group" command
     And I call the nexus "get_group_repository cucumber_group" command
@@ -230,4 +229,4 @@ Feature: Use the Nexus CLI
       """
       \"id\":\"cucumber_group\"
       """
-    And the exit status should be 0
+    And the exit status should be 114
