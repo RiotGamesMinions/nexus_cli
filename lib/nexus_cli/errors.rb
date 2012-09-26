@@ -230,4 +230,19 @@ The output from the server was:
     end
     status_code(125)
   end
+
+  class RepositoryInGroupException < NexusCliError
+    def message
+      "You are attempting to add a repository that is already a part of this group."
+    end
+    status_code(126)
+  end
+
+  class RepositoryNotInGroupException < NexusCliError
+    def message
+      "You are attempting to remove a repository that isn't a part of the group."
+    end
+    status_code(126)
+  end
+
 end

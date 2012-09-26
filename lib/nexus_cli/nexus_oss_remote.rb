@@ -335,13 +335,15 @@ module NexusCli
       case response.status
       when 201
         return true
+      when 400
+        raise CreateRepsitoryException.new(response.content)
       else
         raise UnexpectedStatusCodeException.new(response.status)
       end
     end
 
     def get_group_repository(group_id)
-      response = nexus.get(nexus_url("service/local/repo_groups/#{group_id}"), :header => DEFAULT_ACCEPT_HEADER)
+      response = nexus.get(nexus_url("service/local/repo_groups/#{group_id.gsub(" ", "_").downcase}"), :header => DEFAULT_ACCEPT_HEADER)
       case response.status
       when 200
         return response.content
@@ -352,8 +354,16 @@ module NexusCli
       end
     end
 
+    def repository_in_group?(group_id, repository_to_check)
+      group_repository = JSON.parse(get_group_repository(group_id))
+      repositories_in_group = group_repository["data"]["repositories"]
+
+      repositories_in_group.find{|repository| repository["id"] == repository_to_check}
+    end
+
     def add_to_group_repository(group_id, repository_to_add_id)
-      response = nexus.put(nexus_url("service/local/repo_groups/#{group_id}"), :body => create_add_to_group_repository_json(group_id, repository_to_add_id), :header => DEFAULT_CONTENT_TYPE_HEADER)
+      raise RepositoryInGroupException if repository_in_group?(group_id, repository_to_add_id)
+      response = nexus.put(nexus_url("service/local/repo_groups/#{group_id.gsub(" ", "_").downcase}"), :body => create_add_to_group_repository_json(group_id, repository_to_add_id), :header => DEFAULT_CONTENT_TYPE_HEADER)
       case response.status
       when 200
         return true
@@ -365,7 +375,8 @@ module NexusCli
     end
 
     def remove_from_group_repository(group_id, repository_to_remove_id)
-      response = nexus.put(nexus_url("service/local/repo_groups/#{group_id}"), :body => create_remove_from_group_repository_json(group_id, repository_to_remove_id), :header => DEFAULT_CONTENT_TYPE_HEADER)
+      raise RepositoryNotInGroupException unless repository_in_group?(group_id, repository_to_remove_id)
+      response = nexus.put(nexus_url("service/local/repo_groups/#{group_id.gsub(" ", "_").downcase}"), :body => create_remove_from_group_repository_json(group_id, repository_to_remove_id), :header => DEFAULT_CONTENT_TYPE_HEADER)
       case response.status
       when 200
         return true
@@ -375,7 +386,7 @@ module NexusCli
     end
 
     def delete_group_repository(group_id)
-      response = nexus.delete(nexus_url("service/local/repo_groups/#{group_id}"))
+      response = nexus.delete(nexus_url("service/local/repo_groups/#{group_id.gsub(" ", "_").downcase}"))
       case response.status
       when 204
         return true
@@ -458,26 +469,24 @@ module NexusCli
     end
 
     def create_add_to_group_repository_json(group_id, repository_to_add_id)
-      group_repository_json = get_group_repository(group_id)
-      repositories = JSON.parse(group_repository_json)["data"]["repositories"]
+      group_repository_json = JSON.parse(get_group_repository(group_id))
+      repositories = group_repository_json["data"]["repositories"]
       repositories << {:id => repository_to_add_id}
       params = {:repositories => repositories}
-      params[:id] = group_id
+      params[:id] = group_repository_json["data"]["id"]
+      params[:name] = group_repository_json["data"]["name"]
       JSON.dump(:data => params)
     end
 
     def create_remove_from_group_repository_json(group_id, repository_to_remove_id)
-      group_repository_json = get_group_repository(group_id)
-      repositories = JSON.parse(group_repository_json)["data"]["repositories"]
+      group_repository_json = JSON.parse(get_group_repository(group_id))
+      repositories = group_repository_json["data"]["repositories"]
+
+      repositories.delete(repository_in_group?(group_id, repository_to_remove_id))
       
-      entry_to_remove = repositories.find{|repository| repository["id"] == repository_to_remove_id}
-      if entry_to_remove.nil?
-        raise RepositoryNotFoundException
-      else
-        repositories.delete(entry_to_remove)
-      end
       params = {:repositories => repositories}
-      params[:id] = group_id
+      params[:id] = group_repository_json["data"]["id"]
+      params[:name] = group_repository_json["data"]["name"]
       JSON.dump(:data => params)
     end
   end
