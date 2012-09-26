@@ -242,7 +242,7 @@ The output from the server was:
     def message
       "You are attempting to remove a repository that isn't a part of the group."
     end
-    status_code(126)
+    status_code(127)
   end
 
 end
