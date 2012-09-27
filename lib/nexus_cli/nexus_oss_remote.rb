@@ -56,7 +56,7 @@ module NexusCli
       status['edition_long'] == "Professional"
     end
 
-    def pull_artifact(artifact, destination)
+    def pull_artifact(artifact, destination=nil)
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
       version = Nokogiri::XML(get_artifact_info(artifact)).xpath("//version").first.content() if version.casecmp("latest")
       destination = File.join(File.expand_path(destination || "."), "#{artifact_id}-#{version}.#{extension}")
@@ -90,7 +90,7 @@ module NexusCli
       when 403
         raise PermissionsException
       when 404
-        raise CouldNotConnectToNexusException
+        raise DetailedErrorException.new(response.content)
       else
         raise UnexpectedStatusCodeException.new(response.status)
       end
@@ -397,6 +397,16 @@ module NexusCli
       end
     end
 
+    def transfer_artifact(artifact, from_repository, to_repository)
+      Dir.mktmpdir do |temp_dir|
+        configuration["repository"] = from_repository
+        artifact_file = pull_artifact(artifact, temp_dir)
+        configuration["repository"] = to_repository
+        push_artifact(artifact, artifact_file)
+      end
+      true
+    end
+
     private
 
     def format_search_results(doc, group_id, artifact_id)
@@ -423,6 +433,8 @@ module NexusCli
       params = {:provider => "maven2"}
       params[:providerRole] = "org.sonatype.nexus.proxy.repository.Repository"
       params[:exposed] = true
+      params[:browseable] = true
+      params[:indexable] = true
       params[:repoType] = "hosted"
       params[:repoPolicy] = "RELEASE"
       params[:name] = name
@@ -435,6 +447,8 @@ module NexusCli
       params = {:provider => "maven2"}
       params[:providerRole] = "org.sonatype.nexus.proxy.repository.Repository"
       params[:exposed] = true
+      params[:browseable] = true
+      params[:indexable] = true
       params[:repoType] = "proxy"
       params[:repoPolicy] = "RELEASE"
       params[:checksumPolicy] = "WARN"

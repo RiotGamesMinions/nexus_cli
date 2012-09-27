@@ -15,6 +15,7 @@ module NexusCli
         map 'status'        => :get_nexus_status
         map 'search'        => :search_for_artifacts
         map 'search_custom' => :search_artifacts_custom
+        map 'transfer'      => :transfer_artifact
 
         class_option :overrides,
           :type => :hash,
@@ -413,6 +414,13 @@ module NexusCli
         def delete_group_repository(group_id)
           if @nexus_remote.delete_group_repository(group_id)
             say "The group repository, #{group_id} has been deleted.", :blue
+          end
+        end
+
+        desc "transfer_artifact artifact from_repository to_repository", ""
+        def transfer_artifact(artifact, from_repository, to_repository)
+          if @nexus_remote.transfer_artifact(artifact, from_repository, to_repository)
+            say "The artifact #{artifact} has been transferred from #{from_repository} to #{to_repository}.", :blue
           end
         end
 
