@@ -55,6 +55,14 @@ Feature: Use the Nexus CLI
       """
     And the exit status should be 0
 
+  Scenario: Transfer an artifact between repositories
+    When I call the nexus "transfer com.test:mytest:1.0.0:tgz releases somewhere-else" command
+    Then the output should contain:
+      """
+      The artifact com.test:mytest:1.0.0:tgz has been transferred from releases to somewhere-else.
+      """
+    And the exit status should be 0
+
   @delete
   Scenario: Attempt to delete an artifact
     When I delete an artifact with the GAV of "com.test:mytest:1.0.0:tgz"
