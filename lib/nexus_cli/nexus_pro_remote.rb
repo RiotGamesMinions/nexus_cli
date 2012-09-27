@@ -264,6 +264,34 @@ module NexusCli
       end
     end
 
+    def transfer_artifact(artifact, from_repository, to_repository)
+      do_transfer_artifact(artifact, from_repository, to_repository)
+      
+      configuration["repository"] = from_repository
+      begin
+        from_artifact_metadata = N3Metadata::convert_result_to_hash(get_artifact_custom_info_raw(artifact))
+      rescue N3NotFoundException
+        from_artifact_metadata = {}
+      end
+
+      configuration["repository"] = to_repository
+      begin
+        to_artifact_metadata = N3Metadata::convert_result_to_hash(get_artifact_custom_info_raw(artifact))
+      rescue N3NotFoundException
+        to_artifact_metadata = {}
+      end
+
+      group_id, artifact_id, version, extension = parse_artifact_string(artifact)
+      encoded_string = N3Metadata::create_base64_subject(group_id, artifact_id, version, extension)
+      response = nexus.post(nexus_url("service/local/index/custom_metadata/#{configuration['repository']}/#{encoded_string}"), :body => create_custom_metadata_update_json(to_artifact_metadata, from_artifact_metadata), :header => DEFAULT_CONTENT_TYPE_HEADER)
+      case response.code
+      when 201
+        return true
+      else
+        raise UnexpectedStatusCodeException.new(response.status)
+      end
+    end
+
     private
 
     def create_add_trusted_key_json(params)

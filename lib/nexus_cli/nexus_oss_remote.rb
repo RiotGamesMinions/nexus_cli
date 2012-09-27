@@ -398,16 +398,20 @@ module NexusCli
     end
 
     def transfer_artifact(artifact, from_repository, to_repository)
+      do_transfer_artifact(artifact, from_repository, to_repository)
+      true
+    end
+
+    private
+
+    def do_transfer_artifact(artifact, from_repository, to_repository)
       Dir.mktmpdir do |temp_dir|
         configuration["repository"] = from_repository
         artifact_file = pull_artifact(artifact, temp_dir)
         configuration["repository"] = to_repository
         push_artifact(artifact, artifact_file)
       end
-      true
     end
-
-    private
 
     def format_search_results(doc, group_id, artifact_id)
       versions = doc.xpath("//version").inject([]) {|array,node| array << "#{node.content()}"}
