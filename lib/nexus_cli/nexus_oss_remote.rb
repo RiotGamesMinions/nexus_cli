@@ -399,7 +399,6 @@ module NexusCli
 
     def transfer_artifact(artifact, from_repository, to_repository)
       do_transfer_artifact(artifact, from_repository, to_repository)
-      true
     end
 
     private

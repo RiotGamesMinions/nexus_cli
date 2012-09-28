@@ -55,11 +55,12 @@ Feature: Use the Nexus CLI
       """
     And the exit status should be 0
 
+  @transfer
   Scenario: Transfer an artifact between repositories
-    When I call the nexus "transfer com.test:mytest:1.0.0:tgz releases somewhere-else" command
+    When I call the nexus "transfer com.test:mytest:1.0.0:tgz releases thirdparty" command
     Then the output should contain:
       """
-      The artifact com.test:mytest:1.0.0:tgz has been transferred from releases to somewhere-else.
+      The artifact com.test:mytest:1.0.0:tgz has been transferred from releases to thirdparty.
       """
     And the exit status should be 0
 
@@ -72,6 +73,17 @@ Feature: Use the Nexus CLI
       The artifact you requested information for could not be found. Please ensure it exists inside the Nexus.
       """
     And the exit status should be 101
+
+  @delete
+  Scenario: Attempt to delete another artifact
+    When I delete an artifact with the GAV of "com.test:mytest:1.0.0:tgz" from the "thirdparty" repository
+    And I call the nexus "info com.test:mytest:1.0.0:tgz" command overriding "repository:thirdparty"
+    Then the output should contain:
+      """
+      The artifact you requested information for could not be found. Please ensure it exists inside the Nexus.
+      """
+    And the exit status should be 101
+
 
   Scenario: Get the current global settings of Nexus
     When I call the nexus "get_global_settings" command
