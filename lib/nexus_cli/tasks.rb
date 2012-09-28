@@ -27,10 +27,6 @@ module NexusCli
           :default => true,
           :desc => "Set to false to disable SSL Verification."
 
-        def initialize(*args)
-          super
-        end
-
         method_option :destination,
           :type => :string,
           :default => nil,

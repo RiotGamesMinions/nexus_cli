@@ -206,7 +206,7 @@ module NexusCli
     end
 
     def delete_repository(name)
-      response = nexus.delete(nexus_url("service/local/repositories/#{name.downcase}"))
+      response = nexus.delete(nexus_url("service/local/repositories/#{sanitize_for_id(name)}"))
       case response.status
       when 204
         return true
@@ -218,7 +218,7 @@ module NexusCli
     end
 
     def get_repository_info(name)
-      response = nexus.get(nexus_url("service/local/repositories/#{name.gsub(" ", "_").downcase}"))
+      response = nexus.get(nexus_url("service/local/repositories/#{sanitize_for_id(name)}"))
       case response.status
       when 200
         return response.content
@@ -343,7 +343,7 @@ module NexusCli
     end
 
     def get_group_repository(group_id)
-      response = nexus.get(nexus_url("service/local/repo_groups/#{group_id.gsub(" ", "_").downcase}"), :header => DEFAULT_ACCEPT_HEADER)
+      response = nexus.get(nexus_url("service/local/repo_groups/#{sanitize_for_id(group_id)}"), :header => DEFAULT_ACCEPT_HEADER)
       case response.status
       when 200
         return response.content
@@ -358,12 +358,12 @@ module NexusCli
       group_repository = JSON.parse(get_group_repository(group_id))
       repositories_in_group = group_repository["data"]["repositories"]
 
-      repositories_in_group.find{|repository| repository["id"] == repository_to_check}
+      repositories_in_group.find{|repository| repository["id"] == sanitize_for_id(repository_to_check)}
     end
 
     def add_to_group_repository(group_id, repository_to_add_id)
       raise RepositoryInGroupException if repository_in_group?(group_id, repository_to_add_id)
-      response = nexus.put(nexus_url("service/local/repo_groups/#{group_id.gsub(" ", "_").downcase}"), :body => create_add_to_group_repository_json(group_id, repository_to_add_id), :header => DEFAULT_CONTENT_TYPE_HEADER)
+      response = nexus.put(nexus_url("service/local/repo_groups/#{sanitize_for_id(group_id)}"), :body => create_add_to_group_repository_json(group_id, repository_to_add_id), :header => DEFAULT_CONTENT_TYPE_HEADER)
       case response.status
       when 200
         return true
@@ -376,7 +376,7 @@ module NexusCli
 
     def remove_from_group_repository(group_id, repository_to_remove_id)
       raise RepositoryNotInGroupException unless repository_in_group?(group_id, repository_to_remove_id)
-      response = nexus.put(nexus_url("service/local/repo_groups/#{group_id.gsub(" ", "_").downcase}"), :body => create_remove_from_group_repository_json(group_id, repository_to_remove_id), :header => DEFAULT_CONTENT_TYPE_HEADER)
+      response = nexus.put(nexus_url("service/local/repo_groups/#{sanitize_for_id(group_id)}"), :body => create_remove_from_group_repository_json(group_id, repository_to_remove_id), :header => DEFAULT_CONTENT_TYPE_HEADER)
       case response.status
       when 200
         return true
@@ -386,7 +386,7 @@ module NexusCli
     end
 
     def delete_group_repository(group_id)
-      response = nexus.delete(nexus_url("service/local/repo_groups/#{group_id.gsub(" ", "_").downcase}"))
+      response = nexus.delete(nexus_url("service/local/repo_groups/#{sanitize_for_id(group_id)}"))
       case response.status
       when 204
         return true
@@ -403,11 +403,15 @@ module NexusCli
 
     private
 
+    def sanitize_for_id(unsanitized_string)
+      unsanitized_string.gsub(" ", "_").downcase
+    end
+
     def do_transfer_artifact(artifact, from_repository, to_repository)
       Dir.mktmpdir do |temp_dir|
-        configuration["repository"] = from_repository
+        configuration["repository"] = sanitize_for_id(from_repository)
         artifact_file = pull_artifact(artifact, temp_dir)
-        configuration["repository"] = to_repository
+        configuration["repository"] = sanitize_for_id(to_repository)
         push_artifact(artifact, artifact_file)
       end
     end
@@ -441,7 +445,7 @@ module NexusCli
       params[:repoType] = "hosted"
       params[:repoPolicy] = "RELEASE"
       params[:name] = name
-      params[:id] = name.gsub(" ", "_").downcase
+      params[:id] = sanitize_for_id(name)
       params[:format] = "maven2"
       JSON.dump(:data => params)
     end
@@ -459,7 +463,7 @@ module NexusCli
       params[:downloadRemoteIndexes] = true
       params[:autoBlockActive] = true
       params[:name] = name
-      params[:id] = name.gsub(" ", "_").downcase
+      params[:id] = sanitize_for_id(name)
       params[:remoteStorage] = {:remoteStorageUrl => url.nil? ? "http://change-me.com/" : url}
       JSON.dump(:data => params)
     end
@@ -478,7 +482,7 @@ module NexusCli
     end
 
     def create_group_repository_json(name)
-      params = {:id => name.gsub(" ", "_").downcase}
+      params = {:id => sanitize_for_id(name)}
       params[:name] = name
       params[:provider] = "maven2"
       params[:exposed] = true
@@ -488,7 +492,7 @@ module NexusCli
     def create_add_to_group_repository_json(group_id, repository_to_add_id)
       group_repository_json = JSON.parse(get_group_repository(group_id))
       repositories = group_repository_json["data"]["repositories"]
-      repositories << {:id => repository_to_add_id}
+      repositories << {:id => sanitize_for_id(repository_to_add_id)}
       params = {:repositories => repositories}
       params[:id] = group_repository_json["data"]["id"]
       params[:name] = group_repository_json["data"]["name"]
