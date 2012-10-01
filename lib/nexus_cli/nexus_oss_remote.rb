@@ -90,7 +90,7 @@ module NexusCli
       when 403
         raise PermissionsException
       when 404
-        raise DetailedErrorException.new(response.content)
+        raise NexusHTTP404.new(response.content)
       else
         raise UnexpectedStatusCodeException.new(response.status)
       end

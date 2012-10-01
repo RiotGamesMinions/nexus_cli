@@ -245,7 +245,7 @@ The output from the server was:
     status_code(127)
   end
   
-  class DetailedErrorException < NexusCliError
+  class NexusHTTP404 < NexusCliError
     def initialize(body)
       @server_response = body
     end
