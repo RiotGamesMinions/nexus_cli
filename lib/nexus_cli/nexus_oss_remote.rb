@@ -461,7 +461,7 @@ module NexusCli
       params[:checksumPolicy] = "WARN"
       params[:writePolicy] = "READ_ONLY"
       params[:downloadRemoteIndexes] = true
-      params[:autoBlockActive] = true
+      params[:autoBlockActive] = false
       params[:name] = name
       params[:id] = sanitize_for_id(name)
       params[:remoteStorage] = {:remoteStorageUrl => url.nil? ? "http://change-me.com/" : url}

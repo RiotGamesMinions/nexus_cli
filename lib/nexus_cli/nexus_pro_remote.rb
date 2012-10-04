@@ -252,10 +252,10 @@ module NexusCli
     def transfer_artifact(artifact, from_repository, to_repository)
       do_transfer_artifact(artifact, from_repository, to_repository)
       
-      configuration["repository"] = from_repository
+      configuration["repository"] = sanitize_for_id(from_repository)
       from_artifact_metadata = get_custom_metadata_hash(artifact)
 
-      configuration["repository"] = to_repository
+      configuration["repository"] = sanitize_for_id(to_repository)
       to_artifact_metadata = get_custom_metadata_hash(artifact)
 
       do_update_custom_metadata(artifact, from_artifact_metadata, to_artifact_metadata)
