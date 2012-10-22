@@ -5,7 +5,10 @@ require 'json'
 require 'jsonpath'
 
 module NexusCli
+  # @author Kyle Allan <kallan@riotgames.com>
   class OSSRemote
+    # @param [Hash] overrides
+    # @param [Boolean] ssl_verify
     def initialize(overrides, ssl_verify=true)
       @configuration = Configuration::parse(overrides)
       @ssl_verify = ssl_verify
@@ -15,6 +18,10 @@ module NexusCli
       return @configuration if @configuration
     end
 
+    # Returns an HTTPClient instance with settings to connect
+    # to a Nexus server.
+    #
+    # @return [HTTPClient]
     def nexus
       client = HTTPClient.new
       client.send_timeout = 600
@@ -26,10 +33,20 @@ module NexusCli
       return client
     end
 
+    # Joins a given url to the current url stored in the configuraiton
+    # and returns the combined String.
+    #
+    # @param [String] url
+    #
+    # @return [String]
     def nexus_url(url)
       File.join(configuration['url'], url)
     end
 
+    # Gets that current status of the Nexus server. On a non-error
+    # status code, returns a Hash of values from the server.
+    #
+    # @return [Hash]
     def status
       response = nexus.get(nexus_url("service/local/status"))
       case response.status
@@ -52,10 +69,19 @@ module NexusCli
       end
     end
 
+    # Determines whether or not the Nexus server being
+    # connected to is running Nexus Pro.
     def running_nexus_pro?
       status['edition_long'] == "Professional"
     end
 
+    # Retrieves a file from the Nexus server using the given [String] artifact
+    # identifier. Optionally provide a destination [String].
+    #
+    # @param [String] artifact
+    # @param [String] destination
+    #
+    # @return [File]
     def pull_artifact(artifact, destination=nil)
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
       version = Nokogiri::XML(get_artifact_info(artifact)).xpath("//version").first.content() if version.casecmp("latest")
@@ -77,6 +103,14 @@ module NexusCli
       File.expand_path(destination)
     end
 
+
+    # Pushes the given [file] to the Nexus server
+    # under the given [artifact] identifier.
+    # 
+    # @param  artifact [String] the Maven identifier
+    # @param  file [type] the path to the file
+    # 
+    # @return [Boolean] returns true when successful
     def push_artifact(artifact, file)
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
       response = nexus.post(nexus_url("service/local/artifact/maven/content"), {:hasPom => false, :g => group_id, :a => artifact_id, :v => version, :e => extension, :p => extension, :r => configuration['repository'], :file => File.open(file)})
@@ -122,6 +156,12 @@ module NexusCli
       end
     end
 
+
+    # Searches for an artifact using the given identifier.
+    #
+    # @param  artifact [String] the Maven identifier
+    # 
+    # @return [Array<String>] a formatted Array of results
     def search_for_artifacts(artifact)
       group_id, artifact_id = artifact.split(":")
       response = nexus.get(nexus_url("service/local/data_index"), :query => {:g => group_id, :a => artifact_id})
@@ -134,6 +174,10 @@ module NexusCli
       end
     end
 
+
+    # Retrieves the global settings of the Nexus server
+    # 
+    # @return [File] a File with the global settings.
     def get_global_settings
       json = get_global_settings_json
       pretty_json = JSON.pretty_generate(JSON.parse(json))
@@ -188,6 +232,14 @@ module NexusCli
       end
     end
 
+
+    # Creates a repository that the Nexus uses to hold artifacts.
+    # 
+    # @param  name [String] the name of the repository to create
+    # @param  proxy [Boolean] true if this is a proxy repository
+    # @param  url [String] the url for the proxy repository to point to
+    # 
+    # @return [Boolean] returns true on success
     def create_repository(name, proxy, url)
       json = if proxy
         create_proxy_repository_json(name, url)
@@ -285,6 +337,12 @@ module NexusCli
       end
     end
 
+
+    # Changes the password of a user
+    # 
+    # @param  params [Hash] a hash given to update the users password
+    # 
+    # @return [type] [description]
     def change_password(params)
       response = nexus.post(nexus_url("service/local/users_changepw"), :body => create_change_password_json(params), :header => DEFAULT_CONTENT_TYPE_HEADER)
       case response.status
@@ -403,10 +461,26 @@ module NexusCli
 
     private
 
+
+    # Transforms a given [String] into a sanitized version by
+    # replacing spaces with underscores and downcasing.
+    # 
+    # @param  unsanitized_string [String] the String to sanitize
+    # 
+    # @return [String] the sanitized String
     def sanitize_for_id(unsanitized_string)
       unsanitized_string.gsub(" ", "_").downcase
     end
 
+
+    # Transfers an artifact from one repository
+    # to another. Sometimes called a `promotion`
+    # 
+    # @param  artifact [String] a Maven identifier
+    # @param  from_repository [String] the name of the from repository
+    # @param  to_repository [String] the name of the to repository
+    # 
+    # @return [Boolean] returns true when successful
     def do_transfer_artifact(artifact, from_repository, to_repository)
       Dir.mktmpdir do |temp_dir|
         configuration["repository"] = sanitize_for_id(from_repository)
@@ -416,6 +490,15 @@ module NexusCli
       end
     end
 
+
+    # Formats the given XML into an [Array<String>] so it
+    # can be displayed nicely.
+    # 
+    # @param  doc [Nokogiri::XML] the xml search results
+    # @param  group_id [String] the group id
+    # @param  artifact_id [String] the artifact id
+    # 
+    # @return [type] [description]
     def format_search_results(doc, group_id, artifact_id)
       versions = doc.xpath("//version").inject([]) {|array,node| array << "#{node.content()}"}
       indent_size = versions.max{|a,b| a.length <=> b.length}.size+4
@@ -426,6 +509,13 @@ module NexusCli
       end
     end
 
+
+    # Parses a given artifact string into its
+    # four, distinct, Maven pieces.
+    # 
+    # @param  artifact [String] the Maven identifier
+    # 
+    # @return [Array<String>] an Array with four elements
     def parse_artifact_string(artifact)
       split_artifact = artifact.split(":")
       if(split_artifact.size < 4)
