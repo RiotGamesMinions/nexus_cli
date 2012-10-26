@@ -114,11 +114,12 @@ module NexusCli
       end
     end
 
-    def enable_artifact_subscribe(repository_id)
+    def enable_artifact_subscribe(repository_id, preemptive_fetch)
       raise NotProxyRepositoryException.new(repository_id) unless Nokogiri::XML(get_repository_info(repository_id)).xpath("/repository/data/repoType").first.content == "proxy"
 
       params = {:repositoryId => repository_id}
       params[:subscribe] = true
+      params[:preemptiveFetch] = preemptive_fetch
       artifact_subscribe(repository_id, params)
     end
 
