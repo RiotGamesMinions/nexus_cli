@@ -121,7 +121,6 @@ module NexusCli
           say "Your Nexus global settings have been reset to their default values", :blue
         end
 
-        #name, proxy, url, id, policy, provider
         method_option :id,
           :type => :string,
           :desc => "The id of the repository to use."
