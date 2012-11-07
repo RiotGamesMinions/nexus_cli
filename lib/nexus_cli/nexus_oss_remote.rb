@@ -1,8 +1,10 @@
+require 'erb'
 require 'httpclient'
-require 'nokogiri'
-require 'yaml'
 require 'json'
 require 'jsonpath'
+require 'nokogiri'
+require 'tempfile'
+require 'yaml'
 
 module NexusCli
   # @author Kyle Allan <kallan@riotgames.com>
@@ -614,19 +616,10 @@ module NexusCli
     end
 
     def generate_fake_pom(pom_name, group_id, artifact_id, version, extension)
-      require 'tempfile'
       Tempfile.open(pom_name) do |file|
-        file.puts %Q{<?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>#{group_id}</groupId>
-  <artifactId>#{artifact_id}</artifactId>
-  <version>#{version}</version>
-  <packaging>#{extension}</packaging>
-  <description>POM was created by Sonatype Nexus</description>
-</project>}
-       file
+        template_path = File.join(File.dirname(__FILE__), "templates", "pom.xml.erb")
+        file.puts ERB.new(File.read(template_path)).result(binding)
+        file
       end
     end
   end
