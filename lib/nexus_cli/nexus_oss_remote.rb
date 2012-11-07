@@ -24,8 +24,8 @@ module NexusCli
     # @return [HTTPClient]
     def nexus
       client = HTTPClient.new
-      client.send_timeout = 600
-      client.receive_timeout = 600
+      client.send_timeout = 6000
+      client.receive_timeout = 6000
       # https://github.com/nahi/httpclient/issues/63
       client.set_auth(nil, configuration['username'], configuration['password'])
       client.www_auth.basic_auth.challenge(configuration['url'])
@@ -113,9 +113,24 @@ module NexusCli
     # @return [Boolean] returns true when successful
     def push_artifact(artifact, file)
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
-      response = nexus.post(nexus_url("service/local/artifact/maven/content"), {:hasPom => false, :g => group_id, :a => artifact_id, :v => version, :e => extension, :p => extension, :r => configuration['repository'], :file => File.open(file)})
+      #response = nexus.post(nexus_url("service/local/artifact/maven/content"), {:hasPom => false, :g => group_id, :a => artifact_id, :v => version, :e => extension, :p => extension, :r => configuration['repository'], :file => File.open(file)})
+      file_name = "#{artifact_id}-#{version}.#{extension}"
+      put_string = "content/repositories/#{configuration['repository']}/#{group_id.gsub(".", "/")}/#{artifact_id.gsub(".", "/")}/#{version}/#{file_name}"
+      
+      start_time = Time.now
+      response = nexus.put(nexus_url(put_string), File.open(file))
+      end_time = Time.now
+
+      puts end_time - start_time
+
       case response.status
       when 201
+        pom_name = "#{artifact_id}-#{version}.pom"
+        put_string = "content/repositories/#{configuration['repository']}/#{group_id.gsub(".", "/")}/#{artifact_id.gsub(".", "/")}/#{version}/#{pom_name}"
+        pom_file = generate_fake_pom(pom_name, group_id, artifact_id, version, extension)
+        nexus.put(nexus_url(put_string), File.open(pom_file))
+        delete_string = "/service/local/metadata/repositories/#{configuration['repository']}/content/#{group_id.gsub(".", "/")}/#{artifact_id.gsub(".", "/")}"
+        nexus.delete(nexus_url(delete_string))
         return true
       when 400
         raise BadUploadRequestException
@@ -602,6 +617,23 @@ module NexusCli
       params[:id] = group_repository_json["data"]["id"]
       params[:name] = group_repository_json["data"]["name"]
       JSON.dump(:data => params)
+    end
+
+    def generate_fake_pom(pom_name, group_id, artifact_id, version, extension)
+      require 'tempfile'
+      Tempfile.open(pom_name) do |file|
+        file.puts %Q{<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>#{group_id}</groupId>
+  <artifactId>#{artifact_id}</artifactId>
+  <version>#{version}</version>
+  <packaging>#{extension}</packaging>
+  <description>POM was created by Sonatype Nexus</description>
+</project>}
+       file
+      end
     end
   end
 end
