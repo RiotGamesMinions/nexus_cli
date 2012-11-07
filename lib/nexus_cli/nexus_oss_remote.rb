@@ -113,15 +113,9 @@ module NexusCli
     # @return [Boolean] returns true when successful
     def push_artifact(artifact, file)
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
-      #response = nexus.post(nexus_url("service/local/artifact/maven/content"), {:hasPom => false, :g => group_id, :a => artifact_id, :v => version, :e => extension, :p => extension, :r => configuration['repository'], :file => File.open(file)})
       file_name = "#{artifact_id}-#{version}.#{extension}"
       put_string = "content/repositories/#{configuration['repository']}/#{group_id.gsub(".", "/")}/#{artifact_id.gsub(".", "/")}/#{version}/#{file_name}"
-      
-      start_time = Time.now
       response = nexus.put(nexus_url(put_string), File.open(file))
-      end_time = Time.now
-
-      puts end_time - start_time
 
       case response.status
       when 201
