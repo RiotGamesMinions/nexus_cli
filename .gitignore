@@ -2,7 +2,6 @@
 .rake_tasks~
 .project
 .buildpath
-Gemfile.lock
 tmp/
 pkg/
 *.gem

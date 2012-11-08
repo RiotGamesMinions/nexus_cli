@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   s.add_dependency 'thor'
-  s.add_dependency 'httpclient'
+  s.add_dependency 'httpclient', '= 2.2.5'
   s.add_dependency 'nokogiri'
   s.add_dependency 'extlib'
   s.add_dependency 'json'
