@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    nexus_cli (1.0.1)
+    nexus_cli (1.0.2)
       extlib
       highline
       httpclient (= 2.2.5)
