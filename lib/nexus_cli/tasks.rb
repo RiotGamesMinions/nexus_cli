@@ -48,7 +48,7 @@ module NexusCli
           say nexus_remote.get_artifact_info(artifact), :green
         end
 
-        desc "search_for_artifacts", "Prints out some information about some junk."
+        desc "search_for_artifacts", "Searches for all the versions of a particular artifact and prints it to the screen."
         def search_for_artifacts(artifact)
           nexus_remote.search_for_artifacts(artifact).each{|output| say output, :green}
         end

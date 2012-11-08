@@ -171,8 +171,13 @@ module NexusCli
     # Searches for an artifact using the given identifier.
     #
     # @param  artifact [String] the Maven identifier
+    # @example com.artifact:my-artifact
     # 
     # @return [Array<String>] a formatted Array of results
+    # @example 
+    #   1.0.0     `nexus-cli pull com.artifact:my-artifact:1.0.0:tgz`
+    #   2.0.0     `nexus-cli pull com.artifact:my-artifact:2.0.0:tgz`
+    #   3.0.0     `nexus-cli pull com.artifact:my-artifact:3.0.0:tgz`
     def search_for_artifacts(artifact)
       group_id, artifact_id = artifact.split(":")
       response = nexus.get(nexus_url("service/local/data_index"), :query => {:g => group_id, :a => artifact_id})
