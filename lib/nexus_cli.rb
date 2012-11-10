@@ -16,7 +16,7 @@ module NexusCli
   autoload :OSSRemote, 'nexus_cli/oss_remote'
   autoload :ProRemote, 'nexus_cli/pro_remote'
   autoload :Configuration, 'nexus_cli/configuration'
-  autoload :N3Metadata, 'nexus_cli/ns_metadata'
+  autoload :N3Metadata, 'nexus_cli/n3_metadata'
 
   class << self
     def root
