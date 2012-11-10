@@ -34,18 +34,33 @@ class Default < Thor
 
     desc "all", "run all tests"
     def all
-      invoke(:unit)
-      invoke(:acceptance)
+      unless run_unit && run_acceptance
+        exit 1
+      end
     end
 
     desc "unit", "run only unit tests"
     def unit
-      run "rspec --color --format=documentation spec" 
+      unless run_unit
+        exit 1
+      end
     end
 
     desc "acceptance", "Run acceptance tests"
     def acceptance
-      run "cucumber --color --format pretty"
+      unless run_acceptance
+        exit 1
+      end
+    end
+
+    no_tasks do
+      def run_unit
+        run "rspec --color --format=documentation spec"
+      end
+
+      def run_acceptance
+        run "cucumber --color --format pretty"
+      end
     end
   end
 end
