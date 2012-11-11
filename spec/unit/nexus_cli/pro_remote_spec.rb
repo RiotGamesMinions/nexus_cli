@@ -1,6 +1,11 @@
 require 'nexus_cli'
 
-remote = NexusCli::ProRemote.new(nil)
+remote = NexusCli::ProRemote.new(
+  'url' => 'http://localhost:8081/nexus',
+  'repository' => 'releases',
+  'username' => 'admin',
+  'password' => 'admin123'
+)
 
 describe NexusCli do
   it "gives you errors when you attempt to get an artifact's custom info and don't give a valid artifact name" do

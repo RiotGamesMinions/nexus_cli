@@ -1,6 +1,11 @@
 require 'spec_helper'
 
-remote = NexusCli::OSSRemote.new({'url' => 'http://localhost:8081/nexus', 'repository' => 'releases', 'username' => 'admin', 'password' => 'admin123'})
+remote = NexusCli::OSSRemote.new(
+  'url' => 'http://localhost:8081/nexus',
+  'repository' => 'releases',
+  'username' => 'admin',
+  'password' => 'admin123'
+)
 
 describe NexusCli do
   it "gives you errors when you attempt to pull an artifact don't give a valid artifact name" do
