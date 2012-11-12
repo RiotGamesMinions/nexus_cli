@@ -1,6 +1,6 @@
 module NexusCli
   # @author Kyle Allan <kallan@riotgames.com>
-  module ArtifactMixin
+  module ArtifactsMixin
     # Retrieves a file from the Nexus server using the given [String] artifact
     # identifier. Optionally provide a destination [String].
     #
@@ -34,7 +34,6 @@ module NexusCli
         :size      => File.size(File.expand_path(destination))
       }
     end
-
 
     # Pushes the given [file] to the Nexus server
     # under the given [artifact] identifier.
@@ -117,6 +116,29 @@ module NexusCli
         return format_search_results(doc, group_id, artifact_id)
       else
         raise UnexpectedStatusCodeException.new(response.status)
+      end
+    end
+
+    def transfer_artifact(artifact, from_repository, to_repository)
+      do_transfer_artifact(artifact, from_repository, to_repository)
+    end
+
+    private
+
+    # Transfers an artifact from one repository
+    # to another. Sometimes called a `promotion`
+    # 
+    # @param  artifact [String] a Maven identifier
+    # @param  from_repository [String] the name of the from repository
+    # @param  to_repository [String] the name of the to repository
+    # 
+    # @return [Boolean] returns true when successful
+    def do_transfer_artifact(artifact, from_repository, to_repository)
+      Dir.mktmpdir do |temp_dir|
+        configuration["repository"] = sanitize_for_id(from_repository)
+        artifact_file = pull_artifact(artifact, temp_dir)
+        configuration["repository"] = sanitize_for_id(to_repository)
+        push_artifact(artifact, artifact_file[:file_path])
       end
     end
   end
