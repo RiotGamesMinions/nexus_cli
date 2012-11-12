@@ -28,7 +28,6 @@ module NexusCli
       end
     end
 
-
     # Deletes the given repository
     # 
     # @param  name [String] the name of the repositroy to delete, transformed
@@ -46,7 +45,6 @@ module NexusCli
         raise UnexpectedStatusCodeException.new(response.status)
       end
     end
-
 
     # Find information about the repository with the given
     # [name].
@@ -70,7 +68,6 @@ module NexusCli
       end
     end
 
-
     # Creates a group repository with the given name.
     # 
     # @param  name [String] the name to give the new repository
@@ -90,7 +87,6 @@ module NexusCli
       end
     end
 
-
     # Gets information about the given group repository with
     # the given [group_id].
     # 
@@ -109,7 +105,6 @@ module NexusCli
       end
     end
 
-
     # Checks if a the given [repository_to_check] is a member
     # of the given group repository - [group_ip].
     # 
@@ -123,7 +118,6 @@ module NexusCli
 
       repositories_in_group.find{|repository| repository["id"] == sanitize_for_id(repository_to_check)}
     end
-
 
     # Adds the given [repository_to_add_id] to the given group repository,
     # [group_id].
@@ -145,7 +139,6 @@ module NexusCli
       end
     end
 
-
     # Removes the given [repository_to_remove_id] from the group repository,
     # [group_id].
     # 
@@ -163,7 +156,6 @@ module NexusCli
         raise UnexpectedStatusCodeException.new(response.status)
       end
     end
-
 
     # Deletes the given group repository.
     # 
