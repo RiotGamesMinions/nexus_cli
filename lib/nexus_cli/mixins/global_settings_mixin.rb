@@ -1,6 +1,6 @@
 module NexusCli
   # @author Kyle Allan <kallan@riotgames.com>
-  module GlobalSettingsMixins
+  module GlobalSettingsMixin
     # Retrieves the global settings of the Nexus server
     # 
     # @return [File] a File with the global settings.
