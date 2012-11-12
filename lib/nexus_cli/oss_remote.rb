@@ -251,7 +251,7 @@ module NexusCli
         configuration["repository"] = sanitize_for_id(from_repository)
         artifact_file = pull_artifact(artifact, temp_dir)
         configuration["repository"] = sanitize_for_id(to_repository)
-        push_artifact(artifact, artifact_file)
+        push_artifact(artifact, artifact_file[:file_path])
       end
     end
 
