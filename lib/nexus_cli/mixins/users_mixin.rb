@@ -83,5 +83,15 @@ module NexusCli
         raise UnexpectedStatusCodeException.new(response.status)
       end
     end
+
+    private
+
+    def create_user_json(params)
+      JSON.dump(:data => params)
+    end
+
+    def create_change_password_json(params)
+      JSON.dump(:data => params)
+    end
   end
 end

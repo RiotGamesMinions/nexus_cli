@@ -152,88 +152,9 @@ module NexusCli
       return group_id, artifact_id, version, extension
     end
 
-    def create_hosted_repository_json(name, id, policy, provider)
-      params = {:provider => provider.nil? ? "maven2": provider}
-      params[:providerRole] = "org.sonatype.nexus.proxy.repository.Repository"
-      params[:exposed] = true
-      params[:browseable] = true
-      params[:indexable] = true
-      params[:repoType] = "hosted"
-      params[:repoPolicy] = policy.nil? ? "RELEASE" : ["RELEASE", "SNAPSHOT"].include?(policy) ? policy : "RELEASE" 
-      params[:name] = name
-      params[:id] = id.nil? ? sanitize_for_id(name) : sanitize_for_id(id)
-      params[:format] = "maven2"
-      JSON.dump(:data => params)
-    end
-
-    def create_proxy_repository_json(name, url, id, policy, provider)
-      params = {:provider => provider.nil? ? "maven2" : provider}
-      params[:providerRole] = "org.sonatype.nexus.proxy.repository.Repository"
-      params[:exposed] = true
-      params[:browseable] = true
-      params[:indexable] = true
-      params[:repoType] = "proxy"
-      params[:repoPolicy] = policy.nil? ? "RELEASE" : ["RELEASE", "SNAPSHOT"].include?(policy) ? policy : "RELEASE" 
-      params[:checksumPolicy] = "WARN"
-      params[:writePolicy] = "READ_ONLY"
-      params[:downloadRemoteIndexes] = true
-      params[:autoBlockActive] = false
-      params[:name] = name
-      params[:id] = id.nil? ? sanitize_for_id(name) : sanitize_for_id(id)
-      params[:remoteStorage] = {:remoteStorageUrl => url.nil? ? "http://change-me.com/" : url}
-      JSON.dump(:data => params)
-    end
-
-    def create_user_json(params)
-      JSON.dump(:data => params)
-    end
-
-    def create_change_password_json(params)
-      JSON.dump(:data => params)
-    end
-
     def create_logger_level_json(level)
       params = {:rootLoggerLevel => level.upcase}
       JSON.dump(:data => params)
-    end
-
-    def create_group_repository_json(name, id, provider)
-      params = {:id => id.nil? ? sanitize_for_id(name) : sanitize_for_id(id)}
-      params[:name] = name
-      params[:provider] = provider.nil? ? "maven2" : provider
-      params[:exposed] = true
-      JSON.dump(:data => params)
-    end
-
-    def create_add_to_group_repository_json(group_id, repository_to_add_id)
-      group_repository_json = JSON.parse(get_group_repository(group_id))
-      repositories = group_repository_json["data"]["repositories"]
-      repositories << {:id => sanitize_for_id(repository_to_add_id)}
-      params = {:repositories => repositories}
-      params[:id] = group_repository_json["data"]["id"]
-      params[:name] = group_repository_json["data"]["name"]
-      params[:exposed] = group_repository_json["data"]["exposed"]
-      JSON.dump(:data => params)
-    end
-
-    def create_remove_from_group_repository_json(group_id, repository_to_remove_id)
-      group_repository_json = JSON.parse(get_group_repository(group_id))
-      repositories = group_repository_json["data"]["repositories"]
-
-      repositories.delete(repository_in_group?(group_id, repository_to_remove_id))
-      
-      params = {:repositories => repositories}
-      params[:id] = group_repository_json["data"]["id"]
-      params[:name] = group_repository_json["data"]["name"]
-      JSON.dump(:data => params)
-    end
-
-    def generate_fake_pom(pom_name, group_id, artifact_id, version, extension)
-      Tempfile.open(pom_name) do |file|
-        template_path = File.join(NexusCli.root, "data", "pom.xml.erb")
-        file.puts ERB.new(File.read(template_path)).result(binding)
-        file
-      end
     end
   end
 end

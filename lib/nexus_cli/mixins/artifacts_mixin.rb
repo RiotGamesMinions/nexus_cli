@@ -141,5 +141,13 @@ module NexusCli
         push_artifact(artifact, artifact_file[:file_path])
       end
     end
+
+    def generate_fake_pom(pom_name, group_id, artifact_id, version, extension)
+      Tempfile.open(pom_name) do |file|
+        template_path = File.join(NexusCli.root, "data", "pom.xml.erb")
+        file.puts ERB.new(File.read(template_path)).result(binding)
+        file
+      end
+    end
   end
 end
