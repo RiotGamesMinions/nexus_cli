@@ -1,5 +1,4 @@
 require 'nexus_cli/errors'
-require 'nexus_cli/kernel'
 
 module NexusCli
   DEFAULT_ACCEPT_HEADER = {
@@ -21,6 +20,7 @@ module NexusCli
   autoload :GlobalSettingsMixin, 'nexus_cli/mixins/global_settings_mixin'
   autoload :UsersMixin, 'nexus_cli/mixins/users_mixin'
   autoload :RepositoriesMixin, 'nexus_cli/mixins/repositories_mixin'
+  autoload :LoggingMixin, 'nexus_cli/mixins/logging_mixin'
 
   class << self
     def root

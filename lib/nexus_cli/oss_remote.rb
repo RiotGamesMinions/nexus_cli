@@ -15,6 +15,7 @@ module NexusCli
     include GlobalSettingsMixin
     include UsersMixin
     include RepositoriesMixin
+    include LoggingMixin
 
     # @param [Hash] overrides
     # @param [Boolean] ssl_verify
@@ -81,27 +82,6 @@ module NexusCli
       status['edition_long'] == "Professional"
     end
 
-    def get_logging_info
-      response = nexus.get(nexus_url("service/local/log/config"), :header => DEFAULT_ACCEPT_HEADER)
-      case response.status
-      when 200
-        return response.content
-      else
-        raise UnexpectedStatusCodeException.new(response.status)
-      end
-    end
-
-    def set_logger_level(level)
-      raise InvalidLoggingLevelException unless ["INFO", "DEBUG", "ERROR"].include?(level.upcase)
-      response = nexus.put(nexus_url("service/local/log/config"), :body => create_logger_level_json(level), :header => DEFAULT_CONTENT_TYPE_HEADER)
-      case response.status
-      when 200
-        return true
-      else
-        raise UnexpectedStatusCodeException.new(response.status)
-      end
-    end
-
     private
 
     # Transforms a given [String] into a sanitized version by
@@ -128,11 +108,6 @@ module NexusCli
       group_id, artifact_id, version, extension = split_artifact
       version.upcase! if version.casecmp("latest")
       return group_id, artifact_id, version, extension
-    end
-
-    def create_logger_level_json(level)
-      params = {:rootLoggerLevel => level.upcase}
-      JSON.dump(:data => params)
     end
   end
 end
