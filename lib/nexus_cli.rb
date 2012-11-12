@@ -18,6 +18,7 @@ module NexusCli
   autoload :Configuration, 'nexus_cli/configuration'
   autoload :N3Metadata, 'nexus_cli/n3_metadata'
   autoload :ArtifactMixins, 'nexus_cli/mixins/artifact_mixins'
+  autoload :GlobalSettingsMixins, 'nexus_cli/mixins/global_settings_mixins'
 
   class << self
     def root
