@@ -17,6 +17,7 @@ module NexusCli
   autoload :ProRemote, 'nexus_cli/pro_remote'
   autoload :Configuration, 'nexus_cli/configuration'
   autoload :N3Metadata, 'nexus_cli/n3_metadata'
+  autoload :ArtifactMixins, 'nexus_cli/mixins/artifact_mixins'
 
   class << self
     def root
