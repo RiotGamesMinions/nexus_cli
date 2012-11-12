@@ -11,7 +11,7 @@ module NexusCli
   class OSSRemote
     attr_reader :configuration
 
-    include ArtifactMixin
+    include ArtifactsMixin
     include GlobalSettingsMixin
     include UsersMixin
     include RepositoriesMixin
@@ -112,28 +112,6 @@ module NexusCli
     # @return [String] the sanitized String
     def sanitize_for_id(unsanitized_string)
       unsanitized_string.gsub(" ", "_").downcase
-    end
-
-    # Formats the given XML into an [Array<String>] so it
-    # can be displayed nicely.
-    # 
-    # @param  doc [Nokogiri::XML] the xml search results
-    # @param  group_id [String] the group id
-    # @param  artifact_id [String] the artifact id
-    # 
-    # @return [type] [description]
-    def format_search_results(doc, group_id, artifact_id)
-      versions = doc.xpath("//version").inject([]) {|array,node| array << "#{node.content()}"}
-      if versions.length > 0
-        indent_size = versions.max{|a,b| a.length <=> b.length}.size+4
-        formated_results = ['Found Versions:']
-        versions.inject(formated_results) do |array,version|
-          temp_version = version + ":"
-          array << "#{temp_version.ljust(indent_size)} `nexus-cli pull #{group_id}:#{artifact_id}:#{version}:tgz`"
-        end
-      else 
-        formated_results = ['No Versions Found.']
-      end 
     end
 
     # Parses a given artifact string into its

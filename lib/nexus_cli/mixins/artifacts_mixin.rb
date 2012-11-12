@@ -81,6 +81,13 @@ module NexusCli
       end
     end
 
+
+    # Retrieves information about the given [artifact] and returns
+    # it in as a [String] of XML.
+    # 
+    # @param  artifact [String] the Maven identifier
+    # 
+    # @return [String] A string of XML data about the desired artifact
     def get_artifact_info(artifact)
       group_id, artifact_id, version, extension = parse_artifact_string(artifact)
       response = nexus.get(nexus_url("service/local/artifact/maven/resolve"), :query => {:g => group_id, :a => artifact_id, :v => version, :e => extension, :r => configuration['repository']})
@@ -124,6 +131,28 @@ module NexusCli
     end
 
     private
+
+    # Formats the given XML into an [Array<String>] so it
+    # can be displayed nicely.
+    # 
+    # @param  doc [Nokogiri::XML] the xml search results
+    # @param  group_id [String] the group id
+    # @param  artifact_id [String] the artifact id
+    # 
+    # @return [type] [description]
+    def format_search_results(doc, group_id, artifact_id)
+      versions = doc.xpath("//version").inject([]) {|array,node| array << "#{node.content()}"}
+      if versions.length > 0
+        indent_size = versions.max{|a,b| a.length <=> b.length}.size+4
+        formated_results = ['Found Versions:']
+        versions.inject(formated_results) do |array,version|
+          temp_version = version + ":"
+          array << "#{temp_version.ljust(indent_size)} `nexus-cli pull #{group_id}:#{artifact_id}:#{version}:tgz`"
+        end
+      else 
+        formated_results = ['No Versions Found.']
+      end 
+    end
 
     # Transfers an artifact from one repository
     # to another. Sometimes called a `promotion`

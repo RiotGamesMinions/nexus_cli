@@ -28,6 +28,13 @@ module NexusCli
       end
     end
 
+
+    # Deletes the given repository
+    # 
+    # @param  name [String] the name of the repositroy to delete, transformed
+    # into an id.
+    # 
+    # @return [Boolean] true if the repository is deleted, false otherwise.
     def delete_repository(name)
       response = nexus.delete(nexus_url("service/local/repositories/#{sanitize_for_id(name)}"))
       case response.status
@@ -40,6 +47,15 @@ module NexusCli
       end
     end
 
+
+    # Find information about the repository with the given
+    # [name].
+    # 
+    # @param  name [String] the name of the repository, transformed
+    # into an id.
+    # 
+    # @return [String] A String of XML with information about the desired
+    # repository.
     def get_repository_info(name)
       response = nexus.get(nexus_url("service/local/repositories/#{sanitize_for_id(name)}"))
       case response.status
@@ -54,7 +70,15 @@ module NexusCli
       end
     end
 
-        def create_group_repository(name, id, provider)
+
+    # Creates a group repository with the given name.
+    # 
+    # @param  name [String] the name to give the new repository
+    # @param  id [String] an alternative id to use for the new repository
+    # @param  provider [String] the type of Maven provider for this repository
+    # 
+    # @return [Boolean] true if the group repository is created, false otherwise
+    def create_group_repository(name, id, provider)
       response = nexus.post(nexus_url("service/local/repo_groups"), :body => create_group_repository_json(name, id, provider), :header => DEFAULT_CONTENT_TYPE_HEADER)
       case response.status
       when 201
@@ -66,6 +90,13 @@ module NexusCli
       end
     end
 
+
+    # Gets information about the given group repository with
+    # the given [group_id].
+    # 
+    # @param  group_id [String] the id of the group repository to find
+    # 
+    # @return [String] a JSON String of information about the given group repository
     def get_group_repository(group_id)
       response = nexus.get(nexus_url("service/local/repo_groups/#{sanitize_for_id(group_id)}"), :header => DEFAULT_ACCEPT_HEADER)
       case response.status
@@ -78,6 +109,14 @@ module NexusCli
       end
     end
 
+
+    # Checks if a the given [repository_to_check] is a member
+    # of the given group repository - [group_ip].
+    # 
+    # @param  group_id [String] the group repository to look in
+    # @param  repository_to_check [String] the repository that might be a member of the group
+    # 
+    # @return [Boolean] true if the [repository_to_check] is a member of group repository, false otherwise
     def repository_in_group?(group_id, repository_to_check)
       group_repository = JSON.parse(get_group_repository(group_id))
       repositories_in_group = group_repository["data"]["repositories"]
@@ -85,6 +124,14 @@ module NexusCli
       repositories_in_group.find{|repository| repository["id"] == sanitize_for_id(repository_to_check)}
     end
 
+
+    # Adds the given [repository_to_add_id] to the given group repository,
+    # [group_id].
+    # 
+    # @param  group_id [String] the group repository to add to
+    # @param  repository_to_add_id [String] the repository to added to the group
+    # 
+    # @return [Boolean] true if the repository is successfully added, false otherwise
     def add_to_group_repository(group_id, repository_to_add_id)
       raise RepositoryInGroupException if repository_in_group?(group_id, repository_to_add_id)
       response = nexus.put(nexus_url("service/local/repo_groups/#{sanitize_for_id(group_id)}"), :body => create_add_to_group_repository_json(group_id, repository_to_add_id), :header => DEFAULT_CONTENT_TYPE_HEADER)
@@ -98,6 +145,14 @@ module NexusCli
       end
     end
 
+
+    # Removes the given [repository_to_remove_id] from the group repository,
+    # [group_id].
+    # 
+    # @param  group_id [String] the group repository to remove from
+    # @param  repository_to_remove_id [String] the repository to remove from the group
+    # 
+    # @return [Boolean] true if the repisotory is successfully remove, false otherwise
     def remove_from_group_repository(group_id, repository_to_remove_id)
       raise RepositoryNotInGroupException unless repository_in_group?(group_id, repository_to_remove_id)
       response = nexus.put(nexus_url("service/local/repo_groups/#{sanitize_for_id(group_id)}"), :body => create_remove_from_group_repository_json(group_id, repository_to_remove_id), :header => DEFAULT_CONTENT_TYPE_HEADER)
@@ -109,6 +164,12 @@ module NexusCli
       end
     end
 
+
+    # Deletes the given group repository.
+    # 
+    # @param  group_id [String] the group repository to delete
+    # 
+    # @return [Boolean] true if the group repository is deleted, false otherwise
     def delete_group_repository(group_id)
       response = nexus.delete(nexus_url("service/local/repo_groups/#{sanitize_for_id(group_id)}"))
       case response.status
