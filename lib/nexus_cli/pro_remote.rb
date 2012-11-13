@@ -4,10 +4,7 @@ module NexusCli
     attr_reader :connection
 
     extend Forwardable
-    def_delegator :@connection, :status, :status
-    def_delegator :@connection, :parse_artifact_string, :parse_artifact_string
-    def_delegator :@connection, :nexus_url, :nexus_url
-    def_delegator :@connection, :nexus, :nexus
+    def_delegators :@connection, :status, :parse_artifact_string, :nexus_url, :nexus
     
     include ArtifactsMixin
     include CustomMetadataMixin
