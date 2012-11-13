@@ -2,9 +2,11 @@ module NexusCli
   class Connection
     attr_reader :nexus
     attr_reader :configuration
+    attr_reader :ssl_verify
 
-    def initialize(configuration)
+    def initialize(configuration, ssl_verify)
       @configuration = configuration
+      @ssl_verify = ssl_verify
       @nexus = setup_nexus(configuration)
     end
 
@@ -19,7 +21,7 @@ module NexusCli
       # https://github.com/nahi/httpclient/issues/63
       client.set_auth(nil, configuration['username'], configuration['password'])
       client.www_auth.basic_auth.challenge(configuration['url'])
-      client.ssl_config.verify_mode = OpenSSL::SSL::VERIFY_NONE unless @ssl_verify
+      client.ssl_config.verify_mode = OpenSSL::SSL::VERIFY_NONE unless ssl_verify
       
       client
     end

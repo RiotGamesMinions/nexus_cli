@@ -10,8 +10,7 @@ module NexusCli
 
       def create(overrides, ssl_verify=true)
         @configuration = Configuration::parse(overrides)
-        @connection = Connection.new(configuration)
-        @ssl_verify = ssl_verify
+        @connection = Connection.new(configuration, ssl_verify)
         running_nexus_pro? ? ProRemote.new(overrides, ssl_verify) : OSSRemote.new(overrides, ssl_verify)
       end
 
