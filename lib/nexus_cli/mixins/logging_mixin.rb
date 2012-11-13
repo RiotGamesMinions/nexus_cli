@@ -1,6 +1,7 @@
 module NexusCli
   # @author Kyle Allan <kallan@riotgames.com>
   module LoggingMixin
+    
     # Gets information about the current logging
     # levels in Nexus.
     # 

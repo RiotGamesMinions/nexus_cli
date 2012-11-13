@@ -1,4 +1,7 @@
+require 'httpclient'
 require 'nexus_cli/errors'
+require 'nokogiri'
+require 'yaml'
 
 module NexusCli
   DEFAULT_ACCEPT_HEADER = {
@@ -21,6 +24,7 @@ module NexusCli
   autoload :UsersMixin, 'nexus_cli/mixins/users_mixin'
   autoload :RepositoriesMixin, 'nexus_cli/mixins/repositories_mixin'
   autoload :LoggingMixin, 'nexus_cli/mixins/logging_mixin'
+  autoload :CustomMetadataMixin, 'nexus_cli/mixins/custom_metadata_mixin'
 
   class << self
     def root

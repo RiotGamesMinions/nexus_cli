@@ -1,6 +1,10 @@
+require 'erb'
+require 'tempfile'
+
 module NexusCli
   # @author Kyle Allan <kallan@riotgames.com>
   module ArtifactsMixin
+    
     # Retrieves a file from the Nexus server using the given [String] artifact
     # identifier. Optionally provide a destination [String].
     #

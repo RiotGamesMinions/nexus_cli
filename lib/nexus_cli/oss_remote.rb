@@ -1,11 +1,3 @@
-require 'erb'
-require 'httpclient'
-require 'json'
-require 'jsonpath'
-require 'nokogiri'
-require 'tempfile'
-require 'yaml'
-
 module NexusCli
   # @author Kyle Allan <kallan@riotgames.com>
   class OSSRemote
@@ -13,10 +5,10 @@ module NexusCli
 
     include ArtifactsMixin
     include GlobalSettingsMixin
-    include UsersMixin
-    include RepositoriesMixin
     include LoggingMixin
     include NexusCli
+    include RepositoriesMixin
+    include UsersMixin
 
     # @param [Hash] overrides
     # @param [Boolean] ssl_verify

@@ -1,6 +1,9 @@
+require 'json'
+
 module NexusCli
   # @author Kyle Allan <kallan@riotgames.com>
   module RepositoriesMixin
+    
     # Creates a repository that the Nexus uses to hold artifacts.
     # 
     # @param  name [String] the name of the repository to create

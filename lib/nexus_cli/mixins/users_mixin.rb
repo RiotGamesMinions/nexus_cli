@@ -1,6 +1,9 @@
+require 'json'
+
 module NexusCli
   # @author Kyle Allan <kallan@riotgames.com>
   module UsersMixin
+    
     def get_users
       response = nexus.get(nexus_url("service/local/users"))
       case response.status
