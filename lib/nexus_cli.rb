@@ -24,7 +24,8 @@ module NexusCli
   autoload :UsersMixin, 'nexus_cli/mixins/users_mixin'
   autoload :RepositoriesMixin, 'nexus_cli/mixins/repositories_mixin'
   autoload :LoggingMixin, 'nexus_cli/mixins/logging_mixin'
-  autoload :CustomMetadataMixin, 'nexus_cli/mixins/custom_metadata_mixin'
+  autoload :CustomMetadataMixin, 'nexus_cli/mixins/pro/custom_metadata_mixin'
+  autoload :SmartProxyMixin, 'nexus_cli/mixins/pro/smart_proxy_mixin'
 
   class << self
     def root

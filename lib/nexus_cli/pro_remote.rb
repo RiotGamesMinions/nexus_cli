@@ -8,6 +8,7 @@ module NexusCli
     include LoggingMixin
     include NexusCli
     include RepositoriesMixin
+    include SmartProxyMixin
     include UsersMixin
 
     # @param [Hash] overrides
