@@ -1,10 +1,5 @@
 module NexusCli
-  class ProRemote
-    attr_reader :configuration
-    attr_reader :connection
-
-    extend Forwardable
-    def_delegators :@connection, :status, :parse_artifact_string, :nexus_url, :nexus
+  class ProRemote < BaseRemote
     
     include ArtifactsMixin
     include CustomMetadataMixin
@@ -13,13 +8,6 @@ module NexusCli
     include RepositoriesMixin
     include SmartProxyMixin
     include UsersMixin
-
-    # @param [Hash] overrides
-    # @param [Boolean] ssl_verify
-    def initialize(overrides, ssl_verify=true)
-      @configuration = Configuration::parse(overrides)
-      @connection = Connection.new(configuration, ssl_verify)
-    end
 
     def get_license_info
       response = nexus.get(nexus_url("service/local/licensing"), :header => DEFAULT_ACCEPT_HEADER)
