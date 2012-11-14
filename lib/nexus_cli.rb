@@ -21,13 +21,13 @@ module NexusCli
   autoload :ProRemote, 'nexus_cli/remote/pro_remote'
   autoload :Configuration, 'nexus_cli/configuration'
   autoload :N3Metadata, 'nexus_cli/n3_metadata'
-  autoload :ArtifactsMixin, 'nexus_cli/mixins/artifacts_mixin'
-  autoload :GlobalSettingsMixin, 'nexus_cli/mixins/global_settings_mixin'
-  autoload :UsersMixin, 'nexus_cli/mixins/users_mixin'
-  autoload :RepositoriesMixin, 'nexus_cli/mixins/repositories_mixin'
-  autoload :LoggingMixin, 'nexus_cli/mixins/logging_mixin'
-  autoload :CustomMetadataMixin, 'nexus_cli/mixins/pro/custom_metadata_mixin'
-  autoload :SmartProxyMixin, 'nexus_cli/mixins/pro/smart_proxy_mixin'
+  autoload :ArtifactActions, 'nexus_cli/mixins/artifact_actions'
+  autoload :GlobalSettingsActions, 'nexus_cli/mixins/global_settings_actions'
+  autoload :UserActions, 'nexus_cli/mixins/user_actions'
+  autoload :RepositoryActions, 'nexus_cli/mixins/repository_actions'
+  autoload :LoggingActions, 'nexus_cli/mixins/logging_actions'
+  autoload :CustomMetadataActions, 'nexus_cli/mixins/pro/custom_metadata_actions'
+  autoload :SmartProxyActions, 'nexus_cli/mixins/pro/smart_proxy_actions'
 
   class << self
     def root

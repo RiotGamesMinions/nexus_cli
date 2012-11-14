@@ -2,7 +2,7 @@ require 'json'
 
 module NexusCli
   # @author Kyle Allan <kallan@riotgames.com>
-  module RepositoriesMixin
+  module RepositoryActions
     
     # Creates a repository that the Nexus uses to hold artifacts.
     # 

@@ -1,6 +1,6 @@
 module NexusCli
   # @author Kyle Allan <kallan@riotgames.com>
-  module CustomMetadataMixin
+  module CustomMetadataActions
 
     # Gets the custom metadata for an artifact
     # @param [String] artifact The GAVE string of the artifact

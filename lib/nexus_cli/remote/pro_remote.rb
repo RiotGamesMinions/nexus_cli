@@ -1,13 +1,13 @@
 module NexusCli
   class ProRemote < BaseRemote
     
-    include ArtifactsMixin
-    include CustomMetadataMixin
-    include GlobalSettingsMixin
-    include LoggingMixin
-    include RepositoriesMixin
-    include SmartProxyMixin
-    include UsersMixin
+    include ArtifactActions
+    include CustomMetadataActions
+    include GlobalSettingsActions
+    include LoggingActions
+    include RepositoryActions
+    include SmartProxyActions
+    include UserActions
 
     def get_license_info
       response = nexus.get(nexus_url("service/local/licensing"), :header => DEFAULT_ACCEPT_HEADER)

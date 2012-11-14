@@ -2,7 +2,7 @@ require 'json'
 
 module NexusCli
   # @author Kyle Allan <kallan@riotgames.com>
-  module GlobalSettingsMixin
+  module GlobalSettingsActions
     
     # Retrieves the global settings of the Nexus server
     # 

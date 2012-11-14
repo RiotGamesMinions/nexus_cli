@@ -3,7 +3,7 @@ require 'jsonpath'
 
 module NexusCli
   # @author Kyle Allan <kallan@riotgames.com>
-  module UsersMixin
+  module UserActions
 
 
     # Gets information about the current Nexus users.

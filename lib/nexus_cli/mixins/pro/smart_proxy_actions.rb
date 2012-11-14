@@ -1,6 +1,6 @@
 module NexusCli
   # @author Kyle Allan <kallan@riotgames.com>
-  module SmartProxyMixin
+  module SmartProxyActions
 
     # Gets Smart Proxy related information about the
     # given [repository_id].

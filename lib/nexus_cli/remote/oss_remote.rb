@@ -2,10 +2,10 @@ module NexusCli
   # @author Kyle Allan <kallan@riotgames.com>
   class OSSRemote < BaseRemote
 
-    include ArtifactsMixin
-    include GlobalSettingsMixin
-    include LoggingMixin
-    include RepositoriesMixin
-    include UsersMixin
+    include ArtifactActions
+    include GlobalSettingsActions
+    include LoggingActions
+    include RepositoryActions
+    include UserActions
   end
 end
