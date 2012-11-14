@@ -4,7 +4,7 @@ module NexusCli
     attr_reader :connection
 
     extend Forwardable
-    def_delegators :@connection, :status, :nexus_url, :nexus
+    def_delegators :@connection, :status, :nexus_url, :nexus, :sanitize_for_id
 
     # @param [Hash] overrides
     # @param [Boolean] ssl_verify

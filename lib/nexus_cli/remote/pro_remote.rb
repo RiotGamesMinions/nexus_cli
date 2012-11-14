@@ -55,19 +55,5 @@ module NexusCli
 
       do_update_custom_metadata(artifact, from_artifact_metadata, to_artifact_metadata)
     end
-
-    private
-
-    def create_add_trusted_key_json(params)
-      JSON.dump(:data => params)
-    end
-
-    def create_smart_proxy_settings_json(params)
-      JSON.dump(:data => params)
-    end
-
-    def create_pub_sub_json(params)
-      JSON.dump(:data => params)
-    end
   end
 end

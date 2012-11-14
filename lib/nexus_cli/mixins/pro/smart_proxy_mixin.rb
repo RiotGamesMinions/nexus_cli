@@ -169,6 +169,18 @@ module NexusCli
 
     private
 
+    def create_add_trusted_key_json(params)
+      JSON.dump(:data => params)
+    end
+
+    def create_smart_proxy_settings_json(params)
+      JSON.dump(:data => params)
+    end
+
+    def create_pub_sub_json(params)
+      JSON.dump(:data => params)
+    end
+
     def artifact_subscribe(repository_id, params)
       response = nexus.put(nexus_url("service/local/smartproxy/pub-sub/#{sanitize_for_id(repository_id)}"), :body => create_pub_sub_json(params), :header => DEFAULT_CONTENT_TYPE_HEADER)
       case response.status
