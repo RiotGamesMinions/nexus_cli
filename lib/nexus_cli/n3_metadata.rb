@@ -1,4 +1,3 @@
-require 'nokogiri'
 require 'base64'
 
 module NexusCli
