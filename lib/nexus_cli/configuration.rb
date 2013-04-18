@@ -39,7 +39,7 @@ module NexusCli
 
       def sanitize_config(config)
         config["repository"] = config["repository"].gsub(" ", "_").downcase
-        config.symbolize_keys
+        config.with_indifferent_access
       end
     end
   end

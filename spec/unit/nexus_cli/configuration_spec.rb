@@ -114,10 +114,9 @@ describe NexusCli::Configuration do
       end
     end
 
-    it "symbolizes the keys" do
-      sanitize_config.each do |key, value|
-        key.should be_a(Symbol)
-      end
+    it "has indifferent access" do
+      sanitize_config["url"].should eq(valid_config["url"])
+      sanitize_config[:url].should eq(valid_config["url"])
     end
   end
 end

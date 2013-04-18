@@ -19,7 +19,7 @@ module NexusCli
 
         class_option :overrides,
           :type => :hash,
-          :default => {},
+          :default => nil,
           :desc => "A hashed list of overrides. Available options are 'url', 'repository', 'username', and 'password'."
 
         class_option :ssl_verify,
