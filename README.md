@@ -9,7 +9,7 @@ A CLI wrapper around Sonatype Nexus REST calls.
 
 # Installation
 
-1. Install the Gem
+1. Install the Gem - `gem install nexus_cli`
 2. Create a file in your user's home directory named `.nexus_cli`
 3. Give the file the following information:
 
