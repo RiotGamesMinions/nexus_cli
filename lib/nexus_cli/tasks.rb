@@ -34,7 +34,7 @@ module NexusCli
         desc "pull_artifact artifact", "Pulls an artifact from Nexus and places it on your machine."
         def pull_artifact(artifact)
           pull_artifact_response = nexus_remote.pull_artifact(artifact, options[:destination])
-          say "Artifact has been retrived and can be found at path: #{pull_artifact_response[:file_path]}", :green
+          say "Artifact has been retrieved and can be found at path: #{pull_artifact_response[:file_path]}", :green
         end
 
         desc "push_artifact artifact file", "Pushes an artifact from your machine onto the Nexus."

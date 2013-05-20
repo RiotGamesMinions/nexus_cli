@@ -3,6 +3,7 @@ require 'spec_helper'
 describe NexusCli::Configuration do
   subject { configuration }
   let(:configuration) { described_class }
+  let(:config_instance) { configuration.from_overrides(valid_config) }
   let(:valid_config) {
       {
         "url" => "http://somewebsite.com",
@@ -16,8 +17,8 @@ describe NexusCli::Configuration do
     subject { from_overrides }
     let(:from_overrides) { configuration.from_overrides(valid_config) }
 
-    it "returns a hash" do
-      from_overrides.should be_a(Hash)
+    it "returns a new Configuration object" do
+      expect(from_overrides).to be_a(NexusCli::Configuration)
     end
   end
 
@@ -53,6 +54,10 @@ describe NexusCli::Configuration do
         YAML.should_receive(:load_file).with(nexus_config_path)
         from_file
       end
+    end
+
+    it "returns a new Configuration object" do
+      expect(from_file).to be_a(NexusCli::Configuration)
     end
   end
 
@@ -109,14 +114,52 @@ describe NexusCli::Configuration do
       }
 
       it "turns them into underscores" do
-        sanitize_config[:repository].should eq("foo_bar")
+        expect(sanitize_config[:repository]).to eq("foo_bar")
         sanitize_config
       end
     end
 
     it "has indifferent access" do
-      sanitize_config["url"].should eq(valid_config["url"])
-      sanitize_config[:url].should eq(valid_config["url"])
+      expect(sanitize_config["url"]).to eq(valid_config["url"])
+      expect(sanitize_config[:url]).to eq(valid_config["url"])
+    end
+  end
+
+  describe "#new" do
+    subject { new_config }
+    let(:new_config) { described_class.new(url, repository, username, password) }
+    let(:url) { "http://some-url.com" }
+    let(:repository) { "releases" }
+    let(:username) { "kallan" }
+    let(:password) { "password" }
+
+
+    it "creates a new Configuration object" do
+      expect(new_config).to be_a(NexusCli::Configuration)
+    end
+  end
+
+  describe "#url" do  
+    it "returns the url" do
+      expect(config_instance.url).to eq("http://somewebsite.com")
+    end
+  end
+
+  describe "#repository" do
+    it "returns the repository" do
+      expect(config_instance.repository).to eq("foo")
+    end
+  end
+
+  describe "#username" do
+    it "returns the username" do
+      expect(config_instance.username).to eq("admin")
+    end
+  end
+
+  describe "#password" do
+    it "returns the password" do
+      expect(config_instance.password).to eq("password")
     end
   end
 end

@@ -1,8 +1,14 @@
 require 'extlib'
 
 module NexusCli
-  module Configuration
+  class Configuration
     DEFAULT_FILE = "~/.nexus_cli".freeze
+
+    attr_reader :url
+    attr_reader :repository
+    attr_reader :username
+    attr_reader :password
+    attr_reader :ssl_verify
 
     class << self
       # The filepath to the nexus cli configuration file
@@ -19,7 +25,8 @@ module NexusCli
         raise MissingSettingsFileException unless overrides
 
         validate_config(overrides)
-        sanitize_config(overrides)
+        sanitized_config = sanitize_config(overrides)
+        new(sanitized_config[:url], sanitized_config[:repository], sanitized_config[:username], sanitized_config[:password])
       end
 
       def from_file
@@ -28,7 +35,8 @@ module NexusCli
         raise MissingSettingsFileException unless config
 
         validate_config(config)
-        sanitize_config(config)
+        sanitized_config = sanitize_config(config)
+        new(sanitized_config[:url], sanitized_config[:repository], sanitized_config[:username], sanitized_config[:password])
       end
 
       def validate_config(configuration)
@@ -41,6 +49,13 @@ module NexusCli
         config["repository"] = config["repository"].gsub(" ", "_").downcase
         config.with_indifferent_access
       end
+    end
+
+    def initialize(url, repository, username, password)
+      @url = url
+      @repository = repository
+      @username = username
+      @password = password
     end
   end
 end
