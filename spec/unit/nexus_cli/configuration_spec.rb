@@ -61,44 +61,6 @@ describe NexusCli::Configuration do
     end
   end
 
-  describe "::validate_config" do
-    subject { validate_config }
-    let(:validate_config) { described_class.validate_config(config) }
-
-    context "when a password is missing" do
-      let(:config) {  valid_config.slice("url", "repository", "username") }
-
-      it "raises an InvalidSettingsException" do
-        expect { validate_config }.to raise_error(NexusCli::InvalidSettingsException)
-      end
-    end
-
-    context "when a username is missing" do
-      let(:config) {  valid_config.slice("url", "repository", "password") }
-
-      it "raises an InvalidSettingsException" do
-        expect { validate_config }.to raise_error(NexusCli::InvalidSettingsException)
-      end
-
-    end
-
-    context "when a url is missing" do
-      let(:config) {  valid_config.slice("password", "repository", "username") }
-
-      it "raises an InvalidSettingsException" do
-        expect { validate_config }.to raise_error(NexusCli::InvalidSettingsException)
-      end
-    end
-
-    context "when a repository is missing" do
-      let(:config) {  valid_config.slice("url", "password", "username") }
-
-      it "raises an InvalidSettingsException" do
-        expect { validate_config }.to raise_error(NexusCli::InvalidSettingsException)
-      end
-    end
-  end
-
   describe "::sanitize_config" do
     subject { sanitize_config }
     let(:sanitize_config) { described_class.sanitize_config(valid_config) }

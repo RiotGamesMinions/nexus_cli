@@ -1,14 +1,27 @@
 require 'extlib'
+require 'chozo'
 
 module NexusCli
   class Configuration
     DEFAULT_FILE = "~/.nexus_cli".freeze
 
-    attr_reader :url
-    attr_reader :repository
-    attr_reader :username
-    attr_reader :password
-    attr_reader :ssl_verify
+    include Chozo::VariaModel
+
+    attribute :url,
+      type: String,
+      required: true
+
+    attribute :repository,
+      type: String,
+      required: true
+
+    attribute :username,
+      type: String,
+      required: true
+
+    attribute :password,
+      type: String,
+      required: true
 
     class << self
       # The filepath to the nexus cli configuration file
@@ -24,7 +37,6 @@ module NexusCli
       def from_overrides(overrides)
         raise MissingSettingsFileException unless overrides
 
-        validate_config(overrides)
         sanitized_config = sanitize_config(overrides)
         new(sanitized_config[:url], sanitized_config[:repository], sanitized_config[:username], sanitized_config[:password])
       end
@@ -34,15 +46,8 @@ module NexusCli
 
         raise MissingSettingsFileException unless config
 
-        validate_config(config)
         sanitized_config = sanitize_config(config)
         new(sanitized_config[:url], sanitized_config[:repository], sanitized_config[:username], sanitized_config[:password])
-      end
-
-      def validate_config(configuration)
-        ["url", "repository", "username", "password"].each do |key|
-          raise InvalidSettingsException.new(key) if configuration[key].blank?
-        end
       end
 
       def sanitize_config(config)
@@ -52,10 +57,10 @@ module NexusCli
     end
 
     def initialize(url, repository, username, password)
-      @url = url
-      @repository = repository
-      @username = username
-      @password = password
+      set_attribute(:url, url)
+      set_attribute(:repository, repository)
+      set_attribute(:username, username)
+      set_attribute(:password, password)
     end
   end
 end
