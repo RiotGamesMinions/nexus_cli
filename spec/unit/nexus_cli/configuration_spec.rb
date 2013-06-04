@@ -4,14 +4,19 @@ describe NexusCli::Configuration do
   subject { configuration }
   let(:configuration) { described_class }
   let(:config_instance) { configuration.from_overrides(valid_config) }
-  let(:valid_config) {
-      {
-        "url" => "http://somewebsite.com",
-        "repository" => "foo",
-        "username" => "admin",
-        "password" => "password"
-      }
+  let(:url) { "http://some-url.com" }
+  let(:repository) { "releases" }
+  let(:username) { "kallan" }
+  let(:password) { "password" }
+
+  let(:valid_config) do
+    {
+      "url" => "http://somewebsite.com",
+      "repository" => "foo",
+      "username" => "admin",
+      "password" => "password"
     }
+  end
 
   describe "::from_overrides" do
     subject { from_overrides }
@@ -61,40 +66,23 @@ describe NexusCli::Configuration do
     end
   end
 
-  describe "::sanitize_config" do
-    subject { sanitize_config }
-    let(:sanitize_config) { described_class.sanitize_config(valid_config) }
-
-    context "when the repository has spaces" do
-      let(:valid_config) {
-        {
-          "url" => "http://somewebsite.com",
-          "repository" => "foo bar",
-          "username" => "admin",
-          "password" => "password"
-        }
-      }
-
-      it "turns them into underscores" do
-        expect(sanitize_config[:repository]).to eq("foo_bar")
-        sanitize_config
-      end
+  describe "::validate!" do
+    subject { validate! }
+    let(:validate!) {described_class.validate!(invalid_config)}
+    let(:invalid_config) do
+      described_class.new(url: nil, repository: "something", username: "someone", password: "somepass")
     end
 
-    it "has indifferent access" do
-      expect(sanitize_config["url"]).to eq(valid_config["url"])
-      expect(sanitize_config[:url]).to eq(valid_config["url"])
+    context "when the object is invalide" do
+      it "raises an error" do
+        expect { validate! }.to raise_error(NexusCli::InvalidSettingsException)
+      end
     end
   end
 
   describe "#new" do
     subject { new_config }
-    let(:new_config) { described_class.new(url, repository, username, password) }
-    let(:url) { "http://some-url.com" }
-    let(:repository) { "releases" }
-    let(:username) { "kallan" }
-    let(:password) { "password" }
-
+    let(:new_config) { described_class.new(url: url, repository: repository, username: username, password: password) }
 
     it "creates a new Configuration object" do
       expect(new_config).to be_a(NexusCli::Configuration)
@@ -108,8 +96,17 @@ describe NexusCli::Configuration do
   end
 
   describe "#repository" do
+    let(:repository_config) { described_class.new(url: url, repository: repository, username: username, password: password) }
+
     it "returns the repository" do
       expect(config_instance.repository).to eq("foo")
+    end
+
+    context "when repository has illegal values" do
+      let(:repository) { "ILLEGAL VALUE" }
+      it "makes it legal" do
+        expect(repository_config.repository).to eq("illegal_value")
+      end
     end
   end
 
