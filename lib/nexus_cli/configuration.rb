@@ -70,6 +70,10 @@ module NexusCli
       type: String,
       required: true
 
+    attribute :ssl_verify,
+      type: [ TrueClass, FalseClass ],
+      default: true
+
     def initialize(options)
       mass_assign(options)
       self.repository = options[:repository]

@@ -1,13 +1,19 @@
 module NexusCli
-  # @author Kyle Allan <kallan@riotgames.com>
   class Connection < Faraday::Connection
 
     NEXUS_REST_ENDPOINT = "service/local".freeze
 
-    def initialize(server_url)
+    # Creates a new instance of the Connection class
+    #
+    # @param  server_url [String] the nexus server url
+    # @param  configuration [NexusCli::Configuration] the nexus configuration
+    def initialize(server_url, configuration = Configuration.from_file)
       options = {}
+      options[:ssl] = {verify: configuration.ssl_verify}
+
       options[:builder] = Faraday::Builder.new do |builder|
         builder.request :json
+        builder.request :url_encoded
         builder.response :json
         builder.adapter :net_http_persistent
       end
