@@ -6,24 +6,11 @@ module NexusCli
     end
 
     def find(artifact_id)
-      artifact_id_hash = create_artifact_id_hash(artifact_id)
-      puts artifact_id_hash
-      connection.get("artifact/maven/resolve", artifact_id_hash)
+      connection.get("artifact/maven/resolve", artifact_id.to_artifact_hash.merge({r: "releases"}))
     end
 
     def connection
       @connection
-    end
-
-    def create_artifact_id_hash(artifact_id)
-      split = artifact_id.split(':')
-      {
-        g: split[0],
-        a: split[1],
-        v: split[2],
-        e: split[3],
-        r: "releases"
-      }
     end
   end
 end

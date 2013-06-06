@@ -12,6 +12,7 @@ module NexusCli
   require_relative 'nexus_cli/configuration'
   require_relative 'nexus_cli/connection'
   require_relative 'nexus_cli/artifact_resource'
+  require_relative 'nexus_cli/nexus_objects/artifact_object'
 
   def new(*args)
     Client.new(*args)
