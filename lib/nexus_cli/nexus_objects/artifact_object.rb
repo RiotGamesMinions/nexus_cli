@@ -39,5 +39,15 @@ module NexusCli
     def initialize(attributes)
       mass_assign(attributes)
     end
+
+    # Translates the object into a valid artifact identifier that
+    # can be used in other Nexus requests
+    # 
+    # @example artifact.to_s => "com.test:my-artifact:1.0.0:tgz" 
+    #
+    # @return [String]
+    def to_s
+      "#{self.group_id}:#{self.artifact_id}:#{self.version}:#{self.extension}"
+    end
   end
 end
