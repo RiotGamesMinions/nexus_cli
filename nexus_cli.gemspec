@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'json'
   s.add_dependency 'highline'
   s.add_dependency 'jsonpath'
+  s.add_runtime_dependency 'retryable'
   s.add_runtime_dependency 'faraday', '>= 0.8.4'
   s.add_runtime_dependency 'faraday', '>= 0.8.4'
   s.add_runtime_dependency 'faraday_middleware', '>= 0.9.0'
