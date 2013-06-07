@@ -33,6 +33,9 @@ module NexusCli
     attribute :sha1,
       type: String
 
+    attribute :repository,
+      type: String
+
     attribute :repository_path,
       type: String
 

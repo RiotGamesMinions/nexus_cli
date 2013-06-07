@@ -15,6 +15,7 @@ module NexusCli
         builder.request :json
         builder.request :url_encoded
         builder.request :basic_auth, configuration.username, configuration.password
+        builder.response :follow_redirects
         builder.response :nexus_response
         builder.adapter :net_http_persistent
       end
