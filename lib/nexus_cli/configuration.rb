@@ -50,7 +50,7 @@ module NexusCli
 
     include Chozo::VariaModel
 
-    attribute :url,
+    attribute :server_url,
       type: String,
       required: true
 
@@ -73,7 +73,6 @@ module NexusCli
     def initialize(options)
       mass_assign(options)
       self.repository = options[:repository]
-      self.class.validate!(self)
     end
   end
 end

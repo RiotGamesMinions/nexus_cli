@@ -5,7 +5,11 @@ require 'spork'
 def setup_rspec
   RSpec.configure do |config|
 
+    config.before(:all) { Celluloid.logger = nil }
+
     config.before(:each) do
+      Celluloid.shutdown
+      Celluloid.boot
       clean_tmp_path
     end
   end

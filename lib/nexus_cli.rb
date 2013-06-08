@@ -5,6 +5,7 @@ require 'faraday'
 require 'faraday_middleware'
 require 'rexml/document'
 require 'yaml'
+require 'celluloid'
 require 'active_support/core_ext/hash'
 
 module NexusCli
@@ -15,11 +16,11 @@ module NexusCli
   require_relative 'nexus_cli/nexus_objects/artifact_object'
   require_relative 'nexus_cli/middleware/nexus_response'
 
-  def new(*args)
-    Client.new(*args)
-  end
-
   class << self
+    def new(options = nil)
+      Client.new(options)
+    end
+
     def root
       @root ||= Pathname.new(File.expand_path('../', File.dirname(__FILE__)))
     end

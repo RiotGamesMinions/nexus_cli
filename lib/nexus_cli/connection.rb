@@ -1,18 +1,19 @@
 require 'open-uri'
-require 'retryable'
 require 'tempfile'
-require 'zlib'
 
 module NexusCli
   class Connection < Faraday::Connection
 
+    include Celluloid
+
     NEXUS_REST_ENDPOINT = "service/local".freeze
+
+    attr_reader :default_repository
 
     # Creates a new instance of the Connection class
     #
-    # @param  server_url [String] the nexus server url
     # @param  configuration [NexusCli::Configuration] the nexus configuration
-    def initialize(server_url, configuration = Configuration.from_file)
+    def initialize(configuration)
       options = {}
       options[:ssl] = {verify: configuration.ssl_verify}
 
@@ -20,12 +21,11 @@ module NexusCli
         builder.request :json
         builder.request :url_encoded
         builder.request :basic_auth, configuration.username, configuration.password
-        #builder.response :follow_redirects
         builder.response :nexus_response
         builder.adapter :net_http_persistent
       end
 
-      server_uri = Addressable::URI.parse(server_url).to_hash
+      server_uri = Addressable::URI.parse(configuration.server_url).to_hash
 
       server_uri[:path] = File.join(server_uri[:path], NEXUS_REST_ENDPOINT)
 
@@ -33,6 +33,16 @@ module NexusCli
       @headers[:accept] = 'application/json'
       @headers[:content_type] = 'application/json'
       @headers[:user_agent] = "NexusCli v#{NexusCli::VERSION}"
+
+      @default_repository = configuration.repository
+    end
+
+    def in_alternate_path(alternative_path, &block)
+      old_path = self.path_prefix
+      self.path_prefix = alternative_path
+      yield self
+    ensure
+      self.path_prefix = old_path
     end
 
     # Stream the response body of a remote URL to a file on the local file system

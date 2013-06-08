@@ -9,6 +9,7 @@ class String
   def to_artifact_hash
     split_self = self.split(':')
     raise NexusCli::ArtifactMalformedException if split_self.size < 3
+    split_self[2] = split_self[2].upcase if split_self[2].casecmp("latest") == 0
     {
       g: split_self[0],
       a: split_self[1],

@@ -1,11 +1,11 @@
 require 'spec_helper'
 
 describe NexusCli::Connection do
-  let(:server_url) { "https://repository.apache.org" }
+  let(:connection) { described_class.new(configuration) }
   let(:configuration) { NexusCli::Configuration.new(config_options) }
   let(:config_options) do
     {
-      "url" => "http://somewebsite.com",
+      "server_url" => "http://somewebsite.com",
       "repository" => "foo",
       "username" => "admin",
       "password" => "password"
@@ -13,7 +13,6 @@ describe NexusCli::Connection do
   end
 
   describe "#new" do
-    let(:connection) { described_class.new(server_url, configuration) }
     
     it "sets an accept header of application/json" do
       expect(connection.headers).to include("Accept" => "application/json")
@@ -32,8 +31,27 @@ describe NexusCli::Connection do
     end
   end
 
+  describe "#in_alternate_path" do
+    it "should yield itself in an altnerate path" do
+      expect{ |f| connection.in_alternate_path("/nexus", &f) }.to yield_with_args(connection)
+    end
+
+    it "should change the path_prefix" do
+      connection.in_alternate_path("/nexus") do |yielded|
+        expect(yielded.path_prefix).to eq("/nexus")
+      end
+    end
+
+    context "when the block exits" do
+      it "should change back to the old path_prefix" do
+        connection.in_alternate_path("/nexus") { |yielded|}
+        expect(connection.path_prefix).to eq("/#{NexusCli::Connection::NEXUS_REST_ENDPOINT}")
+      end
+    end
+  end
+
   describe "#stream" do
-    let(:stream) { described_class.new(server_url, configuration).stream(target, destination) }
+    let(:stream) { described_class.new(configuration).stream(target, destination) }
     let(:target) { "http://test.it/file" }
     let(:destination) { tmp_path.join("test.file") }
     let(:contents) { "SOME STRING STUFF\nHERE.\n" }

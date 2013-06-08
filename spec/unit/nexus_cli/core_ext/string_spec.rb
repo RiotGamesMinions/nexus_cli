@@ -30,5 +30,13 @@ describe String do
         expect(to_artifact_hash).to eq({g: "com.test", a: "mytest", v: "1.0.0", e: "jar"})
       end
     end
+
+    context "when the version is sent as 'latest'" do
+      let(:string) { "com.test:mytest:latest:tgz" }
+
+      it "is capitalized" do
+        expect(to_artifact_hash).to eq({g: "com.test", a: "mytest", v: "LATEST", e: "tgz"})
+      end
+    end
   end
 end
