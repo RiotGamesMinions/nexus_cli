@@ -1,5 +1,5 @@
 module NexusCli
-  class ArtifactResource
+  class ArtifactResource < NexusCli::Resource
 
     FILE_NAME_KEYS = [ :a, :v, :e ].freeze
 
@@ -72,11 +72,6 @@ module NexusCli
       version.casecmp("latest") == 0
     end
 
-    # @return [NexusCli::Connection]
-    def connection
-      @connection_registry[:connection_pool]
-    end
-
     private
 
       def create_fake_pom(artifact_id_hash)
@@ -89,22 +84,6 @@ module NexusCli
 
       def pom_name_for(artifact_id_hash)
         "#{artifact_id_hash[:a]}-#{artifact_id_hash[:v]}.pom"
-      end
-
-      # @param [Symbol] method
-      def request(method, *args)
-        raw_request(method, *args).body
-      end
-
-      # @param [Symbol] method
-      def raw_request(method, *args)
-        unless Connection::METHODS.include?(method)
-          #raise Errors::HTTPUnknownMethod, "unknown http method: #{method}"
-        end
-
-        connection.send(method, *args)
-      rescue => ex
-        abort(ex)
       end
   end
 end

@@ -66,7 +66,7 @@ describe NexusCli::ArtifactResource do
     let(:file) { "my-artifact.tgz" }
 
     before do
-      File.stub(:open)
+      File.stub(:read)
     end
 
     it "attempts to upload the file" do
