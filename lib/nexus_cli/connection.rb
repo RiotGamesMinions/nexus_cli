@@ -6,7 +6,7 @@ module NexusCli
 
     include Celluloid
 
-    NEXUS_REST_ENDPOINT = "service/local".freeze
+    NEXUS_REST_ENDPOINT = "service/local/".freeze
 
     attr_reader :default_repository
 
@@ -27,7 +27,7 @@ module NexusCli
 
       server_uri = Addressable::URI.parse(configuration.server_url).to_hash
 
-      server_uri[:path] = File.join(server_uri[:path], NEXUS_REST_ENDPOINT)
+      server_uri[:path] = server_uri[:path]
 
       super(Addressable::URI.new(server_uri), options)
       @headers[:accept] = 'application/json'

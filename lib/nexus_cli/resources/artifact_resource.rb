@@ -14,7 +14,7 @@ module NexusCli
       artifact_id_hash = artifact_id.to_artifact_hash
       artifact_id_hash[:r] = connection.default_repository
 
-      ArtifactObject.new(request(:get, "artifact/maven/resolve", artifact_id_hash))
+      ArtifactObject.new(rest_request(:get, "artifact/maven/resolve", artifact_id_hash))
     end
 
     def download(artifact_id, location = ".")
@@ -38,16 +38,19 @@ module NexusCli
       repository_path = repository_path_for(artifact_id)
       file_name = file_name_for(artifact_id)
 
-      success = request(:put, "content/repositories/#{connection.default_repository}/#{repository_path}/#{file_name}", File.read(File.expand_path(file)))
-      return success
-      if success
-        # pom_name = pom_name_for(artifact_id_hash)
-        # fake_pom = create_fake_pom(artifact_id.to_artifact_id_hash)
-        # 
-        # request(:put, "content/repositories/#{connection.default_repository}/#{repository_path}/#{pom_name}", File.open(fake_pom))
-        # 
-        # delete_metadata(artifact_id)
+      response = raw_request(:put, "content/repositories/#{connection.default_repository}/#{repository_path}/#{file_name}", File.read(File.expand_path(file)))
+      if response.success?
+        pom_name = pom_name_for(artifact_id.to_artifact_hash)
+        fake_pom = create_fake_pom(artifact_id.to_artifact_hash)
+        raw_request(:put, "content/repositories/#{connection.default_repository}/#{repository_path}/#{pom_name}", File.read(fake_pom))
+        delete_metadata(artifact_id)
+        find(artifact_id)
       end
+    end
+
+    def delete_metadata(artifact_id)
+      repository_path = repository_path_for(artifact_id)
+      rest_request(:delete, "metadata/repositories/#{connection.default_repository}/content/#{repository_path}")
     end
 
     # Converts an artifact identifier string into a file
