@@ -13,6 +13,7 @@ module NexusCli
       def initialize(registry, connection_registry)
         super(registry)
         supervise_as :artifact_resource, NexusCli::ArtifactResource, connection_registry
+        supervise_as :staging_resource, NexusCli::StagingResource, connection_registry
       end
     end
 
@@ -33,6 +34,10 @@ module NexusCli
     # @return [NexusCli::ArtifactResource]
     def artifact
       @resource_registry[:artifact_resource]
+    end
+
+    def staging
+      @resource_registry[:staging_resource]
     end
   end
 end

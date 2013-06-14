@@ -3,7 +3,7 @@ require 'spec_helper'
 describe NexusCli::ArtifactResource do
   let(:artifact_resource) { described_class.new(connection_registry) }
   let(:connection_registry) { double(:[] => connection) }
-  let(:connection) { double(:get => response, :put => response , :stream => nil, :default_repository => "releases") }
+  let(:connection) { double(:get => response, :put => response, :delete => response, :stream => nil, :default_repository => "releases") }
   let(:response) { double(:body => {}, :headers => {}) }
   let(:artifact_id) { "com.test:my-test:1.0.0:tgz" }
   let(:artifact_id_hash) do
@@ -21,7 +21,7 @@ describe NexusCli::ArtifactResource do
 
     it "attempts to find an artifact" do
       artifact_id_hash = { g: "com.test", a: "my-test", v: "1.0.0", e: "tgz", r: "releases"}
-      connection.should_receive(:get).with("artifact/maven/resolve", artifact_id_hash)
+      connection.should_receive(:get).with("service/local/artifact/maven/resolve", artifact_id_hash)
       find
     end
   end
@@ -67,34 +67,48 @@ describe NexusCli::ArtifactResource do
 
     before do
       File.stub(:read)
+      Tempfile.stub(:open)
     end
 
-    it "attempts to upload the file" do
-      connection.should_receive(:put).with("content/repositories/releases/com/test/my-test/1.0.0/my-test-1.0.0.tgz", anything())
-      upload
+    context "when the upload is a success" do
+      before do
+        connection.stub(:put).and_return(double(:success? => true))
+      end
+
+      it "uploads an artifact, gives the artifact a pom and regenerates metadata" do
+        connection.should_receive(:put).twice
+        connection.should_receive(:delete).with("service/local/metadata/repositories/releases/content/com/test/my-test/1.0.0")
+
+        upload
+      end
+    end
+
+    context "when the upload is a failure" do
+      before do
+        connection.stub(:put).and_return(double(:success? => false))
+      end
+
+      it "raises an error" do
+        expect{upload}.to raise_error(NexusCli::BadUploadRequestException)
+      end
     end
   end
 
   describe "#delete" do
-  end
+    let(:delete) { artifact_resource.delete(artifact_id) }
 
-  describe "#delete_metadata" do
-
-  end
-
-  describe "#repository_path_for" do
-    let(:repository_path_for) { artifact_resource.repository_path_for(artifact_id) }
-
-    it "returns the repository path" do
-      expect(repository_path_for).to eq("com/test/my-test/1.0.0")
+    it "deletes the artifact" do
+      connection.should_receive(:delete).with("content/repositories/releases/com/test/my-test/1.0.0")
+      delete
     end
   end
 
-  describe "#file_name_for" do
-    let(:file_name_for) { artifact_resource.file_name_for(artifact_id) }
+  describe "#delete_metadata" do
+    let(:delete_metadata) { artifact_resource.delete_metadata(artifact_id) }
 
-    it "returns a composition of the resulting file name" do
-      expect(file_name_for).to eq("my-test-1.0.0.tgz")
+    it "deletes an artifacts metadata" do
+      connection.should_receive(:delete).with("service/local/metadata/repositories/releases/content/com/test/my-test/1.0.0")
+      delete_metadata
     end
   end
 
