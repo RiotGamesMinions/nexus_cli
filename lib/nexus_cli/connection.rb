@@ -22,6 +22,7 @@ module NexusCli
         builder.request :url_encoded
         builder.request :basic_auth, configuration.username, configuration.password
         builder.response :nexus_response
+        builder.response :status_code_handler
         builder.adapter :net_http_persistent
       end
 
@@ -37,12 +38,16 @@ module NexusCli
       @default_repository = configuration.repository
     end
 
-    def in_alternate_path(alternative_path, &block)
-      old_path = self.path_prefix
-      self.path_prefix = alternative_path
-      yield self
-    ensure
-      self.path_prefix = old_path
+    def run_request(*args)
+      super
+    rescue Errors::HTTPError => ex
+      abort ex
+    rescue Faraday::Error::ConnectionFailed => ex
+      abort Errors::ConnectionFailed.new(ex)
+    rescue Faraday::Error::TimeoutError => ex
+      abort Errors::TimeoutError.new(ex)
+    rescue Faraday::Error::ClientError => ex
+      abort Errors::ClientError.new(ex)
     end
 
     # Stream the response body of a remote URL to a file on the local file system

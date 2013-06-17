@@ -14,6 +14,7 @@ module NexusCli
         super(registry)
         supervise_as :artifact_resource, NexusCli::ArtifactResource, connection_registry
         supervise_as :staging_resource, NexusCli::StagingResource, connection_registry
+        supervise_as :procurement_resource, NexusCli::ProcurementResource, connection_registry
       end
     end
 
@@ -38,6 +39,10 @@ module NexusCli
 
     def staging
       @resource_registry[:staging_resource]
+    end
+
+    def procurement
+      @resource_registry[:procurement_resource]
     end
   end
 end

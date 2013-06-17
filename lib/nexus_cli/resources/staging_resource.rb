@@ -11,18 +11,23 @@ module NexusCli
       end
     end
 
-    def close(repository_id)
-      rest_request(:post, "staging/bulk/close", get_payload)
+    def close(repository_id, description = "Closing Repository")
+      rest_request(:post, "staging/bulk/close", get_payload(repository_id, description))
     end
 
-    def drop(repository_id)
-      rest_request(:post, "staging/bulk/drop", get_payload)
+    def drop(repository_id, description = "Dropping Repository")
+      rest_request(:post, "staging/bulk/drop", get_payload(repository_id, description))
     end
 
-    def get_payload
-      json_payload = {"data" => {"stagedRepositoryIds" => ["rcs-008"],"description" => "Kyle!"}}
-
-      JSON.dump(json_payload)
+    def promote(repository_id, promotion_id, description = "Promoting Repository")
+      rest_request(:post, "staging/bulk/promote", get_payload(repository_id, promotion_id, description))
     end
+
+    private
+      def get_payload(repository_id, promotion_id = nil, description)
+        json_payload = {"data" => {"stagedRepositoryIds" => Array(repository_id),"description" => description}}
+        json_payload["stagingProfileGroup"] = promotion_id unless promotion_id.nil?
+        JSON.dump(json_payload)
+      end
   end
 end

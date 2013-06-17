@@ -33,14 +33,6 @@ describe NexusCli::StagingResource do
 
   describe "#close" do
     let(:close) { staging_resource.close(repository_id) }
-    let(:payload) do
-      {
-        :data => {
-          :stagedRepositoryIds => [repository_id],
-          :description => "some description"
-        }
-      }
-    end
 
     it "closes the staging repository" do
       connection.should_receive(:post).with(/staging\/bulk\/close/, kind_of(String))
@@ -48,8 +40,22 @@ describe NexusCli::StagingResource do
     end
   end
 
-  describe "drop" do
+  describe "#drop" do
+    let(:drop) { staging_resource.drop(repository_id) }
 
+    it "drops the staging repository" do
+      connection.should_receive(:post).with(/staging\/bulk\/drop/, kind_of(String))
+      drop
+    end
   end
 
+  describe "#promote" do
+    let(:promote) { staging_resource.promote(repository_id, promotion_id) }
+    let(:promotion_id) { "1234" }
+
+    it "promotes the staging repository" do
+      connection.should_receive(:post).with(/staging\/bulk\/promote/, kind_of(String))
+      promote
+    end
+  end
 end
