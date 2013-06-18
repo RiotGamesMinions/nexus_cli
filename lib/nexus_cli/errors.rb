@@ -3,6 +3,8 @@ module NexusCli
     class NexusCliError < StandardError
     end
 
+    class BadUploadRequestException < NexusCliError; end
+
     class ClientError < NexusCliError; end
     class ConnectionFailed < ClientError; end
     class TimeoutError < ClientError; end

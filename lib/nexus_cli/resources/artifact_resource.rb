@@ -10,7 +10,7 @@ module NexusCli
       artifact_id_hash = artifact_id.to_artifact_hash
       artifact_id_hash[:r] = connection.default_repository
 
-      ArtifactObject.new(rest_request(:get, "artifact/maven/resolve", artifact_id_hash))
+      ArtifactObject.from_nexus_response(rest_request(:get, "artifact/maven/resolve", artifact_id_hash).data)
     end
 
     def download(artifact_id, location = ".")
@@ -18,11 +18,9 @@ module NexusCli
       artifact_id_hash[:r] = connection.default_repository
 
       if latest?(artifact_id_hash[:v])
-        p :before_artifact_id_hash, artifact_id_hash
         artifact_id_hash[:v] = find(artifact_id).version
       end
 
-      p :after_artifact_id_hash, artifact_id_hash
       redirect_url = connection.get("artifact/maven/redirect", artifact_id_hash).headers["location"]
       recomposed_artifact_id = artifact_id_hash.values.join(':')
       download_path = File.join(File.expand_path(location), file_name_for(recomposed_artifact_id))
@@ -42,7 +40,7 @@ module NexusCli
         delete_metadata(artifact_id)
         return find(artifact_id)
       end
-      raise BadUploadRequestException
+      raise Errors::BadUploadRequestException
     end
 
     def delete(artifact_id)

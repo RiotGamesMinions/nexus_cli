@@ -4,7 +4,7 @@ describe NexusCli::ArtifactResource do
   let(:artifact_resource) { described_class.new(connection_registry) }
   let(:connection_registry) { double(:[] => connection) }
   let(:connection) { double(:get => response, :put => response, :delete => response, :stream => nil, :default_repository => "releases") }
-  let(:response) { double(:body => {}, :headers => {}) }
+  let(:response) { double(:body => double(:data => nil), :headers => {}) }
   let(:artifact_id) { "com.test:my-test:1.0.0:tgz" }
   let(:artifact_id_hash) do
     {
@@ -14,6 +14,10 @@ describe NexusCli::ArtifactResource do
       e: "tgz",
       r: "releases"
     }
+  end
+
+  before do
+    NexusCli::ArtifactObject.stub(:from_nexus_response)
   end
 
   describe "#find" do
@@ -89,7 +93,7 @@ describe NexusCli::ArtifactResource do
       end
 
       it "raises an error" do
-        expect{upload}.to raise_error(NexusCli::BadUploadRequestException)
+        expect{upload}.to raise_error(NexusCli::Errors::BadUploadRequestException)
       end
     end
   end

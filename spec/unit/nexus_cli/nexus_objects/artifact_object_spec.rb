@@ -11,6 +11,14 @@ describe NexusCli::ArtifactObject do
     }
   end
 
+  describe ":from_nexus_response" do
+    let(:response) { Hashie::Mash.new }
+
+    it "returns a new instance of the class" do
+      expect(described_class.from_nexus_response(response)).to be_a(NexusCli::ArtifactObject)
+    end
+  end
+
   describe "#to_s" do
     let(:to_s) { artifact_object.to_s }
 

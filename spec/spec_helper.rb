@@ -3,6 +3,9 @@ require 'bundler'
 require 'spork'
 
 def setup_rspec
+
+  Dir[File.join(File.expand_path("../../spec/support/**/*.rb", __FILE__))].each { |f| require f }
+  
   RSpec.configure do |config|
 
     config.before(:all) { Celluloid.logger = nil }

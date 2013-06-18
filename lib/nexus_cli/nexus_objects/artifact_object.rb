@@ -1,5 +1,24 @@
 module NexusCli
   class ArtifactObject
+    class << self
+      def from_nexus_response(response)
+        attributes = Hash.new
+
+        attributes[:group_id] = response.groupId
+        attributes[:artifact_id] = response.artifactId
+        attributes[:version] = response.version
+        attributes[:extension] = response.extension
+        attributes[:present_locally] = response.presentLocally
+        attributes[:snapshot] = response.snapshot
+        attributes[:snapshot_build_number] = response.snapshotBuildNumber
+        attributes[:snapshot_time_stamp] = response.snapshotTimeStamp
+        attributes[:sha1] = response.sha1
+        attributes[:repository_path] = response.repositoryPath
+        attributes[:repository] = response.repository
+        new(attributes)
+      end
+    end
+
     include Chozo::VariaModel
 
     attribute :present_locally,
@@ -24,7 +43,7 @@ module NexusCli
     attribute :snapshot,
       type: [ TrueClass, FalseClass ]
 
-    attribute :snapshotBuildNumber,
+    attribute :snapshot_build_number,
       type: Fixnum
 
     attribute :snapshot_time_stamp,

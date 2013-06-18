@@ -1,5 +1,18 @@
 module NexusCli
   class RuleObject
+    class << self
+      def from_nexus_response(response)
+        attributes = Hash.new
+
+        attributes[:group_id] = response.artifactCoordinate.groupId
+        attributes[:artifact_id] = response.artifactCoordinate.artifactId
+        attributes[:version] = response.artifactCoordinate.version
+        attributes[:rule_type] = response.ruleTypeId.to_sym
+        attributes[:value] = response.properties.first.value
+        new(attributes)
+      end
+    end
+
     include Chozo::VariaModel
 
     attribute :group_id,

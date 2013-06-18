@@ -12,6 +12,11 @@ module NexusCli
       rest_request(:post, "procurement/resolutions/#{repository}", rule)
     end
 
+    def rules(repository)
+      response = rest_request(:get, "procurement/resolutions/#{repository}")
+      response.data.collect { |rule| NexusCli::RuleObject.from_nexus_response(rule) }
+    end
+
     private
       def get_payload(repository, procured_from_repository)
         json_payload = {"data" => {"repositoryId" => repository, "targetClassId" => "repositories", "targetId" => procured_from_repository}}
