@@ -1,8 +1,7 @@
 require 'extlib'
-require 'chozo'
 
 module NexusCli
-  class Configuration
+  class Configuration < Buff::Config::JSON
     DEFAULT_FILE = "~/.nexus_cli".freeze
 
     class << self
@@ -47,8 +46,6 @@ module NexusCli
         end
       end
     end
-
-    include Chozo::VariaModel
 
     attribute :server_url,
       type: String,

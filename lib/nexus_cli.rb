@@ -7,6 +7,7 @@ require 'rexml/document'
 require 'yaml'
 require 'celluloid'
 require 'active_support/core_ext/hash'
+require 'buff/config/json'
 
 module NexusCli
   require_relative 'nexus_cli/client'
@@ -14,6 +15,7 @@ module NexusCli
   require_relative 'nexus_cli/connection'
   require_relative 'nexus_cli/resource'
   require_relative 'nexus_cli/resources'
+  require_relative 'nexus_cli/nexus_object'
   require_relative 'nexus_cli/nexus_objects'
   require_relative 'nexus_cli/middleware'
 

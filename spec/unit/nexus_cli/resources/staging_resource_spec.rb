@@ -3,7 +3,7 @@ require 'spec_helper'
 describe NexusCli::StagingResource do
   let(:staging_resource) { described_class.new(connection_registry) }
   let(:connection_registry) { double(:[] => connection) }
-  let(:connection) { double(:put => response, :post => response) }
+  let(:connection) { double(:get => response, :put => response, :post => response) }
   let(:response) { double(:body => {}, :headers => {}) }
   let(:repository_id) { "123" }
 
@@ -56,6 +56,15 @@ describe NexusCli::StagingResource do
     it "promotes the staging repository" do
       connection.should_receive(:post).with(/staging\/bulk\/promote/, kind_of(String))
       promote
+    end
+  end
+
+  describe "#profiles" do
+    let(:profiles) { staging_resource.profiles }
+
+    it "should return an array of staging profiles" do
+      connection.should_receive(:get).with(/staging\/profiles/)
+      expect(profiles).to be_a(Array)
     end
   end
 end

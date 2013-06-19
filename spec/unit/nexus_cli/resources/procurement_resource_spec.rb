@@ -28,10 +28,10 @@ describe NexusCli::ProcurementResource do
 
   describe "#add_rule" do
     let(:add_rule) { procurement_resource.add_rule(repository, rule) }
-    let(:rule) { double }
+    let(:rule) { NexusCli::RuleObject.new({}) }
 
     it "adds the rule to the procurement repository" do
-      connection.should_receive(:post).with(/procurement\/resolutions\/artifacts/, kind_of(String))
+      connection.should_receive(:post).with(/procurement\/resolutions\/artifacts/, kind_of(NexusCli::RuleObject))
       add_rule
     end
   end

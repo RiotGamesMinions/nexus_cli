@@ -27,7 +27,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'faraday_middleware', '>= 0.9.0'
   s.add_runtime_dependency 'net-http-persistent', '>= 2.8'
   s.add_runtime_dependency 'addressable', '~> 2.3.4'
-  s.add_runtime_dependency 'chozo', '>= 0.6.0'
+  s.add_runtime_dependency 'buff-config'
   s.add_runtime_dependency 'activesupport', '>= 3.2.0'
 
   s.add_development_dependency 'rspec'

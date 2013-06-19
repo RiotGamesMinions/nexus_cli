@@ -1,64 +1,33 @@
 module NexusCli
-  class RuleObject
-    class << self
-      def from_nexus_response(response)
-        attributes = Hash.new
+  class RuleObject < NexusObject
 
-        attributes[:group_id] = response.artifactCoordinate.groupId
-        attributes[:artifact_id] = response.artifactCoordinate.artifactId
-        attributes[:version] = response.artifactCoordinate.version
-        attributes[:rule_type] = response.ruleTypeId.to_sym
-        attributes[:value] = response.properties.first.value
-        new(attributes)
-      end
-    end
+    attribute :id,
+      type: String
 
-    include Chozo::VariaModel
-
-    attribute :group_id,
+    attribute 'artifact_coordinate.group_id',
       type: String,
       required: true
+    def_delegator :artifact_coordinate, :group_id, :group_id
 
-    attribute :artifact_id,
+    attribute 'artifact_coordinate.artifact_id',
       type: String,
       required: true
+    def_delegator :artifact_coordinate, :artifact_id, :artifact_id
 
-    attribute :version,
+    attribute 'artifact_coordinate.version',
       type: String,
       required: true
+    def_delegator :artifact_coordinate, :version, :version
 
-    attribute :rule_type,
+    attribute :rule_type_id,
       type: Symbol,
       required: true
 
-    attribute :value,
-      type: [ TrueClass, FalseClass ],
-      required: true
+    attribute :properties,
+      type: Array
 
     def initialize(attributes)
       mass_assign(attributes)
-    end
-
-    def to_json(options)
-      json = Hash.new
-      json["artifactCoordinate"] = { groupId: self.group_id, artifactId: self.artifact_id, version: self.version }
-      json["properties"] = get_properties
-      json["ruleTypeId"] = self.rule_type
-      
-      enveloped = Hash.new
-      enveloped["data"] = json
-      JSON.dump(enveloped) 
-    end
-
-    def get_properties
-      case self.rule_type
-      when :simple
-        [{key: "isApproved", value: self.value.to_s}]
-      when :signature
-        [{key: "requireSignature", value: self.value.to_s}]
-      else
-        # UNKNOWN RULE_TYPE
-      end
     end
   end
 end

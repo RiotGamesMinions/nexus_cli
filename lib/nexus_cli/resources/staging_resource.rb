@@ -23,6 +23,10 @@ module NexusCli
       rest_request(:post, "staging/bulk/promote", get_payload(repository_id, promotion_id, description))
     end
 
+    def profiles
+      rest_request(:get, "staging/profiles")
+    end
+
     private
       def get_payload(repository_id, promotion_id = nil, description)
         json_payload = {"data" => {"stagedRepositoryIds" => Array(repository_id),"description" => description}}

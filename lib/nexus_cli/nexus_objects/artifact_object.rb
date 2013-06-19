@@ -1,5 +1,5 @@
 module NexusCli
-  class ArtifactObject
+  class ArtifactObject < NexusObject
     class << self
       def from_nexus_response(response)
         attributes = Hash.new
@@ -18,8 +18,6 @@ module NexusCli
         new(attributes)
       end
     end
-
-    include Chozo::VariaModel
 
     attribute :present_locally,
       type: [ TrueClass, FalseClass ]
