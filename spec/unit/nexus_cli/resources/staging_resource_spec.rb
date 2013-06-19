@@ -4,7 +4,7 @@ describe NexusCli::StagingResource do
   let(:staging_resource) { described_class.new(connection_registry) }
   let(:connection_registry) { double(:[] => connection) }
   let(:connection) { double(:get => response, :put => response, :post => response) }
-  let(:response) { double(:body => {}, :headers => {}) }
+  let(:response) { double(:body => Hashie::Mash.new(:data => []), :headers => {}) }
   let(:repository_id) { "123" }
 
   describe "#upload" do
@@ -62,9 +62,19 @@ describe NexusCli::StagingResource do
   describe "#profiles" do
     let(:profiles) { staging_resource.profiles }
 
-    it "should return an array of staging profiles" do
+    it "returns an array of staging profiles" do
       connection.should_receive(:get).with(/staging\/profiles/)
       expect(profiles).to be_a(Array)
+    end
+  end
+
+  describe "#create_profile" do
+    let(:create_profile) { staging_resource.create_profile(profile) }
+    let(:profile) { NexusCli::StagingProfileObject.new({}) }
+
+    it "creates a new profile" do
+      connection.should_receive(:post).with(/staging\/profiles/, kind_of(NexusCli::StagingProfileObject))
+      create_profile
     end
   end
 end

@@ -1,5 +1,14 @@
 module NexusCli
   class StagingResource < NexusCli::Resource
+
+    # Uploads an artifact to either the default deploy path or to a specific staging
+    # repository, depending on the provided repository_id
+    #
+    # @param  artifact_id [String] a colon-separated Nexus artifact identifier
+    # @param  repository_id = nil [String] optional repository to upload to
+    # @param  file [String] a path to the file to upload
+    # 
+    # @return [type] [description]
     def upload(artifact_id, repository_id = nil, file)
       repository_path = repository_path_for(artifact_id)
       file_name = file_name_for(artifact_id)
@@ -23,8 +32,18 @@ module NexusCli
       rest_request(:post, "staging/bulk/promote", get_payload(repository_id, promotion_id, description))
     end
 
+    # Returns an Array of the current Staging Profiles on the Nexus
+    # server.
+    #
+    # @return [Array<StagingProfileObject] the current set
+    # of staging repository profiles on the Nexus server
     def profiles
-      rest_request(:get, "staging/profiles")
+      response = rest_request(:get, "staging/profiles")
+      response.data.collect { |profile| NexusCli::StagingProfileObject.from_nexus_response(profile) }
+    end
+
+    def create_profile(profile)
+      rest_request(:post, "staging/profiles", profile)
     end
 
     private

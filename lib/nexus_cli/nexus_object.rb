@@ -8,9 +8,16 @@ module NexusCli
 
     extend Forwardable
 
+    def initialize(attributes)
+      mass_assign(attributes)
+    end
+
     def to_json(options = {})
-      attributes = Hash[{"data" => self._attributes_.to_hash}]
-      JSON.dump(attributes.deep_transform_keys { |key| key.camelize(:lower) })
+      attributes = self._attributes_.to_hash
+      attributes.reject! { |key, value| value.nil? }
+
+      enveloped = Hash[{"data" => attributes}]
+      JSON.dump(enveloped.deep_transform_keys { |key| key.camelize(:lower) })
     end
   end
 end

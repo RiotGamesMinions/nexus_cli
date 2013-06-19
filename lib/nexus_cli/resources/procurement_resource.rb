@@ -12,6 +12,12 @@ module NexusCli
       rest_request(:post, "procurement/resolutions/#{repository}", rule)
     end
 
+    # Returns an Array of the current rules for the given
+    # procurement repository.
+    # 
+    # @param  repository [String] the id of the repository
+    # 
+    # @return [Array<RuleOBject>] the applied procurement rules on this repository
     def rules(repository)
       response = rest_request(:get, "procurement/resolutions/#{repository}")
       response.data.collect { |rule| NexusCli::RuleObject.from_nexus_response(rule) }

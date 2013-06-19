@@ -3,8 +3,8 @@ require 'spec_helper'
 describe NexusCli::ProcurementResource do
   let(:procurement_resource) { described_class.new(connection_registry) }
   let(:connection_registry) { double(:[] => connection) }
-  let(:connection) { double(:delete => response, :post => response) }
-  let(:response) { double(:body => {}, :headers => {}) }
+  let(:connection) { double(:get => response, :delete => response, :post => response) }
+  let(:response) { double(:body => Hashie::Mash.new(:data => []), :headers => {}) }
   let(:repository) { "artifacts" }
   let(:procured_from_repository) { "procured" }
 
@@ -37,5 +37,11 @@ describe NexusCli::ProcurementResource do
   end
 
   describe "#rules" do
+    let(:rules) { procurement_resource.rules(repository) }
+
+    it "returns an array of procurement rules" do
+      connection.should_receive(:get).with(/procurement\/resolutions\/artifacts/)
+      expect(rules).to be_a(Array)
+    end
   end
 end
