@@ -59,6 +59,15 @@ describe NexusCli::StagingResource do
     end
   end
 
+  describe "#release" do
+    let(:release) { staging_resource.release(repository_id) }
+
+    it "releases the staging repository" do
+      connection.should_receive(:post).with(/staging\/bulk\/promote/, kind_of(String))
+      release
+    end
+  end
+
   describe "#profiles" do
     let(:profiles) { staging_resource.profiles }
 
