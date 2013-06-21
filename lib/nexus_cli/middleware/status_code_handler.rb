@@ -1,9 +1,12 @@
 module NexusCli
   module Middleware
     class StatusCodeHandler < Faraday::Response::Middleware
+
+      NEXUS_SUCCESS_STATUS_CODES = (200..210).to_a + [307]
+
       class << self
         def success?(env)
-          (200..210).to_a.include?(env[:status].to_i)
+          NEXUS_SUCCESS_STATUS_CODES.include?(env[:status].to_i)
         end
       end
 

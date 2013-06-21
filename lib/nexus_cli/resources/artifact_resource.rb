@@ -21,7 +21,8 @@ module NexusCli
         artifact_id_hash[:v] = find(artifact_id).version
       end
 
-      redirect_url = connection.get("artifact/maven/redirect", artifact_id_hash).headers["location"]
+      redirect_url = connection.get("service/local/artifact/maven/redirect", artifact_id_hash).headers["location"]
+
       recomposed_artifact_id = artifact_id_hash.values.join(':')
       download_path = File.join(File.expand_path(location), file_name_for(recomposed_artifact_id))
 
