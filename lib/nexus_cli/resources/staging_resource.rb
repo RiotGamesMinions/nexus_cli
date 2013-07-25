@@ -75,6 +75,11 @@ module NexusCli
       response.data.collect { |profile| NexusCli::StagingProfileObject.from_nexus_response(profile) }
     end
 
+    def repositories
+      response = rest_request(:get, "staging/profile_repositories")
+      response.data
+    end
+
     # Creates a new Staging Profile, which will intercept artifact uploads and place them
     # into staging repositories.
     #

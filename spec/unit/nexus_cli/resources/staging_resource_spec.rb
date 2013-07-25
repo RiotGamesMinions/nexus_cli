@@ -77,6 +77,15 @@ describe NexusCli::StagingResource do
     end
   end
 
+  describe "#repositories" do
+    let(:repositories) { staging_resource.repositories }
+
+    it "returns an array of staging repositories" do
+      connection.should_receive(:get).with(/staging\/profile_repositories/)
+      expect(repositories).to be_a(Array)
+    end
+  end
+
   describe "#create_profile" do
     let(:create_profile) { staging_resource.create_profile(profile) }
     let(:profile) { NexusCli::StagingProfileObject.new({}) }

@@ -6,9 +6,9 @@ module NexusCli
     end
 
     # @return [NexusCli::ArtifactObject]
-    def find(artifact_id)
+    def find(artifact_id, repository = nil)
       artifact_id_hash = artifact_id.to_artifact_hash
-      artifact_id_hash[:r] = connection.default_repository
+      artifact_id_hash[:r] = repository || connection.default_repository
 
       ArtifactObject.from_nexus_response(rest_request(:get, "artifact/maven/resolve", artifact_id_hash).data)
     end

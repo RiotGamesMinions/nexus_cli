@@ -28,6 +28,17 @@ describe NexusCli::ArtifactResource do
       connection.should_receive(:get).with("service/local/artifact/maven/resolve", artifact_id_hash)
       find
     end
+
+    context "when a repository name is given" do
+      let(:find) { artifact_resource.find(artifact_id, repository) }
+      let(:repository) { "fooo" }
+
+      it "attempts to find an artifact in the given repository" do
+        artifact_id_hash = { g: "com.test", a: "my-test", v: "1.0.0", e: "tgz", r: "fooo"}
+        connection.should_receive(:get).with("service/local/artifact/maven/resolve", artifact_id_hash)
+        find
+      end
+    end
   end
 
   describe "#download" do
