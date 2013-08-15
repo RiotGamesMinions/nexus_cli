@@ -36,6 +36,8 @@ nexus-cli pull_artifact com.mycompany.artifacts:myartifact:tgz:1.0.0
 nexus-cli push_artifact com.mycompany.artifacts:myartifact:tgz:1.0.0 ~/path/to/file/to/push/myartifact.tgz
 ```
 
+TEST
+
 # License and Author
 
 Author:: Kyle Allan (<kallan@riotgames.com>)
