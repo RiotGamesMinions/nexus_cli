@@ -19,7 +19,7 @@ When /^I call the nexus "(.*?)" command as the "(.*?)" user with password "(.*?)
 end
 
 When /^I push an artifact with the GAV of "(.*)"$/ do |gav|
-  groupId, artifact_id, version, extension = gav.split(":")
+  groupId, artifact_id, extension, version = gav.split(":")
   file = File.new(File.join(temp_dir, "#{artifact_id}-#{version}.#{extension}"), 'w')
   file.puts "some data"
   file.close
