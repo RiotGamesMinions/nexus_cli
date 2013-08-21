@@ -10,6 +10,7 @@ Feature: Use the Nexus CLI
       """
     And the exit status should be 0
 
+  @wip
   @push
   Scenario: Push an Artifact
     When I push an artifact with the GAV of "com.test:mytest:tgz:1.0.0"
