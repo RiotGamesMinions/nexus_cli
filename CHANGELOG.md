@@ -1,3 +1,7 @@
+# 4.0.1
+
+* Actually support anonymous browsing
+
 # 4.0.0
 
 * Major Change - GAV ordering that used to be G:A:V:E has changed to G:A:E:C:V
