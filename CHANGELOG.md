@@ -1,3 +1,7 @@
+# 4.0.2
+
+* #89 - Restrict activesupport gem to 3.2.0 .
+
 # 4.0.1
 
 * Actually support anonymous browsing
