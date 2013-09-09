@@ -19,15 +19,10 @@ module NexusCli
       #
       # @return [NexusCli::Configuration]
       def from_overrides(overrides)
-        configuration = Hash.new
         raise MissingSettingsFileException unless overrides
         overrides = overrides.with_indifferent_access
 
-        config_file = load_config
-        if config_file
-          config_file = config_file.with_indifferent_access
-          configuration = config_file
-        end
+        configuration = (load_config || Hash.new).with_indifferent_access
         configuration.merge!(overrides)
         new(configuration)
       end
@@ -56,6 +51,10 @@ module NexusCli
       end
 
       private
+
+        # Loads the config file
+        #
+        # @return [Hash]
         def load_config
           begin
             config = YAML.load_file(file_path)
