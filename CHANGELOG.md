@@ -1,3 +1,7 @@
+# 4.0.3
+
+* Support old-style overriding of config file.
+
 # 4.0.2
 
 * #89 - Restrict activesupport gem to 3.2.0 .
