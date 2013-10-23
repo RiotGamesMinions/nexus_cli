@@ -75,4 +75,9 @@ describe NexusCli do
     stub_request(:get, "http://admin:admin123@localhost:8081/nexus/service/local/data_index?a=something&g=com.something").to_return(:status => 200, :body => fake_xml, :headers => {})
     remote.search_for_artifacts("com.something:something").should eq fake_xml
   end
+
+  it "gives you errors when you attempt to get an artifact's download url and it cannot be found" do
+    HTTPClient.any_instance.stub(:get).and_raise(NexusCli::ArtifactNotFoundException)
+    expect {remote.get_artifact_download_url "com.something:something:tgz:1.0.0"}.to raise_error(NexusCli::ArtifactNotFoundException)
+  end
 end

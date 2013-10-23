@@ -140,6 +140,30 @@ module NexusCli
       do_transfer_artifact(coordinates, from_repository, to_repository)
     end
 
+    # Gets the Nexus download URL for the given [artifact].
+    #
+    # @param  coordinates [String] the Maven identifier
+    # @example com.artifact:my-artifact
+    #
+    # @return [String] The Nexus download url for the artifact
+    # @example
+    #   https://nexus.my-domain.com/content/repositories/my-repository/my-artifact/1.0.0/my-artifact-1.0.0.tgz
+    def get_artifact_download_url(coordinates)
+      artifact = Artifact.new(coordinates)
+      query = {:g => artifact.group_id, :a => artifact.artifact_id, :e => artifact.extension, :v => artifact.version, :r => configuration['repository']}
+      query.merge!({:c => artifact.classifier}) unless artifact.classifier.nil?
+      response = nexus.get(nexus_url("service/local/artifact/maven/redirect"), :query => query)
+      case response.status
+        when 301, 307
+          # Follow redirect and return download URL.
+          return response.content.gsub(/If you are not automatically redirected use this url: /, "")
+        when 404
+          raise ArtifactNotFoundException
+        else
+          raise UnexpectedStatusCodeException.new(response.status)
+      end
+    end
+
     private
 
     # Formats the given XML into an [Array<String>] so it

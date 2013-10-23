@@ -433,6 +433,11 @@ module NexusCli
           end
         end
 
+        desc "get_artifact_download_url coordinates", "Gets the Nexus download URL for the given artifact."
+        def get_artifact_download_url(coordinates)
+          say nexus_remote.get_artifact_download_url(coordinates), :green
+        end
+
         private
 
           def nexus_remote
