@@ -54,6 +54,14 @@ Feature: Use the Nexus CLI
       """
     And the exit status should be 0
 
+  Scenario: Get an artifact's download URL
+    When I call the nexus "get_artifact_download_url com.test:mytest" command
+    Then the output should contain:
+      """
+      com/test/mytest/1.0.0/mytest-1.0.0.tgz
+      """
+    And the exit status should be 0
+
   @transfer
   Scenario: Transfer an artifact between repositories
     When I call the nexus "transfer com.test:mytest:tgz:1.0.0 releases thirdparty" command
