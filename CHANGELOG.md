@@ -1,3 +1,8 @@
+# 4.1.0
+
+* [#92](https://github.com/RiotGames/nexus_cli/pull/92) Added a new task for gettting an artifact's download URL
+* Add License to Gemspec
+
 # 4.0.3
 
 * Support old-style overriding of config file.
