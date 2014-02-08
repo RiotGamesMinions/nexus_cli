@@ -58,7 +58,7 @@ module NexusCli
     # @return [String] A String of XML with information about the desired
     # repository.
     def get_repository_info(name)
-      response = nexus.get(nexus_url("service/local/repositories/#{sanitize_for_id(name)}"))
+      response = nexus.get(nexus_url("service/local/repositories/#{sanitize_for_id(name)}"), :header => DEFAULT_ACCEPT_HEADER)
       case response.status
       when 200
         return response.content
