@@ -136,6 +136,27 @@ module NexusCli
       end
     end
 
+    # Searches for an artifact using the lucene indexer.
+    # requires UI: Search role
+    # https://repository.sonatype.org/nexus-indexer-lucene-plugin/default/docs/path__lucene_search.html
+    #
+    # @param  coordinates [String] the Maven identifier
+    # @example com.artifact:my-artifact:jar:4.9.*
+    #
+    # @return [String]
+    def search_artifacts_lucene(coordinates)
+      artifact = Artifact.new(coordinates)
+      query = {:g => artifact.group_id, :a => artifact.artifact_id, :e => artifact.extension, :v => artifact.version, :r => configuration['repository']}
+      query.merge!({:c => artifact.classifier}) unless artifact.classifier.nil?
+      response = nexus.get(nexus_url("service/local/lucene/search"), query)
+      case response.status
+        when 200
+          return response.content
+        else
+          raise UnexpectedStatusCodeException.new(response.status)
+      end
+    end
+
     def transfer_artifact(coordinates, from_repository, to_repository)
       do_transfer_artifact(coordinates, from_repository, to_repository)
     end
