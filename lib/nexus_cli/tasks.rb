@@ -14,6 +14,7 @@ module NexusCli
         map 'config'        => :get_nexus_configuration
         map 'status'        => :get_nexus_status
         map 'search'        => :search_for_artifacts
+        map 'search_lucene' => :search_artifacts_lucene
         map 'search_custom' => :search_artifacts_custom
         map 'transfer'      => :transfer_artifact
 
@@ -51,6 +52,11 @@ module NexusCli
         desc "search_for_artifacts", "Searches for all the versions of a particular artifact and prints it to the screen."
         def search_for_artifacts(coordinates)
           say nexus_remote.search_for_artifacts(coordinates), :green
+        end
+
+        desc "search_artifacts_lucene", "Searches all repositiories with a gaecv maven search using wildcards"
+        def search_artifacts_lucene(coordinates)
+          say nexus_remote.search_artifacts_lucene(coordinates), :green
         end
 
         desc "get_artifact_custom_info coordinates", "Gets and returns the custom metadata in XML format about a particular artifact."
