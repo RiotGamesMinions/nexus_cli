@@ -78,7 +78,7 @@ module NexusCli
       type: String,
       required: true,
       coerce: lambda { |m|
-        m = m.is_a?(String) ? m.gsub(' ', '_').downcase : m
+        m = m.is_a?(String) ? m.gsub(' ', '_') : m
       }
 
     attribute :username,
