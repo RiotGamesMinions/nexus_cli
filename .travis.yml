@@ -3,4 +3,3 @@ rvm:
   - 2.3.1
 script:
   - rspec --color --format=documentation spec
-  - cucumber --color --format pretty
