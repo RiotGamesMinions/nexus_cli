@@ -1,5 +1,5 @@
 # Nexus CLI
-[![Build Status](https://travis-ci.org/RiotGames/nexus_cli.png)](https://travis-ci.org/RiotGames/nexus_cli)
+[![Build Status](https://travis-ci.org/RiotGamesMinions/nexus_cli.png)](https://travis-ci.org/RiotGamesMinions/nexus_cli)
 
 A CLI wrapper around Sonatype Nexus REST calls.
 
