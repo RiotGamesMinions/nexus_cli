@@ -56,7 +56,7 @@ describe NexusCli do
   end
 
   it "gives you an error when you try to update a user that doesnt exist" do
-    stub_request(:get, "http://admin:admin123@localhost:8081/nexus/service/local/users/qwertyasdf").
+    stub_request(:get, "http://localhost:8081/nexus/service/local/users/qwertyasdf").
       with(:headers => {
         'Accept' => 'application/json',
         'Authorization' => 'Basic YWRtaW46YWRtaW4xMjM='
@@ -72,8 +72,8 @@ describe NexusCli do
   end
 
   it "will return raw xml from the search command" do
-    stub_request(:get, "http://admin:admin123@localhost:8081/nexus/service/local/data_index?a=something&g=com.something").to_return(:status => 200, :body => fake_xml, :headers => {})
-    remote.search_for_artifacts("com.something:something").should eq fake_xml
+    stub_request(:get, "http://localhost:8081/nexus/service/local/data_index?a=something&g=com.something").to_return(:status => 200, :body => fake_xml, :headers => {})
+    expect(remote.search_for_artifacts("com.something:something")).to eq fake_xml
   end
 
   it "gives you errors when you attempt to get an artifact's download url and it cannot be found" do

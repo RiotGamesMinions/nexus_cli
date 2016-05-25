@@ -1,4 +1,6 @@
-script: "bundle exec thor spec:unit"
+sudo: false
 language: ruby
 rvm:
-  - 1.9.3
+  - 2.3.1
+script:
+  - rspec --color --format=documentation spec
